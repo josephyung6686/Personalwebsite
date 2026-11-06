@@ -1,0 +1,29 @@
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body { margin: 0; background: var(--page); color: var(--body); font-family: var(--font-body); line-height: 1.5; }
+img, svg { max-width: 100%; }
+a { color: var(--blue); }
+.pixel { font-family: var(--font-pixel); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 480px) { .wrap { padding: 0 16px; } }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+.sec { padding-top: 48px; }
+.num { display: flex; align-items: center; gap: 10px; font: 500 12px/1 var(--font-mono); text-transform: uppercase; color: var(--columbia); letter-spacing: .12em; margin: 0 0 12px; }
+.num::before { content: ''; width: 8px; height: 8px; flex: none; background: var(--gold); box-shadow: 2px 2px 0 var(--gold-deep); }
+.sec h2 { font-family: var(--font-mono); font-size: clamp(24px, 3.6vw, 32px); font-weight: 700; letter-spacing: -.03em; line-height: 1.1; margin: 0 0 18px; color: var(--ink); }
+.body { color: var(--body); font-size: 16px; line-height: 1.6; max-width: 640px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips span { font: 500 12px/1.2 var(--font-mono); color: var(--columbia); background: var(--panel-2); padding: 5px 10px; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; }
+/* Arcade keys: square, a hard offset shadow, a lift on hover and a full press on click. */
+.btn { display: inline-block; background: var(--gold); color: #1a1405; font: 700 13px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; padding: 11px 16px; text-decoration: none; border: 0; cursor: pointer; box-shadow: 4px 4px 0 var(--gold-deep); transition: translate .1s steps(2), box-shadow .1s steps(2); }
+.btn:hover { translate: -1px -1px; box-shadow: 5px 5px 0 var(--gold-deep); }
+.btn:active { translate: 3px 3px; box-shadow: 1px 1px 0 var(--gold-deep); }
+.btn.alt { background: var(--page); color: var(--columbia); box-shadow: inset 0 0 0 2px var(--columbia), 4px 4px 0 #060b18; }
+.btn.alt:hover { color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold), 5px 5px 0 #060b18; }
+.btn.alt:active { box-shadow: inset 0 0 0 2px var(--gold), 1px 1px 0 #060b18; }
+.btn:focus-visible { outline: 3px solid var(--columbia); outline-offset: 3px; }
+.panel { background: var(--panel); box-shadow: inset 0 0 0 2px var(--panel-edge), var(--panel-drop); }

@@ -1,0 +1,127 @@
+.gi { width: 22px; height: 22px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* roaming lion: 44 sprite pixels at 2x (1.5x on phones) */
+#lion { position: fixed; left: 0; top: 0; z-index: 50; width: 88px; height: 88px; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; will-change: transform; }
+#lion[hidden] { display: none; }
+#lion[data-mode="held"] { cursor: grabbing; }
+#lion:focus-visible { outline: 3px solid var(--columbia); outline-offset: 2px; border-radius: 6px; }
+#lion .lion-inner { width: 100%; height: 100%; transform-origin: 50% 100%; transition: translate .2s steps(4); }
+/* Ducking on phones: down 26 of its 44 sprite pixels, so only the ears and eyes clear the bottom edge, and it takes no taps. */
+#lion.duck { pointer-events: none; }
+#lion.duck .lion-inner { translate: 0 calc(100% * 26 / 44); }
+#lion.duck .lion-hint { opacity: 0; }
+
+/* walk: four frames, feet alternating and the body lifting a pixel on the passing frames */
+#lion[data-mode="walk"] .l-head { animation: none; }
+#lion[data-mode="walk"] .lg-a { animation: l-walk-a .44s steps(1) infinite; }
+#lion[data-mode="walk"] .lg-stand { animation: l-walk-pass .44s steps(1) infinite; }
+#lion[data-mode="walk"] .lg-b { animation: l-walk-b .44s steps(1) infinite; }
+#lion[data-mode="walk"] .l-upper { animation: l-walk-bob .44s steps(1) infinite; }
+@keyframes l-walk-a { 0% { visibility: visible; } 25% { visibility: hidden; } }
+@keyframes l-walk-pass { 0% { visibility: hidden; } 25% { visibility: visible; } 50% { visibility: hidden; } 75% { visibility: visible; } }
+@keyframes l-walk-b { 0% { visibility: hidden; } 50% { visibility: visible; } 75% { visibility: hidden; } }
+@keyframes l-walk-bob { 0% { transform: translateY(0); } 25% { transform: translateY(-1px); } 50% { transform: translateY(0); } 75% { transform: translateY(-1px); } }
+
+/* sit and dizzy: on the ground, soles out */
+#lion:is([data-mode="sit"], [data-mode="dizzy"]) .lg-stand { visibility: hidden; }
+#lion:is([data-mode="sit"], [data-mode="dizzy"]) .lg-sit { visibility: visible; }
+#lion:is([data-mode="sit"], [data-mode="dizzy"]) .l-upper { transform: translateY(2px); }
+
+/* held and flying: arms up, legs dangling, mouth open */
+#lion:is([data-mode="held"], [data-mode="air"]) :is(.lg-stand, .ar-down, .sl-down, .m-smile) { visibility: hidden; }
+#lion:is([data-mode="held"], [data-mode="air"]) :is(.lg-dangle, .ar-up, .sl-up, .m-open) { visibility: visible; }
+#lion:is([data-mode="held"], [data-mode="air"]) .l-held { transform: translate(7px, -10px); }
+#lion[data-mode="air"] :is(.e-open, .e-blink) { animation: none; visibility: hidden; }
+#lion[data-mode="air"] .e-squint { visibility: visible; }
+
+/* dizzy: crossed eyes, a wobbly mouth, stars going round */
+#lion[data-mode="dizzy"] :is(.e-open, .e-blink) { animation: none; visibility: hidden; }
+#lion[data-mode="dizzy"] .e-dizzy, #lion[data-mode="dizzy"] .m-wobble { visibility: visible; }
+#lion[data-mode="dizzy"] .m-smile { visibility: hidden; }
+#lion[data-mode="dizzy"] .l-head { animation: l-dizzy-sway .36s steps(1) infinite; }
+@keyframes l-dizzy-sway { 0% { transform: translateX(-1px); } 50% { transform: translateX(1px); } }
+#lion[data-mode="dizzy"] .l-stars { visibility: visible; animation: l-stars .36s steps(1) infinite; }
+@keyframes l-stars { 0% { transform: translate(-2px, 1px); } 25% { transform: translate(0, 0); } 50% { transform: translate(2px, 1px); } 75% { transform: translate(0, 2px); } }
+
+#lion .lion-hint { position: absolute; bottom: 100%; left: 0; margin-bottom: 4px; background: var(--panel); color: var(--ink); border-radius: 12px; padding: 7px 11px; font: 600 13px/1.2 var(--font-ui); white-space: nowrap; box-shadow: inset 0 0 0 2px var(--panel-edge-hi), 0 4px 0 #060b18; opacity: 0; transition: opacity .2s; pointer-events: none; }
+#lion .for-touch { display: none; }
+#lion:hover .lion-hint, #lion:focus-visible .lion-hint, #lion.show-hint .lion-hint { opacity: 1; }
+#lion[data-mode="air"] .lion-hint, #lion[data-mode="held"] .lion-hint { opacity: 0; }
+@media (hover: none) { #lion .for-touch { display: inline; } #lion .for-mouse { display: none; } }
+
+.dress-btn.btn { position: fixed; right: 16px; bottom: 16px; z-index: 40; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+.dress-btn .gi { width: 20px; height: 20px; }
+.game-toast { position: fixed; left: 50%; top: 16px; z-index: 100; margin: 0; translate: -50% -140%; background: var(--panel); color: var(--ink); border-radius: 14px; padding: 10px 16px; font: 600 15px/1.3 var(--font-ui); box-shadow: inset 0 0 0 2px var(--gold), 0 5px 0 #060b18; transition: translate .35s steps(5); max-width: calc(100vw - 32px); width: max-content; }
+.game-toast:not(.show) { visibility: hidden; }
+.game-toast.show { translate: -50% 0; }
+
+/* wardrobe dialog */
+.wd { width: min(880px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 0; border-radius: 22px; background: var(--panel); box-shadow: inset 0 0 0 3px var(--panel-edge-hi), 0 8px 0 #060b18; color: var(--ink); font-family: var(--font-ui); overflow: auto; }
+.wd[open] { display: grid; grid-template-columns: 124px minmax(0, 1fr) minmax(0, 1.2fr); }
+.wd::backdrop { background: rgba(6, 11, 24, .72); }
+.wd-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.wd [hidden] { display: none; }
+.wd button { font: inherit; color: inherit; }
+.wd-close { position: absolute; left: 14px; top: 14px; z-index: 2; display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 12px; background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--panel-edge); cursor: pointer; }
+.wd-close:hover { box-shadow: inset 0 0 0 2px var(--panel-edge-hi); }
+.wd-close .gi { width: 18px; height: 18px; }
+.wd-rail { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 68px 12px 16px; }
+.rail-btn { width: 100px; display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; border-radius: 14px; padding: 12px 6px 9px; background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--panel-edge), 0 4px 0 #060b18; cursor: pointer; font-weight: 600 !important; font-size: 15px !important; color: var(--columbia) !important; }
+.rail-btn .gi { width: 28px; height: 28px; }
+.rail-btn:hover { box-shadow: inset 0 0 0 2px var(--panel-edge-hi), 0 4px 0 #060b18; }
+.rail-btn[aria-pressed="true"] { background: var(--gold); color: #1a1405 !important; box-shadow: 0 4px 0 var(--gold-deep); }
+.wd-stage { display: flex; flex-direction: column; align-items: center; padding: 18px 12px; background: var(--panel-2); box-shadow: inset 2px 0 0 var(--panel-edge), inset -2px 0 0 var(--panel-edge); }
+.wd-slots { display: flex; gap: 6px; }
+.slot { position: relative; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--panel); box-shadow: inset 0 0 0 2px var(--panel-edge); color: var(--columbia); }
+.slot .gi { width: 18px; height: 18px; }
+.slot .tick { position: absolute; right: -3px; bottom: -3px; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 5px; background: var(--gold); color: #1a1405; }
+.slot .tick .gi { width: 10px; height: 10px; stroke-width: 3.5; }
+.wd-window { position: relative; display: grid; place-items: end center; width: 100%; max-width: 244px; margin: 12px 0; padding-top: 8px; overflow: hidden; border-radius: 12px; box-shadow: inset 0 0 0 2px var(--panel-edge-hi); background:
+    linear-gradient(var(--blue-deep) 0 0) 0 100% / 100% 12px no-repeat,
+    linear-gradient(#0b1226 0 12%, #10203f 12% 34%, #152c54 34% 58%, #1b3a6b 58% 100%); }
+.wd-preview { width: 220px; height: 220px; }
+.wd-level { width: 88%; }
+.wd-bar { height: 14px; border-radius: 4px; background: var(--page); box-shadow: inset 0 0 0 2px var(--panel-edge); overflow: hidden; }
+.wd-fill { height: 100%; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .4s steps(6); }
+.wd-lvl { margin: 6px 0 0; text-align: center; font-weight: 600; font-size: 14px; color: var(--body); }
+.wd-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
+.tool { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 12px; background: var(--panel); padding: 8px 12px; font-weight: 600 !important; font-size: 14px !important; box-shadow: inset 0 0 0 2px var(--panel-edge), 0 3px 0 #060b18; cursor: pointer; color: var(--columbia) !important; }
+.tool:hover { box-shadow: inset 0 0 0 2px var(--panel-edge-hi), 0 3px 0 #060b18; }
+.tool:active { translate: 0 2px; box-shadow: inset 0 0 0 2px var(--panel-edge-hi), 0 1px 0 #060b18; }
+.tool .gi { width: 16px; height: 16px; }
+.wd-shop { display: flex; flex-direction: column; padding: 18px 16px 16px; }
+.wd-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.tab { flex: 1; display: grid; place-items: center; border: 0; border-radius: 12px 12px 4px 4px; padding: 9px 0; background: var(--panel-2); color: var(--columbia) !important; box-shadow: inset 0 0 0 2px var(--panel-edge); cursor: pointer; transition: translate .12s steps(2); }
+.tab[aria-selected="true"] { background: var(--gold); color: #1a1405 !important; box-shadow: 0 3px 0 var(--gold-deep); translate: 0 -2px; }
+.wd-grid { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; min-height: 260px; align-content: start; padding: 10px; border-radius: 14px; background: var(--page); box-shadow: inset 0 0 0 2px var(--panel-edge); }
+.item { position: relative; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 4px; border: 0; border-radius: 12px; background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--panel-edge); cursor: pointer; color: var(--body) !important; font-weight: 500 !important; font-size: 13px !important; line-height: 1.15; }
+.item svg:not(.gi) { flex: none; }
+.item:hover:not(:disabled) { box-shadow: inset 0 0 0 2px var(--panel-edge-hi); }
+.item.on { background: var(--gold-soft); box-shadow: inset 0 0 0 3px var(--gold); color: var(--cream) !important; }
+.item.locked { background: var(--panel); color: var(--muted) !important; cursor: not-allowed; }
+.item.locked svg:not(.gi) { opacity: .6; filter: grayscale(1); }
+.item .lock-ic { position: absolute; top: 7px; right: 7px; width: 14px; height: 14px; color: var(--muted); }
+.item .none-ic { width: 36px; height: 36px; color: var(--muted); }
+.item-name { text-align: center; }
+.item:focus-visible, .tab:focus-visible, .tool:focus-visible, .rail-btn:focus-visible, .wd-close:focus-visible { outline: 3px solid var(--columbia); outline-offset: 2px; }
+.wd-quests { flex: 1; list-style: none; margin: 0; padding: 10px; min-height: 260px; border-radius: 14px; background: var(--page); box-shadow: inset 0 0 0 2px var(--panel-edge); }
+.quest { display: flex; align-items: center; gap: 10px; padding: 9px; margin-bottom: 6px; border-radius: 10px; background: var(--panel-2); font-weight: 600; font-size: 15px; line-height: 1.25; color: var(--ink); }
+.quest:last-child { margin-bottom: 0; }
+.quest small { display: block; color: var(--muted); font-weight: 500; font-size: 13px; }
+.quest .chk { display: grid; place-items: center; width: 22px; height: 22px; flex: none; border-radius: 6px; background: var(--panel); box-shadow: inset 0 0 0 2px var(--panel-edge-hi); color: #1a1405; }
+.quest.done .chk { background: var(--gold); box-shadow: none; }
+.quest .chk .gi { width: 14px; height: 14px; stroke-width: 3; }
+
+@media (max-width: 720px) {
+  #lion { width: 66px; height: 66px; }
+  /* On phones the button sits after the footer instead of floating over the page. The clearance below it keeps it out from under the lion. */
+  .dress-btn.btn { position: static; display: flex; width: max-content; margin: 24px auto 84px; }
+  .wd[open] { grid-template-columns: 1fr; }
+  .wd-rail { flex-direction: row; justify-content: center; padding: 14px 12px 10px 60px; }
+  .rail-btn { width: auto; flex-direction: row; padding: 8px 14px; }
+  .rail-btn .gi { width: 20px; height: 20px; }
+  .wd-stage { box-shadow: inset 0 2px 0 var(--panel-edge), inset 0 -2px 0 var(--panel-edge); }
+  .wd-window { max-width: 192px; }
+  .wd-preview { width: 176px; height: 176px; }
+  .item { aspect-ratio: auto; min-height: 96px; }
+}

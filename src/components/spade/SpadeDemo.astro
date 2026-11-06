@@ -1,0 +1,81 @@
+---
+import './spade.css';
+import { BATCH, DEFAULT_TARGET, FACTORS, GRID, MAX_ROUNDS, TARGET_RANGE, YIELD_SCALE, describeStatus, newCampaign, summarize } from './spadeMath';
+interface Props { size?: 'compact' | 'full' }
+const { size = 'full' } = Astro.props;
+const uid = `spd-${size}`;
+const start = newCampaign();
+const status = describeStatus(start, DEFAULT_TARGET);
+const mid = (a: { min: number; max: number }) => (a.min + a.max) / 2;
+---
+<div class:list={['spd', size]} data-demo="spade" data-size={size} role="region" aria-label="Interactive demo: planning experiments with a Gaussian process">
+  <p class="spd-label"><i aria-hidden="true"></i>My reimagining of the idea, with sample data. Not NutriGene's product.</p>
+  <div class="spd-grid">
+    <div class="spd-status" role="status" data-kind={status.kind}>
+      <span class="spd-ic" aria-hidden="true">
+        <svg data-for="start" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/></svg>
+        <svg data-for="hold" viewBox="0 0 16 16"><path d="M5 3v10M11 3v10"/></svg>
+        <svg data-for="recommend" viewBox="0 0 16 16"><path d="M3 8.5l3.5 3.5L13 4.5"/></svg>
+      </span>
+      <p class="spd-head">{status.headline}</p>
+      <p class="spd-detail">{status.detail}</p>
+    </div>
+
+    <div class="spd-map">
+      <div class="spd-plot">
+        <span class="spd-yname">{FACTORS.y.name} ({FACTORS.y.unit})</span>
+        <span class="spd-yticks" aria-hidden="true"><b>{FACTORS.y.max.toFixed(1)}</b><b>{mid(FACTORS.y).toFixed(1)}</b><b>{FACTORS.y.min.toFixed(1)}</b></span>
+        <div class="spd-canvas">
+          <canvas role="img" aria-labelledby={`${uid}-sum`}></canvas>
+          <p class="spd-empty" aria-hidden="true">No data yet</p>
+        </div>
+        <span class="spd-xticks" aria-hidden="true"><b>{FACTORS.x.min}</b><b>{mid(FACTORS.x)}</b><b>{FACTORS.x.max}</b></span>
+        <span class="spd-xname">{FACTORS.x.name} ({FACTORS.x.unit})</span>
+      </div>
+      <p class="spd-readout">Point at a cell to read its prediction.</p>
+    </div>
+
+    <div class="spd-controls">
+      <div class="spd-round">
+        <span class="spd-pips" aria-hidden="true">{Array.from({ length: MAX_ROUNDS }, () => <i></i>)}</span>
+        <p class="spd-count">Round 0 of {MAX_ROUNDS} · 0 experiments</p>
+      </div>
+
+      <div class="spd-keys">
+        <button type="button" class="spd-key spd-run">Run next round</button>
+        <button type="button" class="spd-key alt spd-reset">Reset</button>
+      </div>
+
+      <div class="spd-target">
+        <label for={`${uid}-target`}>Target yield <span class="spd-tval">{DEFAULT_TARGET}%</span></label>
+        <input id={`${uid}-target`} type="range" min={TARGET_RANGE.min} max={TARGET_RANGE.max} step={TARGET_RANGE.step} value={DEFAULT_TARGET} aria-valuetext={`${DEFAULT_TARGET} percent`} />
+        <small>A higher target asks for more proof. Set it high enough and the model never commits.</small>
+      </div>
+
+    </div>
+
+    <div class="spd-notes">
+      <ul class="spd-legend">
+        <li><i class="m-ramp" aria-hidden="true"></i>Predicted yield, {YIELD_SCALE.min}% to {YIELD_SCALE.max}%</li>
+        <li><i class="m-fog" aria-hidden="true"></i>Faded: still unsure</li>
+        <li><i class="m-dots" aria-hidden="true"><u></u><u></u></i>Experiment, latest larger</li>
+        <li><i class="m-cert" aria-hidden="true"></i>Certified: bound clears target</li>
+        <li><i class="m-rec" aria-hidden="true"></i>Recommended range</li>
+      </ul>
+
+      <p class="spd-sum" id={`${uid}-sum`}>{summarize(start, DEFAULT_TARGET)}</p>
+
+      <details class="spd-how">
+        <summary>How this demo works</summary>
+        <p>A real Gaussian process runs in your browser: an RBF kernel with fixed settings on a {GRID} by {GRID} grid, refit after every round. The yield function and its noise are invented and seeded, so Reset replays the same run.</p>
+        <p>Round 1 spreads {BATCH} experiments across the space. After that, each batch goes where the model is unsure and near your target. A setting is certified when its mean minus two standard deviations clears the target, and the recommendation is the largest fully certified rectangle.</p>
+        <p>The system this reimagines works over six factors with a stricter estimate of the whole region at once. This shows the shape of the idea on two.</p>
+      </details>
+    </div>
+  </div>
+  <noscript><p class="spd-detail">This demo runs in your browser and needs JavaScript.</p></noscript>
+</div>
+<script>
+  import { initSpadeDemos } from './spadeDemo';
+  initSpadeDemos();
+</script>

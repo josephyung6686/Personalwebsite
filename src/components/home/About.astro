@@ -1,0 +1,37 @@
+---
+import Lion from '../Lion.astro';
+import { site } from '../../data/site';
+---
+<section id="about" class="sec wrap about" aria-labelledby="about-h">
+  <Lion pose="scarf" class="about-lion" />
+  <div>
+    <p class="num">04 · ABOUT</p>
+    <h2 id="about-h">Hi, I'm Joseph.</h2>
+    <div class="body bio">
+      <p class="intro">{site.bio.intro}</p>
+      <p>{site.bio.why}</p>
+      <p class="lead">{site.bio.howLead}</p>
+      <ul>{site.bio.how.map((h) => <li>{h}</li>)}</ul>
+      <p class="now">{site.bio.now}</p>
+      <p>{site.bio.outro}</p>
+      <dl class="personal">
+        <div><dt>Languages</dt><dd>{site.languages}</dd></div>
+        <div><dt>Interests</dt><dd>{site.interests}</dd></div>
+      </dl>
+    </div>
+    <p class="btns"><a class="btn" href={`mailto:${site.email}`}>Email me</a><a class="btn alt" href={site.linkedin} rel="noopener">LinkedIn</a><a class="btn alt" href={site.github} rel="noopener">GitHub</a><a class="btn alt" href={site.devpost} rel="noopener">Devpost</a></p>
+  </div>
+</section>
+<style>
+  .about { display: flex; gap: 24px; align-items: center; }
+  .bio p { margin: 0 0 14px; }
+  .bio .intro { font-size: 18px; color: var(--ink); font-weight: 600; }
+  .bio .lead { margin-bottom: 6px; }
+  .bio ul { margin: 0 0 14px; padding-left: 20px; } .bio li { margin: 4px 0; } .bio li::marker { color: var(--gold); }
+  .bio .now { color: var(--ink); font-weight: 600; padding: 8px 12px; background: var(--gold-soft); border-radius: 0; }
+  .personal { margin: 0 0 18px; display: grid; gap: 6px; }
+  .personal div { display: grid; grid-template-columns: 92px 1fr; gap: 10px; }
+  .personal dt { color: var(--muted); } .personal dd { margin: 0; color: var(--ink); }
+  :global(.about-lion) { width: 130px; flex: none; }
+  @media (max-width: 480px) { .about { flex-direction: column; align-items: flex-start; } :global(.about-lion) { width: 100px; } }
+</style>

@@ -1,0 +1,15 @@
+---
+import { getCollection, render } from 'astro:content';
+import CaseStudy from '../../layouts/CaseStudy.astro';
+
+export async function getStaticPaths() {
+  const showDrafts = process.env.SHOW_DRAFTS === '1';
+  const entries = await getCollection('work', (e) => showDrafts || !e.data.draft);
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<CaseStudy {...entry.data} theme={entry.id}>
+  <Content />
+</CaseStudy>

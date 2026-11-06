@@ -1,0 +1,12 @@
+---
+import Lion from '../Lion.astro';
+---
+<footer class="foot">
+  <p>Thanks for stopping by.</p>
+  <Lion pose="bed" class="foot-lion" />
+</footer>
+<style>
+  .foot { background: linear-gradient(var(--page), #14224a); text-align: center; padding: 28px 16px 0; margin-top: 40px; color: var(--gold); font-weight: 700; }
+  .foot p { margin: 0 0 6px; }
+  :global(.foot-lion) { width: 160px; }
+</style>

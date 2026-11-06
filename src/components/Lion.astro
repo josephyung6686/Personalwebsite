@@ -1,0 +1,9 @@
+---
+import { poseSvg, type Pose } from '../assets/lion/poses';
+import '../styles/lion.css';
+
+export type { Pose };
+interface Props { pose: Pose; class?: string }
+const { pose, class: cls } = Astro.props;
+---
+<span class:list={['lion-pose', cls]} data-pose={pose} aria-hidden="true" set:html={poseSvg(pose)} />

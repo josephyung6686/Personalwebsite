@@ -1,0 +1,48 @@
+---
+// A real frame of the Aikonic demo: the same search, run at build time, so this card ships no script.
+import { LANG_NAME, LANG_TAG, MEETINGS, crossesLanguage, formatTime, search, segments } from '../../aikonic/aikonicSearch';
+
+const QUERY = 'supplier delay';
+const all = search(QUERY, 'both');
+// The English hit that shares the words, then the Cantonese one that shares only the meaning.
+const shown = [all[0], all.find((h) => h.passage.lang === 'yue')!];
+const title = (id: string) => MEETINGS.find((m) => m.id === id)!.title;
+---
+<div class="vig v-ak" aria-hidden="true">
+  <p class="box"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>{QUERY}</p>
+  <ul>
+    {[...shown].reverse().map((h) => (
+      <li>
+        <span class="t">{formatTime(h.passage.start)}</span>
+        <div class="hit">
+          <p class="txt" lang={LANG_TAG[h.passage.lang]}>{segments(h, QUERY, 'both').map((s) => s.kind ? <mark class={s.kind}>{s.text}</mark> : s.text)}</p>
+          <p class="src"><span><span class="mt">{title(h.passage.meetingId)} · </span>{LANG_NAME[h.passage.lang]}</span>{crossesLanguage(QUERY, h.passage) && <span class="cross">Crossed languages</span>}</p>
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>
+<style>
+  .v-ak { background: #16110f; color: #f6efea; font-family: var(--font-body), "PingFang HK", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif; }
+  .box { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 10px; background: #1f1815; box-shadow: inset 0 0 0 2px #33271f; font-weight: 600; font-size: 14px; }
+  .box svg { flex: none; width: 15px; height: 15px; fill: none; stroke: #c4b6ad; stroke-width: 1.6; stroke-linecap: round; }
+  ul { list-style: none; margin: 10px 0 0; padding: 0; }
+  li { display: flex; gap: 10px; align-items: flex-start; padding: 9px 2px 8px; }
+  li + li { border-top: 1px solid #33271f; }
+  .t { flex: none; padding: 5px 8px; border-radius: 8px; font-weight: 800; font-size: 12px; line-height: 1; font-variant-numeric: tabular-nums; color: #231008; background: #ff8a5b; box-shadow: 0 3px 0 #8f4326; transition: translate .25s cubic-bezier(.25, 1, .5, 1), box-shadow .25s cubic-bezier(.25, 1, .5, 1); }
+  .hit { min-width: 0; }
+  .txt { font-size: 13px; line-height: 1.45; font-weight: 500; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+  mark { color: inherit; background: none; }
+  mark.keyword { background: rgba(255,138,91,.42); border-radius: 3px; padding: 0 1px; }
+  mark.meaning { text-decoration: underline dotted #ff8a5b 2px; text-underline-offset: 3px; }
+  .src { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; margin-top: 3px !important; font-size: 11.5px; color: #c4b6ad; }
+  .cross { font-weight: 700; font-size: 10.5px; line-height: 1.2; padding: 2px 6px; border-radius: 5px; color: #1a1405; background: #f5c04a; }
+  /* Two narrow columns of cards: keep the language and the crossing, and drop what would spill out of the fixed height. */
+  @media (min-width: 721px) and (max-width: 1000px) {
+    .mt { display: none; }
+    li:last-child .src { display: none; }
+    ul { margin-top: 7px; }
+    li { padding: 7px 2px 6px; }
+  }
+  :global(.card2:hover) .t { translate: 0 -2px; box-shadow: 0 5px 0 #8f4326; }
+</style>

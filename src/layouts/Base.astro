@@ -1,0 +1,57 @@
+---
+import '@fontsource/press-start-2p';
+import '@fontsource/jetbrains-mono/500.css';
+import '@fontsource/jetbrains-mono/700.css';
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+import LionGame from '../components/game/LionGame.astro';
+import { site } from '../data/site';
+
+interface Props { title: string; description?: string }
+const { title, description = 'Joseph Yung builds AI products end to end: engines, agents and the interfaces people trust them through.' } = Astro.props;
+const url = new URL(Astro.url.pathname, Astro.site);
+const home = new URL('/', Astro.site).href;
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, url: home },
+  { '@context': 'https://schema.org', '@type': 'Person', name: site.name, url: home, image: new URL('/headshot.jpg', Astro.site).href,
+    jobTitle: 'AI and product engineer', description,
+    alumniOf: { '@type': 'CollegeOrUniversity', name: 'Columbia University' }, address: { '@type': 'PostalAddress', addressLocality: site.location },
+    sameAs: [site.linkedin, site.github, site.devpost] },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={url} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={url} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={new URL('/og.png', Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Joseph Yung, with a pixel lion at a laptop, in front of a pixel-art campus at night." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL('/og.png', Astro.site)} />
+    <meta name="theme-color" content="#0b1226" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </head>
+  <body>
+    <slot />
+    <LionGame />
+  </body>
+</html>

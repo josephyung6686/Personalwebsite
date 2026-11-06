@@ -1,0 +1,25 @@
+:root {
+  color-scheme: dark;
+  /* Night campus: navy surfaces, Columbia blue for structure, lion gold for what matters. */
+  --page: #0b1226;
+  --panel: #131d38;
+  --panel-2: #1a2747;
+  --panel-edge: #2a3b66;
+  --panel-edge-hi: #3f5688;
+  --panel-drop: 4px 4px 0 #060b18;
+  --panel-drop-hi: 6px 6px 0 #060b18;
+  --ink: #f2f5fb;
+  --body: #c9d4e8;
+  --muted: #a3b2cf;
+  --columbia: #b9d9eb;
+  --blue: #6fb1e6;
+  --blue-deep: #1d4f91;
+  --gold: #f5c04a;
+  --gold-deep: #a9761b;
+  --gold-soft: #2c2612;
+  --cream: #ffe9b0;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --font-pixel: "Press Start 2P", ui-monospace, monospace;
+  --font-ui: var(--font-mono);
+}

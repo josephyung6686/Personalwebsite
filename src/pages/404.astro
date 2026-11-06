@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import Lion from '../components/Lion.astro';
+---
+<Base title="Nothing here yet · Joseph Yung">
+  <main class="nf">
+    <Lion pose="bed" class="nf-lion" />
+    <h1>Nothing here yet.</h1>
+    <p><a class="btn" href="/">Go back home</a></p>
+  </main>
+</Base>
+<style>
+  .nf { min-height: 80vh; display: grid; place-content: center; justify-items: center; text-align: center; padding: 24px; background: linear-gradient(var(--page), #14224a); }
+  :global(.nf-lion) { width: 180px; }
+  h1 { font-family: var(--font-pixel); font-size: 18px; color: var(--ink); margin: 18px 0; }
+</style>

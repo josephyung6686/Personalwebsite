@@ -1,0 +1,43 @@
+---
+import '@fontsource/bricolage-grotesque/800.css';
+import '@fontsource/onest/400.css';
+import '@fontsource/onest/600.css';
+import TuckDemo from '../tuck/TuckDemo.astro';
+---
+<section class="sec wrap" aria-labelledby="featured-h">
+  <p class="num">01 · FEATURED</p>
+  <!-- Tuck's own branding: its dark window, Bricolage Grotesque over Onest, the brand blue. -->
+  <div class="tuck-brand">
+    <i class="aurora" aria-hidden="true"></i>
+    <p class="mark"><img src="/work/tuck/tuck-icon.svg" alt="" width="28" height="28" /><b>Tuck</b><span>macOS app · with my cofounder</span></p>
+    <h2 id="featured-h"><span>Tuck:</span> <span class="grad">a file app people can trust</span></h2>
+    <p class="promises" aria-label="Tuck's promises"><span>Nothing moves on disk</span><span>Private files stay on this Mac</span><span>Undo any answer</span></p>
+    <TuckDemo size="compact" />
+    <div class="body"><p>A macOS app I'm building with my cofounder: an autonomous file organizer and an AI brain for your computer</p>
+      <ul><li>I work on the engine: reading files, grouping them, and the assistant that answers from them</li><li>Sorts into virtual folders, and asks you only about the decisions it can't make alone</li><li>Checked against sample home folders with answer keys, not by feel</li></ul></div>
+    <p class="tags"><span>Cofounder</span><span>Sorting engine</span><span>AI products</span></p>
+    <p class="cta"><a class="btn" href="/work/tuck">Read the case study</a><a class="btn alt" href="/work/tuck#demo">Try the demo</a></p>
+  </div>
+</section>
+<style>
+  .tuck-brand { position: relative; isolation: isolate; overflow: hidden; border-radius: 0; padding: clamp(20px, 4vw, 44px);
+    background: linear-gradient(155deg, #10172b 0%, #111a33 48%, #131a2e 100%); color: #f1f3f8; font-family: "Onest", -apple-system, sans-serif;
+    box-shadow: inset 0 0 0 2px var(--panel-edge), var(--panel-drop); }
+  .aurora { position: absolute; inset: 0; z-index: -1;
+    background: conic-gradient(from 200deg at 88% 112%, transparent 0deg, rgba(61,108,255,.22) 38deg, rgba(111,177,230,.14) 78deg, transparent 135deg); }
+  .mark { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; }
+  .mark img { width: 28px; height: 28px; border-radius: 0; }
+  .mark b { font-size: 17px; font-weight: 600; }
+  .mark span { font-size: 13px; color: var(--muted); padding-left: 10px; border-left: 1px solid var(--panel-edge); }
+  h2 { font-family: "Bricolage Grotesque", "Onest", sans-serif; font-weight: 800; letter-spacing: -.04em; line-height: 1.02; font-size: clamp(32px, 5vw, 52px); margin: 0 0 16px; color: #fff; }
+  .grad { color: #7ea2ff; }
+  .promises { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+  .promises span { font-size: 13px; color: #dfe6f5; background: rgba(255,255,255,.07); border-radius: 0; padding: 7px 12px; }
+  .body { font-size: 16px; line-height: 1.6; color: var(--body); max-width: 680px; margin: 24px 0 0; }
+  .body p { margin: 0 0 8px; color: #fff; font-weight: 600; }
+  .body ul { margin: 0; padding-left: 20px; } .body li { margin: 4px 0; } .body li::marker { color: #7ea2ff; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0; }
+  .tags span { font: 500 12px/1.2 var(--font-mono); color: #cdd9ff; background: rgba(61,108,255,.22); padding: 6px 11px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 6px; }
+  @media (max-width: 480px) { .tuck-brand { border-radius: 0; padding: 16px; } .mark span { display: none; } }
+</style>

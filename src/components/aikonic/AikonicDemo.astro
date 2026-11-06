@@ -1,0 +1,63 @@
+---
+import './aikonic.css';
+import { CONCEPT_COUNT, MEETINGS, PASSAGES, SUGGESTIONS } from './aikonicSearch';
+interface Props { size?: 'compact' | 'full' }
+const { size = 'full' } = Astro.props;
+const uid = `aik-${size}`;
+const modes = [['keyword', 'Keyword'], ['semantic', 'Semantic'], ['both', 'Both']] as const;
+---
+<div class:list={['aik', size]} data-demo="aikonic" data-size={size} role="region" aria-label="Interactive demo: searching meeting transcripts across languages">
+  <p class="aik-label"><i aria-hidden="true"></i>My reimagining of the idea, with sample data. Not Aikonic's product.</p>
+  <div class="aik-grid">
+    <div class="aik-find">
+      <form class="aik-form" role="search">
+        <label for={`${uid}-q`}>Search {MEETINGS.length} sample meetings</label>
+        <div class="aik-box">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+          <input id={`${uid}-q`} type="search" placeholder="Ask in English or 中文" autocomplete="off" spellcheck="false" />
+        </div>
+      </form>
+
+      <div class="aik-chips" role="group" aria-label="Suggested searches">
+        {SUGGESTIONS.map((s) => (
+          <button type="button" class="aik-chip" data-q={s.query}><b>{s.query}</b><small>{s.hint}</small></button>
+        ))}
+      </div>
+
+      <div class="aik-modes" role="group" aria-label="How to search">
+        {modes.map(([id, name]) => (
+          <button type="button" class="aik-mode" data-mode={id} aria-pressed={String(id === 'both')}>{name}<span class="n" hidden></span></button>
+        ))}
+      </div>
+      <p class="aik-why"></p>
+
+      <p class="aik-summary" role="status"></p>
+      <ol class="aik-results" hidden></ol>
+      <div class="aik-empty">
+        <p class="aik-empty-h">Press a suggestion or type a question.</p>
+        <p>Every result cites the moment it was said. Press its timestamp to jump there in the transcript.</p>
+      </div>
+    </div>
+
+    <div class="aik-viewer">
+      <div class="aik-vhead">
+        <p class="aik-vtitle"></p>
+        <p class="aik-vtime"></p>
+      </div>
+      <div class="aik-rail" aria-hidden="true"><i class="aik-head"></i></div>
+      <ol class="aik-lines" aria-label="Transcript"></ol>
+    </div>
+  </div>
+
+  <details class="aik-how">
+    <summary>How this demo works</summary>
+    <p>The search really runs in your browser, over {PASSAGES.length} invented passages from a made-up tea chain. Keyword mode is BM25 scoring over words and Chinese character pairs, with Traditional folded to Simplified.</p>
+    <p>Semantic mode is a stand-in, not a real embedding model. It uses a small hand-built map of {CONCEPT_COUNT} ideas and their English, Cantonese and Mandarin words, then compares them with cosine similarity, so it only knows those {CONCEPT_COUNT} ideas. The English under Chinese lines is there for you to read and is never searched.</p>
+    <p>Both merges the two ranked lists with reciprocal rank fusion. Each passage keeps its own timestamp, which is why a result can cite the exact moment.</p>
+  </details>
+  <noscript><p>This demo runs in your browser and needs JavaScript.</p></noscript>
+</div>
+<script>
+  import { initAikonicDemos } from './aikonicDemo';
+  initAikonicDemos();
+</script>

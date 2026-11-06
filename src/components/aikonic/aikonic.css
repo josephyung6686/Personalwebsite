@@ -1,0 +1,112 @@
+/* The Aikonic demo: a search desk beside a transcript, on the Aikonic theme. Chinese falls back to the system's CJK face, chosen per line by its lang. */
+.aik { container: aik / inline-size; --aik-drop: color-mix(in srgb, var(--accent) 48%, #000); --aik-key-drop: #0c0806;
+  background: color-mix(in srgb, var(--bg) 92%, #fff); border-radius: 0; box-shadow: inset 0 0 0 1px var(--line);
+  padding: clamp(14px, 3vw, 24px); color: var(--ink); text-align: left;
+  font: 400 15px/1.5 var(--f-body), "PingFang HK", "PingFang SC", "Noto Sans CJK TC", "Noto Sans CJK SC", "Microsoft JhengHei", "Microsoft YaHei", sans-serif; }
+.aik p { margin: 0; }
+.aik ol { list-style: none; margin: 0; padding: 0; }
+.aik [hidden] { display: none !important; }
+.aik :is(button, input, summary):focus-visible, .aik-line:focus-visible { outline: 3px solid var(--accent-deep); outline-offset: 2px; }
+
+.aik-label { display: flex; gap: 9px; align-items: baseline; font-weight: 700; font-size: 14px; color: var(--soft-ink); margin-bottom: 16px !important; }
+.aik-label i { flex: none; width: 8px; height: 8px; background: var(--gold); box-shadow: 2px 2px 0 var(--gold-deep); translate: 0 -1px; }
+
+.aik-grid { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+.aik-find, .aik-viewer { min-width: 0; }
+@container aik (min-width: 760px) {
+  .aik-grid { grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  .aik-results { max-height: 430px; overflow-y: auto; padding-right: 8px !important; }
+  .aik-viewer { position: sticky; top: 16px; }
+  .aik-lines { max-height: 540px !important; }
+}
+
+/* Search */
+.aik-form label { display: block; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+.aik-box { position: relative; }
+.aik-box svg { position: absolute; left: 14px; top: 50%; translate: 0 -50%; width: 18px; height: 18px; fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linecap: round; pointer-events: none; }
+.aik-box input { width: 100%; height: 50px; padding: 0 14px 0 42px; border: 0; border-radius: 0; background: var(--bg); color: var(--ink); font: 500 16px/1 var(--f-body), "PingFang HK", "PingFang SC", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif; box-shadow: inset 0 0 0 2px var(--line); -webkit-appearance: none; appearance: none; }
+.aik-box input::placeholder { color: var(--muted); opacity: 1; }
+.aik-box input:hover { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 45%, var(--line)); }
+
+/* Game keys: a hard drop, a lift on hover and a press on click. */
+.aik-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.aik-chip, .aik-mode, .aik-time { border: 0; cursor: pointer; font-family: inherit; transition: translate .12s ease-out, box-shadow .12s ease-out, background .12s ease-out; }
+.aik-chip { display: flex; flex-direction: column; gap: 1px; min-height: 52px; padding: 7px 11px; border-radius: 0; text-align: left; color: var(--ink); background: var(--soft); box-shadow: inset 0 0 0 1px var(--line), 0 3px 0 var(--aik-key-drop); }
+.aik-chip b { font-weight: 700; font-size: 14px; line-height: 1.25; overflow-wrap: anywhere; }
+.aik-chip small { font-size: 12px; line-height: 1.25; color: var(--soft-ink); }
+.aik-chip:hover { translate: 0 -1px; box-shadow: inset 0 0 0 1px var(--accent), 0 4px 0 var(--aik-key-drop); }
+.aik-chip:active { translate: 0 2px; box-shadow: inset 0 0 0 1px var(--accent), 0 1px 0 var(--aik-key-drop); }
+
+.aik-modes { display: flex; gap: 8px; margin-top: 16px; }
+.aik-mode { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 8px 6px; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 0; font-weight: 700; font-size: 14px; color: var(--soft-ink); background: var(--soft); box-shadow: inset 0 0 0 1px var(--line), 0 4px 0 var(--aik-key-drop); }
+.aik-mode .n { min-width: 20px; padding: 1px 5px; border-radius: 0; font-size: 12px; line-height: 1.4; text-align: center; font-variant-numeric: tabular-nums; background: color-mix(in srgb, var(--bg) 62%, transparent); color: var(--ink); }
+.aik-mode:hover { translate: 0 -1px; box-shadow: inset 0 0 0 1px var(--accent), 0 5px 0 var(--aik-key-drop); }
+.aik-mode:active { translate: 0 3px; box-shadow: inset 0 0 0 1px var(--accent), 0 1px 0 var(--aik-key-drop); }
+.aik-mode[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent); box-shadow: 0 4px 0 var(--aik-drop); }
+.aik-mode[aria-pressed="true"] .n { background: rgba(35,16,8,.2); color: var(--accent-ink); }
+.aik-mode[aria-pressed="true"]:hover { box-shadow: 0 5px 0 var(--aik-drop); }
+.aik-mode[aria-pressed="true"]:active { box-shadow: 0 1px 0 var(--aik-drop); }
+.aik-why { margin-top: 12px !important; min-height: 2.9em; font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+
+@container aik (max-width: 380px) {
+  .aik-modes { gap: 6px; }
+  .aik-mode { gap: 4px; padding: 8px 3px; font-size: 13px; }
+  .aik-mode .n { min-width: 17px; padding: 1px 3px; }
+}
+
+/* Results */
+.aik-summary { margin-top: 6px !important; font-size: 13.5px; line-height: 1.45; font-weight: 600; }
+.aik-summary:empty { display: none; }
+.aik-summary.none { padding: 14px; border-radius: 0; background: var(--soft); color: var(--ink); font-weight: 500; }
+.aik-empty { margin-top: 6px; padding: 16px; border-radius: 0; background: var(--soft); font-size: 14px; line-height: 1.45; color: var(--soft-ink); }
+.aik-empty-h { font-weight: 700; color: var(--ink); margin-bottom: 2px !important; }
+.aik-results { margin-top: 6px !important; }
+.aik-result { padding: 12px 8px; border-top: 1px solid var(--line); border-radius: 0; }
+.aik-result.on { background: var(--soft); border-radius: 0; }
+.aik-rtext { font-size: 15px; line-height: 1.55; font-weight: 500; }
+.aik-rtext:lang(zh), .aik-ltext:lang(zh), .aik-rtext:lang(yue), .aik-ltext:lang(yue) { line-height: 1.7; }
+.aik-gloss { margin-top: 2px !important; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.aik mark { color: inherit; border-radius: 0; padding: 0 1px; }
+.aik mark.kw { background: color-mix(in srgb, var(--accent) 42%, transparent); }
+.aik mark.sem { background: none; text-decoration: underline dotted var(--accent) 2px; text-underline-offset: 3px; }
+.aik-rmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; }
+.aik-src { font-size: 12.5px; line-height: 1.3; color: var(--muted); min-width: 0; }
+.aik-time { flex: none; min-width: 58px; min-height: 30px; padding: 3px 9px; border-radius: 0; font-weight: 800; font-size: 13px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--accent-ink); background: var(--accent); box-shadow: 0 3px 0 var(--aik-drop); }
+.aik-time:hover { translate: 0 -1px; box-shadow: 0 4px 0 var(--aik-drop); }
+.aik-time:active { translate: 0 2px; box-shadow: 0 1px 0 var(--aik-drop); }
+.aik-time.alt { color: var(--soft-ink); background: var(--soft); box-shadow: inset 0 0 0 1px var(--line), 0 3px 0 var(--aik-key-drop); }
+.aik-time.alt:hover { box-shadow: inset 0 0 0 1px var(--accent), 0 4px 0 var(--aik-key-drop); }
+.aik-time.alt:active { box-shadow: inset 0 0 0 1px var(--accent), 0 1px 0 var(--aik-key-drop); }
+.aik-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.aik-tag { font-size: 11.5px; font-weight: 700; line-height: 1.2; padding: 3px 7px; border-radius: 0; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.aik-tag.kw { background: color-mix(in srgb, var(--accent) 30%, transparent); box-shadow: none; }
+.aik-tag.sem { text-decoration: underline dotted var(--accent) 1.5px; text-underline-offset: 2px; }
+.aik-tag.cross { color: #1a1405; background: var(--gold); box-shadow: none; }
+
+/* Transcript */
+.aik-viewer { padding: 14px; border-radius: 0; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); }
+.aik-vhead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; align-items: baseline; }
+.aik-vtitle { font-family: var(--f-head), "PingFang HK", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif; font-weight: 800; font-size: 16px; line-height: 1.3; letter-spacing: -.01em; }
+.aik-vtime { font-size: 13px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.aik-rail { position: relative; height: 20px; margin: 8px 7px 10px; background: linear-gradient(var(--line), var(--line)) 0 50% / 100% 4px no-repeat; }
+.aik-tick { position: absolute; top: 5px; width: 2px; height: 10px; translate: -1px 0; background: var(--muted); }
+.aik-tick.hit { top: 2px; width: 4px; height: 16px; translate: -2px 0; background: var(--accent); }
+.aik-head { position: absolute; z-index: 1; top: 3px; width: 14px; height: 14px; translate: -7px 0; background: var(--ink); box-shadow: 2px 2px 0 var(--aik-drop), 0 0 0 2px var(--bg); transition: left .28s cubic-bezier(.25, 1, .5, 1); }
+.aik-lines { position: relative; max-height: 360px; overflow-y: auto; margin: 0 -6px !important; padding: 0 6px !important; }
+.aik-line { padding: 10px 8px; border-radius: 0; }
+.aik-line + .aik-line { margin-top: 2px; }
+.aik-line.hit { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.aik-line.on { background: var(--soft); box-shadow: inset 0 0 0 2px var(--accent); }
+.aik-line.flash { animation: aik-flash .7s cubic-bezier(.25, 1, .5, 1); }
+@keyframes aik-flash { from { background: color-mix(in srgb, var(--accent) 45%, var(--soft)); } to { background: var(--soft); } }
+.aik-lmeta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.aik-who { font-size: 13px; font-weight: 700; color: var(--muted); }
+.aik-ltext { font-size: 14.5px; line-height: 1.55; }
+
+.aik-how { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.aik-how summary { width: fit-content; cursor: pointer; font-weight: 700; color: var(--ink); padding: 4px 0; }
+.aik-how p { max-width: 72ch; }
+.aik-how p + p, .aik-how summary + p { margin-top: 8px; }
+
+.aik.compact { font-size: 14px; }
+.aik.compact .aik-how { display: none; }

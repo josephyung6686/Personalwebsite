@@ -1,0 +1,86 @@
+---
+// A real frame of the SPADE demo: the same model, run at build time for four rounds, so this card ships no script.
+import { bioRow } from '../../spade/bioIcons';
+import { DEFAULT_TARGET, FACTORS, GRID, MAX_ROUNDS, certify, factorValue, heatColor, newCampaign, recommend, runRound } from '../../spade/spadeMath';
+
+let c = newCampaign();
+const ROUNDS = 4;
+let firstRecommended = 0;
+for (let r = 1; r <= ROUNDS; r++) {
+  c = runRound(c, DEFAULT_TARGET);
+  if (!firstRecommended && recommend(c.post, DEFAULT_TARGET)) firstRecommended = r;
+}
+const bucket = (k: number) => heatColor(Math.round(c.post.mean[k] / 6) * 6, Math.round(c.post.sd[k] / 5) * 5);
+
+// Quantize to a few dozen colors and merge runs along each row, which keeps 1,024 cells to a few KB of markup.
+const fills = new Map<string, string>();
+for (let j = 0; j < GRID; j++) {
+  let run = 0;
+  for (let i = 0; i < GRID; i++) {
+    const k = j * GRID + i;
+    const color = bucket(k).join();
+    run++;
+    if (i + 1 === GRID || bucket(k + 1).join() !== color) {
+      fills.set(color, `${fills.get(color) ?? ''}M${i + 1 - run} ${GRID - 1 - j}h${run}v1h-${run}z`);
+      run = 0;
+    }
+  }
+}
+
+const mask = certify(c.post, DEFAULT_TARGET);
+const on = (i: number, j: number) => i >= 0 && j >= 0 && i < GRID && j < GRID && mask[j * GRID + i] === 1;
+let fence = '';
+for (let j = 0; j < GRID; j++) {
+  for (let i = 0; i < GRID; i++) {
+    if (!on(i, j)) continue;
+    const top = GRID - 1 - j;
+    if (!on(i - 1, j)) fence += `M${i} ${top}v1`;
+    if (!on(i + 1, j)) fence += `M${i + 1} ${top}v1`;
+    if (!on(i, j + 1)) fence += `M${i} ${top}h1`;
+    if (!on(i, j - 1)) fence += `M${i} ${top + 1}h1`;
+  }
+}
+const rect = recommend(c.post, DEFAULT_TARGET);
+if (!rect || firstRecommended < 2) throw new Error('The SPADE preview expects it to hold off first, then recommend by round 4. Check the tuning in spadeMath.ts.');
+const range = (axis: 'x' | 'y', a: number, b: number) => `${factorValue(axis, a).toFixed(1)} to ${factorValue(axis, b).toFixed(1)} ${FACTORS[axis].unit}`;
+---
+<div class="vig v-sp" aria-hidden="true">
+  <svg class="map" viewBox={`0 0 ${GRID} ${GRID}`} shape-rendering="crispEdges">
+    {[...fills].map(([fill, d]) => <path fill={`rgb(${fill})`} d={d} />)}
+    <path class="fence" d={fence} />
+    <rect class="range" x={rect.x0} y={GRID - 1 - rect.y1} width={rect.x1 - rect.x0 + 1} height={rect.y1 - rect.y0 + 1} />
+    <g shape-rendering="auto">
+      {c.obs.map((o) => <circle cx={o.x * GRID} cy={(1 - o.y) * GRID} r=".62" />)}
+    </g>
+  </svg>
+  <div class="side">
+    <p class="bio" set:html={bioRow.map((svg) => svg.replace('<svg', '<svg width="18" height="18"')).join('')} />
+    <p class="rnd"><span class="pips">{Array.from({ length: MAX_ROUNDS }, (_, i) => <i class={i < ROUNDS ? 'on' : ''}></i>)}</span>Round {ROUNDS} of {MAX_ROUNDS}</p>
+    <p class="rec">Recommend: range</p>
+    <p class="fac"><b>{FACTORS.x.name}</b>{range('x', rect.x0, rect.x1)}</p>
+    <p class="fac"><b>{FACTORS.y.name}</b>{range('y', rect.y0, rect.y1)}</p>
+    <p class="note">Held off until round {firstRecommended}</p>
+  </div>
+</div>
+<style>
+  .v-sp { display: flex; gap: 16px; align-items: center; background: #0b1a1c; color: #eaf6f4; }
+  .map { flex: none; width: min(178px, 46%); height: auto; aspect-ratio: 1; display: block; border-radius: 4px; box-shadow: 0 0 0 1px #1f3a38; }
+  .fence { fill: none; stroke: #eaf6f4; stroke-width: .16; }
+  .range { fill: none; stroke: #f5c04a; stroke-width: .42; }
+  circle { fill: #eaf6f4; stroke: #06201b; stroke-width: .22; }
+  .side { min-width: 0; flex: 1; }
+  .bio { display: flex; gap: 6px; margin: 0 0 8px !important; color: #4fd1b5; }
+  .bio :global(svg) { width: 18px; height: 18px; flex: none; }
+  .rnd { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 11.5px; color: #a9c4c0; font-variant-numeric: tabular-nums; }
+  .pips { display: flex; gap: 3px; }
+  .pips i { width: 9px; height: 9px; background: #12302d; box-shadow: inset 0 0 0 1px #1f3a38; }
+  .pips i.on { background: #4fd1b5; }
+  .rec { width: fit-content; margin: 10px 0 !important; padding: 6px 9px; border-radius: 9px; font-weight: 700; font-size: 12.5px; line-height: 1.2; white-space: nowrap; color: #06201b; background: #4fd1b5; box-shadow: 0 3px 0 #1f7a66; transition: translate .25s cubic-bezier(.25, 1, .5, 1), box-shadow .25s cubic-bezier(.25, 1, .5, 1); }
+  .fac { font-size: 12.5px; line-height: 1.35; font-variant-numeric: tabular-nums; }
+  .fac + .fac { margin-top: 5px !important; }
+  .fac b { display: block; font-weight: 500; font-size: 11px; color: #a9c4c0; }
+  .note { margin-top: 9px !important; font-size: 11.5px; color: #a9c4c0; }
+  /* Two narrow columns of cards: the preview loses its footnote rather than spill out of the fixed height. */
+  @media (min-width: 721px) and (max-width: 900px) { .note { display: none; } .rec { margin: 8px 0 !important; } }
+  :global(.card2:hover) .rec { translate: 0 -2px; box-shadow: 0 5px 0 #1f7a66; }
+</style>

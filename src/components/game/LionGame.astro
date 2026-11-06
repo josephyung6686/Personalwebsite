@@ -1,0 +1,46 @@
+---
+import '@fontsource/fredoka/500.css';
+import '@fontsource/fredoka/600.css';
+import '@fontsource/fredoka/700.css';
+import icons from './icons.svg?raw';
+import '../../styles/lion.css';
+import './game.css';
+const I = (n: string, cls = 'gi') => `<svg class="${cls}" aria-hidden="true" focusable="false"><use href="#i-${n}"/></svg>`;
+---
+<Fragment set:html={icons} />
+<div id="lion" role="button" tabindex="0" aria-label="The lion. Drag to throw. Press Enter to dress up." data-mode="walk">
+  <span class="lion-hint" aria-hidden="true"><span class="for-mouse">Throw me! Double-click to dress up</span><span class="for-touch">Throw me! Double-tap to dress up</span></span>
+  <div class="lion-inner"></div>
+</div>
+<button type="button" id="dress-btn" class="btn dress-btn"><Fragment set:html={I('shirt')} /><span>Dress up the lion</span></button>
+<p id="game-toast" class="game-toast" role="status" aria-live="polite"></p>
+
+<dialog id="wardrobe" class="wd" aria-labelledby="wd-title">
+  <h2 id="wd-title" class="wd-title">Dress up the lion</h2>
+  <button type="button" class="wd-close" aria-label="Close"><Fragment set:html={I('close')} /></button>
+  <div class="wd-rail">
+    <button type="button" class="rail-btn" data-mode="quests" aria-pressed="false"><Fragment set:html={I('quest')} />Quests</button>
+    <button type="button" class="rail-btn" data-mode="wardrobe" aria-pressed="true"><Fragment set:html={I('shirt')} />Wardrobe</button>
+  </div>
+  <div class="wd-stage">
+    <div class="wd-slots" aria-hidden="true"></div>
+    <div class="wd-window"><div class="wd-preview"></div></div>
+    <div class="wd-level"><div class="wd-bar" role="progressbar" aria-label="Quests done" aria-valuemin="0"><div class="wd-fill"></div></div><p class="wd-lvl"></p></div>
+    <div class="wd-tools">
+      <button type="button" class="tool" data-act="random"><Fragment set:html={I('dice')} />Random</button>
+      <button type="button" class="tool" data-act="reset"><Fragment set:html={I('reset')} />Reset</button>
+      <button type="button" class="tool" data-act="save" aria-label="Save picture"><Fragment set:html={I('camera')} />Save</button>
+      <button type="button" class="tool" data-act="bed"></button>
+    </div>
+  </div>
+  <div class="wd-shop">
+    <div class="wd-tabs" role="tablist" aria-label="Item types"></div>
+    <div class="wd-grid" role="tabpanel"></div>
+    <ul class="wd-quests" hidden></ul>
+  </div>
+</dialog>
+
+<script>
+  import { initGame } from './lionGame';
+  initGame();
+</script>

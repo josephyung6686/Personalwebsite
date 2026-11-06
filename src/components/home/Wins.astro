@@ -1,0 +1,37 @@
+---
+import Lion from '../Lion.astro';
+import { wins } from '../../data/wins';
+---
+<section id="wins" class="sec wrap" aria-labelledby="wins-h">
+  <p class="num">03 · WINS</p>
+  <div class="head"><h2 id="wins-h">Hackathons</h2><Lion pose="phone" class="wins-lion" /></div>
+  <ul class="rows panel">
+    {wins.map((w) => (
+      <li class="win-row">
+        <span class="place">{w.place}</span>
+        <span class="info">
+          <strong>{w.name}</strong>
+          <span class="meta">{w.event} · {w.what}</span>
+          <span class="meta role">{w.role}</span>
+          <span class="links">
+            <a class="btn" href={w.devpost} rel="noopener">Devpost</a>
+            <a class="btn alt" href={w.repo} rel="noopener">Repo</a>
+          </span>
+        </span>
+      </li>
+    ))}
+  </ul>
+</section>
+<style>
+  .head { display: flex; align-items: flex-end; justify-content: space-between; }
+  :global(.wins-lion) { width: 96px; margin-bottom: -6px; }
+  .rows { list-style: none; margin: 0; padding: 4px 22px; }
+  .win-row { display: flex; gap: 18px; align-items: baseline; padding: 16px 0; border-bottom: 2px dashed var(--panel-edge); }
+  .win-row:last-child { border-bottom: 0; }
+  .place { font: 700 13px/1.5 var(--font-mono); text-transform: uppercase; letter-spacing: .04em; color: var(--gold); width: 150px; flex: none; }
+  .info strong { font: 700 16px/1.3 var(--font-mono); letter-spacing: -.02em; color: var(--ink); }
+  .meta { display: block; color: var(--muted); font-size: 13px; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .links .btn { font-size: 12px; padding: 8px 12px; }
+  @media (max-width: 480px) { .rows { padding: 4px 16px; } .win-row { flex-direction: column; gap: 4px; } .place { width: auto; } :global(.wins-lion) { width: 72px; } }
+</style>

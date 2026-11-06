@@ -1,0 +1,67 @@
+/* The pixel lion. Inside the SVG one CSS pixel is one sprite pixel, so every move lands on the grid.
+   Base frames are visible and alternates carry visibility="hidden", so with animation off the lion simply holds still. */
+.lion-pose { display: inline-block; line-height: 0; vertical-align: bottom; }
+.lion-svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* In the hero, one sprite pixel is one campus pixel: 44 of the scene's 320 columns. */
+.hero-lion .lion.lion-pose { width: max(72px, 13.75vw); }
+
+/* blink, twice in quick succession */
+.lion-svg .e-open { animation: l-eye-open 5.2s steps(1) infinite; }
+.lion-svg .e-blink { animation: l-eye-shut 5.2s steps(1) infinite; }
+@keyframes l-eye-open { 0% { visibility: visible; } 88% { visibility: hidden; } 90% { visibility: visible; } 92% { visibility: hidden; } 95% { visibility: visible; } }
+@keyframes l-eye-shut { 0% { visibility: hidden; } 88% { visibility: visible; } 90% { visibility: hidden; } 92% { visibility: visible; } 95% { visibility: hidden; } }
+
+/* breathing: the head settles one pixel */
+.lion-svg .l-head { animation: l-breathe 2.4s steps(1) infinite; }
+@keyframes l-breathe { 0% { transform: translateY(0); } 50% { transform: translateY(1px); } }
+
+/* tail flick */
+.lion-svg .t-rest { animation: l-tail-rest 4s steps(1) infinite; }
+.lion-svg .t-left { animation: l-tail-left 4s steps(1) infinite; }
+.lion-svg .t-right { animation: l-tail-right 4s steps(1) infinite; }
+@keyframes l-tail-rest { 0% { visibility: visible; } 70% { visibility: hidden; } 94% { visibility: visible; } }
+@keyframes l-tail-left { 0% { visibility: hidden; } 70% { visibility: visible; } 76% { visibility: hidden; } 82% { visibility: visible; } 88% { visibility: hidden; } }
+@keyframes l-tail-right { 0% { visibility: hidden; } 76% { visibility: visible; } 82% { visibility: hidden; } 88% { visibility: visible; } 94% { visibility: hidden; } }
+
+/* laptop: paws tapping away in bursts, screen light flickering on the lid edge */
+.lion-svg .key-a { animation: l-key 1.8s steps(1) infinite; }
+.lion-svg .key-b { animation: l-key 1.8s steps(1) infinite -.15s; }
+@keyframes l-key { 0% { transform: translateY(0); } 8% { transform: translateY(1px); } 16% { transform: translateY(0); } 24% { transform: translateY(1px); } 32% { transform: translateY(0); } 40% { transform: translateY(1px); } 48% { transform: translateY(0); } }
+.lion-svg .l-glow { animation: l-glow 2.8s steps(1) infinite; }
+@keyframes l-glow { 0% { opacity: .95; } 22% { opacity: .55; } 30% { opacity: .95; } 66% { opacity: .7; } 74% { opacity: .95; } }
+
+/* phone: good news pops up now and then */
+.lion-svg .l-ping { animation: l-ping 6s steps(1) infinite; }
+@keyframes l-ping { 0% { visibility: hidden; transform: translateY(2px); } 30% { visibility: visible; transform: translateY(1px); } 33% { transform: translateY(-1px); } 37% { transform: translateY(0); } 72% { visibility: hidden; } }
+
+/* scarf: a wave hello */
+.lion-svg .w-a { animation: l-wave-a 4.4s steps(1) infinite; }
+.lion-svg .w-b { animation: l-wave-b 4.4s steps(1) infinite; }
+@keyframes l-wave-a { 0% { visibility: hidden; } 6% { visibility: visible; } 12% { visibility: hidden; } 18% { visibility: visible; } 24% { visibility: hidden; } 30% { visibility: visible; } }
+@keyframes l-wave-b { 0% { visibility: visible; } 6% { visibility: hidden; } 12% { visibility: visible; } 18% { visibility: hidden; } 24% { visibility: visible; } 30% { visibility: hidden; } }
+
+/* bed: slow breaths under the blanket, a lazy tail and rising z's */
+[data-pose="bed"] .lion-svg .b-down { animation: l-eye-a 3.4s steps(1) infinite; }
+[data-pose="bed"] .lion-svg .b-up { animation: l-eye-b 3.4s steps(1) infinite; }
+@keyframes l-eye-a { 0% { visibility: visible; } 50% { visibility: hidden; } }
+@keyframes l-eye-b { 0% { visibility: hidden; } 50% { visibility: visible; } }
+[data-pose="bed"] .lion-svg .t-rest { animation: l-tail-lazy-a 7s steps(1) infinite; }
+[data-pose="bed"] .lion-svg .t-left { animation: l-tail-lazy-b 7s steps(1) infinite; }
+@keyframes l-tail-lazy-a { 0% { visibility: visible; } 78% { visibility: hidden; } 84% { visibility: visible; } 90% { visibility: hidden; } 96% { visibility: visible; } }
+@keyframes l-tail-lazy-b { 0% { visibility: hidden; } 78% { visibility: visible; } 84% { visibility: hidden; } 90% { visibility: visible; } 96% { visibility: hidden; } }
+.lion-svg .zz { animation: l-zz 4.5s steps(1) infinite; }
+.lion-svg .z1 { animation-delay: 0s; }
+.lion-svg .z2 { animation-delay: .6s; }
+.lion-svg .z3 { animation-delay: 1.2s; }
+@keyframes l-zz { 0% { visibility: hidden; transform: translate(0, 2px); } 10% { visibility: visible; } 30% { transform: translate(0, 1px); } 50% { transform: translate(1px, 0); } 70% { visibility: visible; transform: translate(1px, -1px); } 85% { visibility: hidden; } }
+
+/* so the lions on a page don't all blink at once */
+[data-pose="phone"] .lion-svg :is(.e-open, .e-blink) { animation-delay: -1.7s; }
+[data-pose="scarf"] .lion-svg :is(.e-open, .e-blink) { animation-delay: -3.1s; }
+[data-pose="phone"] .lion-svg .l-head { animation-delay: -.8s; }
+[data-pose="scarf"] .lion-svg .l-head { animation-delay: -1.6s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lion-svg *, .lion-svg { animation: none !important; }
+}
