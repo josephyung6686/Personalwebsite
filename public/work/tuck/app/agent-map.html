@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head><script>try{if(!localStorage.getItem('tuckTheme'))localStorage.setItem('tuckTheme','dark')}catch(e){}</script><script>(function(){var t=null;try{t=localStorage.getItem("tuckTheme")}catch(e){}if(t)document.documentElement.dataset.theme=t})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What Tuck Can Do</title>
+<link rel="stylesheet" href="system.css"><link rel="stylesheet" href="phosphor.css">
+<script src="sample.js"></script>
+<script src="plan.js"></script>
+<script src="chatbot.js"></script>
+<style>
+html,body{height:100%;margin:0;background:var(--desk);color:var(--ink);font:500 13px/1.4 var(--f);overflow:hidden}
+.am{position:fixed;inset:16px;display:grid;grid-template-rows:auto auto minmax(0,1fr);border-radius:14px;background:var(--win);box-shadow:var(--sh-win);overflow:hidden}
+.am-hd{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);min-width:0}
+.am-hd h1{margin:0;font:700 17px var(--fd);white-space:nowrap}.am-hd .sp{flex:1}
+.am-hd .stats{display:flex;gap:6px;flex-wrap:wrap;min-width:0}.am-hd .stats span{height:22px;padding:0 8px;border-radius:7px;background:var(--soft);font:600 11.5px/22px var(--f);color:var(--ink2);white-space:nowrap}
+.am-tabs{display:flex;gap:4px;padding:8px 14px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}.am-tabs::-webkit-scrollbar{display:none}
+.am-tabs button{flex:none;height:28px;padding:0 10px;border-radius:8px;font:600 12.5px var(--f);color:var(--ink2)}.am-tabs button:hover{background:var(--hov)}.am-tabs button.on{background:var(--sel);color:var(--sel-ink)}
+.am-tabs small{margin-left:4px;font-weight:500;color:var(--ink3)}
+.am-body{overflow:auto;padding:12px 18px 18px;min-height:0}
+table{width:100%;border-collapse:separate;border-spacing:0;font:500 12.5px/1.35 var(--f)}
+th{position:sticky;top:-12px;z-index:1;background:var(--win);text-align:left;padding:6px 8px;font:600 11.5px var(--f);color:var(--ink3);border-bottom:1px solid var(--line2);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
+td.say{color:var(--ink2)}td.say div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+td code{font:500 11.5px var(--mono);color:var(--ink2);word-break:break-word}
+.tag{display:inline-flex;align-items:center;height:19px;padding:0 6px;border-radius:6px;font:600 11px var(--f);white-space:nowrap;background:var(--soft);color:var(--ink2)}
+.tag.c{background:var(--ac-fill);color:var(--ac-ink)}.tag.added{box-shadow:inset 0 0 0 1px var(--line2);background:none}
+.tag.st-built{color:var(--ink)}.tag.st-missing{color:var(--ink3)}
+.feat b{font-weight:600}.feat .tag{margin-left:6px}
+.rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.rule{padding:10px 12px;border-radius:10px;background:var(--soft)}.rule b{display:block;font:600 13px var(--f);margin-bottom:2px}.rule span{color:var(--ink2)}
+h2{margin:16px 0 8px;font:600 13px var(--f);color:var(--ink2)}h2:first-child{margin-top:0}
+.theme{display:inline-flex;gap:2px;padding:2px;border-radius:8px;background:var(--soft)}.theme button{height:24px;padding:0 8px;border-radius:6px;font:600 12px var(--f);color:var(--ink2)}.theme button.on{background:var(--win);color:var(--ink);box-shadow:0 0 0 1px var(--line2)}
+@media (max-width:760px){.am{inset:0;border-radius:0}td.proto,th.proto,td.route,th.route{display:none}.am-hd .stats{display:none}}
+</style>
+<style></style>
+</head>
+<body>
+<div class="am" role="main">
+ <header class="am-hd"><a class="btn ghost sm" href="tuck.html#chats"><i class="ph ph-caret-left"></i>Chats</a><h1>What Tuck Can Do</h1><div class="stats" id="stats"></div><span class="sp"></span><div class="theme" role="group" aria-label="Appearance"><button data-t="light">Light</button><button data-t="dark">Dark</button></div></header>
+ <nav class="am-tabs" id="tabs" aria-label="Sections"></nav>
+ <section class="am-body" id="body"></section>
+</div>
+<script>
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const T=TuckBot.TOOLS;
+const SECTIONS=[...new Set(T.map(t=>t.section))];
+const RULES=[['Button parity','Anything a button does, the chat does, through the same route.'],['No bare sentences','An answer that shows or changes files is a card. One line above it.'],['Result, with Undo','Safe, undoable changes: done at once, only the result card. A card first only for tiers B, C and Q.'],['Edit in the card or by typing','Ticks, renames, folder ⌄; or type “only the PDFs”.'],['One link out','Every card: Open in [page], same id, changes sync both ways.'],['Labels, not narration','Labelled facts and tables.'],['Private stays private','Lock chip; the model gets counts only.'],['One answer shape','A line, then cards, then action chips.'],['Files only in rows','A file appears only in a row that says what happened to it.'],['Tools return cards','The chat draws every card it gets.']];
+const CARDS=[['C1','Tick list','Clean up (Trash); Sort at over 20 files or Ask each time'],['C2','Plan','Over 20 files, name clashes, Ask each time'],['C3','Result','Every safe change at once, and after every Apply'],['C4','Progress','Re-sort, big sorts'],['C5','Decision','Needs You in chat, forks'],['C6','Setting','Depth, autonomy, reading, watching, rules'],['C7','File','Find, What is this, Why here'],['C8','List','What was sent, History, Due, Attention'],['C9','Compare','Copies, versions'],['C10','Profile','About you, Memory']];
+const TIERS=[['R','Read','Questions and lists; no confirm'],['A','Act, then receipt','Safe and undoable, inside your level: done at once, only C3 or C6 with Undo. Type on the card to adjust it'],['B','Approve the card','Over 20 files, name clashes, new rules, accepting decisions, applying waiting changes; every change in Ask each time or Plan Only'],['C','Always confirm','Trash, making private files readable, raising autonomy, resetting data, older undos'],['Q','Ask','A real fork: one question, 2–4 options with consequences, and Other']];
+let cur=localStorage.getItem('agentMapTab')||'Rules';
+function stats(){const n=T.length,add=T.filter(t=>t.added).length;$('stats').innerHTML=`<span>${n} features</span><span>${n-add} from the map</span><span>${add} added</span><span>${new Set(T.map(t=>t.tool)).size} tools</span>`}
+const $=id=>document.getElementById(id);
+function tabs(){$('tabs').innerHTML=['Rules',...SECTIONS].map(s=>`<button data-s="${esc(s)}" class="${s===cur?'on':''}">${esc(s)}${s==='Rules'?'':`<small>${T.filter(t=>t.section===s).length}</small>`}</button>`).join('')}
+function body(){if(cur==='Rules'){$('body').innerHTML=`<h2>Rules for every answer</h2><div class="rules">${RULES.map(([b,s],i)=>`<div class="rule"><b>${i+1}. ${esc(b)}</b><span>${esc(s)}</span></div>`).join('')}</div>
+  <h2>Files on disk</h2><div class="rule"><b>Tuck never moves files on disk</b><span>Tuck’s folders are a view. Trash with Undo is the only exception.</span></div>
+  <h2>The 10 card types</h2><table><thead><tr><th>Card</th><th>Name</th><th>Used by</th></tr></thead><tbody>${CARDS.map(r=>`<tr><td><span class="tag c">${r[0]}</span></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</tbody></table>
+  <h2>Ask or act: tier chosen by code</h2><table><thead><tr><th>Tier</th><th>Name</th><th>When</th></tr></thead><tbody>${TIERS.map(r=>`<tr><td><span class="tag c">${r[0]}</span></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</tbody></table>`;return}
+ const rows=T.filter(t=>t.section===cur);
+ $('body').innerHTML=`<table><thead><tr><th>Feature</th><th>You might say</th><th>Card</th><th>Agent tool</th><th class="route">Backend route</th><th>Status</th><th>Tier</th><th class="proto">Prototype</th></tr></thead><tbody>${rows.map(t=>`<tr data-id="${esc(t.id)}"><td class="feat"><b>${esc(t.feature)}</b>${t.added?'<span class="tag added">added</span>':''}</td><td class="say">${t.say.slice(0,2).map(s=>`<div>“${esc(s)}”</div>`).join('')}</td><td><span class="tag c">${esc(t.card)}</span></td><td><code>${esc(t.tool)}</code></td><td class="route"><code>${esc(t.route)}</code></td><td><span class="tag st-${esc(String(t.status).split(' ')[0])}">${esc(t.status)}</span></td><td><span class="tag">${esc(t.tierR)}</span></td><td class="proto"><code>${esc(t.maps)}</code></td></tr>`).join('')}</tbody></table>`}
+$('tabs').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;cur=b.dataset.s;try{localStorage.setItem('agentMapTab',cur)}catch(x){}tabs();body();$('body').scrollTop=0};
+document.querySelectorAll('.theme button').forEach(b=>b.onclick=()=>{document.documentElement.dataset.theme=b.dataset.t;try{localStorage.setItem('tuckTheme',b.dataset.t)}catch(x){}sync()});
+function sync(){const d=document.documentElement.dataset.theme?document.documentElement.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.querySelectorAll('.theme button').forEach(b=>b.classList.toggle('on',(b.dataset.t==='dark')===d))}
+if(!SECTIONS.includes(cur))cur='Rules';stats();tabs();body();sync();
+</script>
+</body>
+</html>

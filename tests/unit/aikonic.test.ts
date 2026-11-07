@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { MEETINGS, PASSAGES, SUGGESTIONS, conceptsOf, crossesLanguage, fold, formatTime, search, segments, tokenize } from '../../src/components/aikonic/aikonicSearch';
+import { ANSWER, ASK_PROMPTS, CHUNK_LIMIT, JA_MEETING, MEETINGS, PASSAGES, SAMPLE_QUESTION, SUGGESTIONS, answerFor, chunkLines, citeTerm, conceptsOf, countBySpaces, crossesLanguage, estimateLength, fold, resolveCitation, formatTime, search, segments, tokenize } from '../../src/components/aikonic/aikonicSearch';
 
 const ids = (q: string, mode: 'keyword' | 'semantic' | 'both') => search(q, mode).map((h) => h.passage.id);
 
 describe('sample transcripts', () => {
-  it('cover English, Cantonese and Mandarin', () => {
-    expect(new Set(MEETINGS.map((m) => m.lang))).toEqual(new Set(['en', 'yue', 'cmn']));
+  it('cover English, Cantonese, Mandarin and Japanese', () => {
+    expect(new Set(MEETINGS.map((m) => m.lang))).toEqual(new Set(['en', 'yue', 'cmn', 'ja']));
   });
   it('every passage maps back to a timestamp inside its meeting, in order', () => {
     for (const m of MEETINGS) {
@@ -68,7 +68,7 @@ describe('ranking', () => {
     const keyword = search('supplier delay', 'keyword');
     expect(keyword.map((h) => h.passage.lang)).toEqual(['en']);
     const langs = new Set(search('supplier delay', 'semantic').map((h) => h.passage.lang));
-    expect(langs).toEqual(new Set(['en', 'yue', 'cmn']));
+    expect(langs).toEqual(new Set(['en', 'yue', 'cmn', 'ja']));
   });
   it('a Chinese query finds the English passage and the Cantonese slang for it', () => {
     expect(new Set(search('退款', 'keyword').map((h) => h.passage.lang))).toEqual(new Set(['cmn']));
@@ -130,6 +130,109 @@ describe('ranking', () => {
     const q = search('training', 'semantic');
     const tied = q.filter((h) => h.score === q[0].score).map((h) => PASSAGES.indexOf(h.passage));
     expect(tied).toEqual([...tied].sort((a, b) => a - b));
+  });
+});
+
+describe('Reciprocal Rank Fusion', () => {
+  it('scores a passage by the sum of 1 / (60 + rank) across both lists', () => {
+    const top = search('supplier delay', 'both')[0];
+    expect(top.ranks).toEqual({ keyword: 1, semantic: 1 });
+    expect(top.score).toBeCloseTo(2 / 61, 10);
+  });
+  it('a passage only one list found gets one term', () => {
+    const single = search('supplier delay', 'both').find((h) => !h.keyword)!;
+    expect(single.ranks.keyword).toBeUndefined();
+    expect(single.score).toBeCloseTo(1 / (60 + single.ranks.semantic!), 10);
+  });
+  it('reports each list\'s own rank', () => {
+    const hits = search('supplier delay', 'semantic');
+    hits.forEach((h, i) => expect(h.ranks.semantic).toBe(i + 1));
+  });
+});
+
+describe('when the embedding service is down', () => {
+  const down = { embeddingsDown: true };
+  it('semantic search has nothing to answer with', () => {
+    expect(search('supplier delay', 'semantic', down)).toEqual([]);
+  });
+  it('hybrid degrades to keyword rather than failing', () => {
+    const hits = search('supplier delay', 'both', down);
+    expect(hits.map((h) => h.passage.id)).toEqual(search('supplier delay', 'keyword').map((h) => h.passage.id));
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((h) => h.keyword && !h.semantic)).toBe(true);
+  });
+  it('an exact code still answers', () => {
+    expect(search('PO-8812', 'both', down)).toHaveLength(1);
+  });
+  it('what only meaning could find is gone, honestly', () => {
+    expect(search('supplier delay', 'both', down).some((h) => h.passage.lang !== 'en')).toBe(false);
+  });
+});
+
+describe('citation safeguards', () => {
+  it('resolves a reference to its recording and timestamp', () => {
+    const p = resolveCitation('menu-1')!;
+    expect(p.meetingId).toBe('menu');
+    expect(formatTime(p.start)).toBe('09:22');
+  });
+  it('a reference to no recording does not resolve, so it can never become a link', () => {
+    expect(resolveCitation('ops-7')).toBeNull();
+    expect(ANSWER.filter((a) => resolveCitation(a.ref)).length).toBeGreaterThanOrEqual(2);
+    expect(ANSWER.filter((a) => !resolveCitation(a.ref))).toHaveLength(1);
+  });
+});
+
+describe('Ask', () => {
+  it('the sample question has a written answer, with one unresolved citation among resolved ones', () => {
+    expect(answerFor(SAMPLE_QUESTION)).toBe(ANSWER);
+    expect(answerFor(SAMPLE_QUESTION.toLowerCase())).toBe(ANSWER);
+  });
+  it('anything else is stitched from search hits, each one citing a real passage', () => {
+    const parts = answerFor('Why are refunds slow?');
+    expect(parts.length).toBeGreaterThan(0);
+    for (const p of parts) expect(resolveCitation(p.ref)).not.toBeNull();
+  });
+  it('answers in English from a Chinese passage, using its gloss', () => {
+    const parts = answerFor('supplier delay');
+    expect(parts.every((p) => !/[\u3400-\u9fff]/.test(p.text))).toBe(true);
+  });
+  it('a question nothing covers gets no invented answer', () => {
+    expect(answerFor('xylophone')).toEqual([]);
+  });
+  it('a stray keyword cannot answer an instruction, though a question may use one', () => {
+    expect(answerFor('Order me a pizza')).toEqual([]);
+    expect(answerFor('Which purchase order is late?').length).toBeGreaterThan(0);
+  });
+  it('offers three prompts: a question, an action and the folder limit', () => {
+    expect(ASK_PROMPTS).toHaveLength(3);
+  });
+});
+
+describe('multilingual chunking', () => {
+  it('splitting on spaces sees almost nothing in Japanese', () => {
+    for (const l of JA_MEETING) expect(countBySpaces(l.text)).toBe(1);
+    expect(countBySpaces('The fit-out should finish next week as planned.')).toBe(8);
+  });
+  it('before: the whole Japanese meeting becomes one chunk with one useless timestamp', () => {
+    const chunks = chunkLines(JA_MEETING, countBySpaces);
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0].lines).toHaveLength(JA_MEETING.length);
+    expect(citeTerm(chunks, '予算')).toBe(0);
+  });
+  it('after: it splits, and the citation lands where it was said', () => {
+    const chunks = chunkLines(JA_MEETING, estimateLength);
+    expect(chunks.length).toBeGreaterThanOrEqual(3);
+    expect(citeTerm(chunks, '予算')).toBe(845);
+    expect(formatTime(845)).toBe('14:05');
+    for (const c of chunks) expect(c.length).toBeLessThanOrEqual(CHUNK_LIMIT);
+  });
+  it('the fix leaves English behaving as it did', () => {
+    const en = JA_MEETING.map((l) => ({ ...l, text: l.gloss }));
+    expect(chunkLines(en, estimateLength).map((c) => c.start)).toEqual(chunkLines(en, countBySpaces).map((c) => c.start));
+    expect(chunkLines(en, countBySpaces).length).toBeGreaterThan(1);
+  });
+  it('a citation for a word nobody said is null, not 00:00', () => {
+    expect(citeTerm(chunkLines(JA_MEETING, estimateLength), '存在しない')).toBeNull();
   });
 });
 

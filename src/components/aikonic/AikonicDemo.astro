@@ -1,60 +1,166 @@
 ---
 import './aikonic.css';
-import { CONCEPT_COUNT, MEETINGS, PASSAGES, SUGGESTIONS } from './aikonicSearch';
+import { ASK_PROMPTS, FOLDERS, LANG_NAME, LANG_TAG, folderOf, formatTime, meetingById } from './aikonicSearch';
+import { FACTS } from './featureMemory';
+import { LINKS } from './featureDesktop';
 interface Props { size?: 'compact' | 'full' }
 const { size = 'full' } = Astro.props;
 const uid = `aik-${size}`;
-const modes = [['keyword', 'Keyword'], ['semantic', 'Semantic'], ['both', 'Both']] as const;
+const open = meetingById('launch');
+const subs = [['transcript', 'Transcript'], ['summary', 'Summary'], ['todos', 'To-dos']] as const;
+const links = ['classic', 'ble'] as const;
 ---
-<div class:list={['aik', size]} data-demo="aikonic" data-size={size} role="region" aria-label="Interactive demo: searching meeting transcripts across languages">
-  <p class="aik-label"><i aria-hidden="true"></i>My reimagining of the idea, with sample data. Not Aikonic's product.</p>
-  <div class="aik-grid">
-    <div class="aik-find">
-      <form class="aik-form" role="search">
-        <label for={`${uid}-q`}>Search {MEETINGS.length} sample meetings</label>
-        <div class="aik-box">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
-          <input id={`${uid}-q`} type="search" placeholder="Ask in English or 中文" autocomplete="off" spellcheck="false" />
-        </div>
+<div class:list={['aik', size]} data-demo="aikonic" data-size={size} role="region" aria-label="Interactive demo: a voice notes app">
+  <p class="aik-label"><i aria-hidden="true"></i>A visualization of how the backend works, with sample data. Not the actual system.</p>
+  <p class="aik-what">A voice notes app. It records your meetings, transcribes them, and lets you search and ask questions across everything you've recorded.</p>
+
+  <section class="panel aik-start" aria-label="Guided tour">
+    <div class="aik-start-text">
+      <p class="aik-start-title">See what this does in six stops.</p>
+      <p class="aik-start-does">I press things for you in the real window, then you try them.</p>
+    </div>
+    <div class="aik-guide-keys">
+      <button type="button" class="btn" data-guide="start">Start tour</button>
+      <button type="button" class="btn alt" data-guide="skip">Skip</button>
+    </div>
+  </section>
+  <button type="button" class="btn alt aik-restart" data-guide="start" hidden>Start tour</button>
+
+  <div class="aik-window">
+    <div class="aik-titlebar">
+      <p class="aik-app"><i aria-hidden="true"></i>Aikonic</p>
+      <form class="aik-search" role="search">
+        <label class="aik-sr" for={`${uid}-q`}>Search everything you've recorded</label>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+        <input id={`${uid}-q`} type="search" placeholder="Search your recordings" autocomplete="off" spellcheck="false" />
       </form>
-
-      <div class="aik-chips" role="group" aria-label="Suggested searches">
-        {SUGGESTIONS.map((s) => (
-          <button type="button" class="aik-chip" data-q={s.query}><b>{s.query}</b><small>{s.hint}</small></button>
-        ))}
-      </div>
-
-      <div class="aik-modes" role="group" aria-label="How to search">
-        {modes.map(([id, name]) => (
-          <button type="button" class="aik-mode" data-mode={id} aria-pressed={String(id === 'both')}>{name}<span class="n" hidden></span></button>
-        ))}
-      </div>
-      <p class="aik-why"></p>
-
-      <p class="aik-summary" role="status"></p>
-      <ol class="aik-results" hidden></ol>
-      <div class="aik-empty">
-        <p class="aik-empty-h">Press a suggestion or type a question.</p>
-        <p>Every result cites the moment it was said. Press its timestamp to jump there in the transcript.</p>
-      </div>
     </div>
 
-    <div class="aik-viewer">
-      <div class="aik-vhead">
-        <p class="aik-vtitle"></p>
-        <p class="aik-vtime"></p>
+    <div class="aik-panes">
+      <nav class="aik-side" aria-label="Folders and recordings">
+        {FOLDERS.map((f) => (
+          <div class="aik-folder" data-folder={f.id}>
+            <p class="aik-folder-h">{f.name}</p>
+            <ul class="aik-recs">
+              {f.meetings.map((id) => {
+                const m = meetingById(id);
+                return <li><button type="button" class="aik-rec" data-open={id} aria-current={id === open.id ? 'true' : undefined}><b>{m.name}</b><small>{formatTime(m.duration)} · {LANG_NAME[m.lang]}</small></button></li>;
+              })}
+            </ul>
+            {f.id === 'stores' && <p class="aik-sub-h">Q3<small> empty</small></p>}
+          </div>
+        ))}
+        <div class="aik-side-mem">
+          <p class="aik-folder-h">What Aikonic remembers</p>
+          <ul class="aik-recs">
+            {FACTS.map((f) => <li><button type="button" class="aik-rec" data-memory={f.id}><b>{f.name}</b><small>{f.kind}</small></button></li>)}
+          </ul>
+        </div>
+        <div class="aik-side-more">
+          <button type="button" class="aik-more" data-show="folders" aria-expanded="false">Folders</button>
+          <button type="button" class="aik-more" data-show="memory" aria-expanded="false">Memory</button>
+        </div>
+      </nav>
+
+      <section class="aik-main" aria-label="Open recording">
+        <div class="aik-v-recording">
+          <div class="aik-rec-head">
+            <div class="aik-rec-id">
+              <p class="aik-vtitle">{open.title}</p>
+              <p class="aik-rec-meta">{folderOf(open.id).name} · {formatTime(open.duration)} · {LANG_NAME[open.lang]}</p>
+            </div>
+            <div class="aik-rec-actions">
+              <button type="button" class="aik-key sm pri" data-action="podcast">Make a podcast</button>
+              <button type="button" class="aik-key sm aik-phone-key" data-action="phone" aria-label="Phone view" title="Phone view"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4.5" y="1.5" width="7" height="13" rx="1.5"/><path d="M7 12.5h2"/></svg></button>
+            </div>
+          </div>
+          <div class="aik-subtabs" role="tablist" aria-label="Open recording">
+            {subs.map(([id, name], i) => (
+              <button type="button" role="tab" class="aik-subtab" id={`${uid}-tab-${id}`} aria-controls={`${uid}-sub-${id}`} aria-selected={String(i === 0)} tabindex={i === 0 ? 0 : -1} data-sub={id}>{name}</button>
+            ))}
+          </div>
+          <div class="aik-sub" role="tabpanel" id={`${uid}-sub-transcript`} aria-labelledby={`${uid}-tab-transcript`} data-sub="transcript">
+            <div class="aik-playbar" hidden>
+              <div class="aik-rail" aria-hidden="true"><i class="aik-head"></i></div>
+              <p class="aik-vtime">00:00 / {formatTime(open.duration)}</p>
+            </div>
+            <ol class="aik-lines" aria-label="Transcript">
+              {open.passages.map((p) => (
+                <li class="aik-line" data-id={p.id} tabindex="-1">
+                  <div class="aik-lmeta"><button type="button" class="aik-time alt" data-jump={p.id} aria-label={`${formatTime(p.start)}, jump to this moment in ${open.name}`}>{formatTime(p.start)}</button><span class="aik-who">{p.speaker}</span></div>
+                  <p class="aik-ltext" lang={LANG_TAG[p.lang]}>{p.text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div class="aik-sub" role="tabpanel" id={`${uid}-sub-summary`} aria-labelledby={`${uid}-tab-summary`} data-sub="summary" hidden></div>
+          <div class="aik-sub" role="tabpanel" id={`${uid}-sub-todos`} aria-labelledby={`${uid}-tab-todos`} data-sub="todos" hidden></div>
+        </div>
+
+        <div class="aik-v-feature" hidden>
+          <button type="button" class="aik-key sm aik-back" data-action="back">◀ Back to <span class="aik-backname">{open.name}</span></button>
+          <div class="aik-host" data-host="memory" hidden></div>
+          <div class="aik-host" data-host="podcast" hidden></div>
+          <div class="aik-host" data-host="phone" hidden></div>
+        </div>
+      </section>
+
+      <aside class="aik-ask" aria-label="Ask and search results">
+        <p class="aik-summary" role="status"></p>
+        <div class="aik-results-wrap" hidden>
+          <div class="aik-aside-head"><p class="aik-aside-h">Search results</p><button type="button" class="aik-key sm" data-action="close-results">Back to Ask</button></div>
+          <ol class="aik-results" hidden></ol>
+          <details class="aik-drawer"><summary>How I built this</summary><div class="aik-drawer-body"></div></details>
+        </div>
+        <div class="aik-ask-wrap">
+          <p class="aik-aside-h">Ask Aikonic</p>
+          <div class="aik-log" role="log" aria-label="Conversation"></div>
+          <div class="aik-prompts" role="group" aria-label="Suggested prompts">
+            {ASK_PROMPTS.map((p) => <button type="button" class="aik-chip" data-prompt={p.text} data-away={p.away}>{p.text}{p.hint && <small>{p.hint}</small>}</button>)}
+          </div>
+          <form class="aik-cmd">
+            <label class="aik-sr" for={`${uid}-ask`}>Ask a question or give an instruction</label>
+            <input id={`${uid}-ask`} type="text" autocomplete="off" spellcheck="false" placeholder="Ask or tell it what to do" />
+            <button type="submit" class="aik-key pri sm">Send</button>
+          </form>
+          <details class="aik-drawer"><summary>How I built this</summary><div class="aik-drawer-body"></div></details>
+        </div>
+      </aside>
+    </div>
+
+    <div class="aik-status" role="group" aria-label="Microphone">
+      <button type="button" class="aik-mic" data-show="mic" aria-expanded="false"><i aria-hidden="true"></i><span class="aik-mic-state">Microphone connected</span></button>
+      <button type="button" class="aik-key pri sm aik-rec-key" data-rec>Record</button>
+      <div class="aik-mic-more">
+        <div class="aik-linkchips">
+          {links.map((id) => (
+            <div class="aik-linkchip" data-id={id} data-state="connected">
+              <i aria-hidden="true"></i>
+              <p><b>{LINKS[id].name}</b> <span class="aik-linkstate">Connected</span><small>{LINKS[id].short}</small></p>
+              <button type="button" class="aik-key sm" data-drop={id} aria-label={`Disconnect ${LINKS[id].name}`}>Disconnect</button>
+            </div>
+          ))}
+        </div>
+        <p class="aik-status-text" role="status"></p>
+        <details class="aik-drawer"><summary>How I built this</summary><div class="aik-drawer-body"></div></details>
       </div>
-      <div class="aik-rail" aria-hidden="true"><i class="aik-head"></i></div>
-      <ol class="aik-lines" aria-label="Transcript"></ol>
     </div>
   </div>
 
-  <details class="aik-how">
-    <summary>How this demo works</summary>
-    <p>The search really runs in your browser, over {PASSAGES.length} invented passages from a made-up tea chain. Keyword mode is BM25 scoring over words and Chinese character pairs, with Traditional folded to Simplified.</p>
-    <p>Semantic mode is a stand-in, not a real embedding model. It uses a small hand-built map of {CONCEPT_COUNT} ideas and their English, Cantonese and Mandarin words, then compares them with cosine similarity, so it only knows those {CONCEPT_COUNT} ideas. The English under Chinese lines is there for you to read and is never searched.</p>
-    <p>Both merges the two ranked lists with reciprocal rank fusion. Each passage keeps its own timestamp, which is why a result can cite the exact moment.</p>
-  </details>
+  <section class="panel aik-guide" aria-label="Guided tour" hidden>
+    <div class="aik-guide-text" aria-live="polite">
+      <p class="aik-guide-step"></p>
+      <p class="aik-guide-title"></p>
+      <p class="aik-guide-does"></p>
+      <p class="aik-guide-try"></p>
+      <p class="aik-guide-built"><b>What I built</b> <span></span></p>
+    </div>
+    <div class="aik-guide-keys">
+      <button type="button" class="btn alt" data-guide="back">Back</button>
+      <button type="button" class="btn" data-guide="next">Next</button>
+      <button type="button" class="btn alt" data-guide="skip">Skip</button>
+    </div>
+  </section>
   <noscript><p>This demo runs in your browser and needs JavaScript.</p></noscript>
 </div>
 <script>

@@ -1,0 +1,77 @@
+/* The crayon box: every crayon, the carton and the tab are wax drawings from scripts/render-wax.mjs, the same as the rest of the page.
+   Labels sit on each crayon's cream paper wrapper, so they read the same on any colour and on any background behind the box.
+   From 1280px up it stands in a gutter the page leaves free for it (--box-room in tokens.css), so it covers nothing. Below that it
+   folds into a slim tab on the right edge that opens on tap, and slides away whenever something tappable passes under it. */
+.cb { --w: 130px; position: fixed; right: 0; top: 50%; translate: 0 -50%; z-index: 38; width: var(--w); }
+.cb-panel { position: relative; }
+.cb-tab { display: none; }
+.cb-tray { position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.cb-tray li { display: block; }
+
+.cr { display: flex; align-items: center; width: var(--w); height: 34px; margin-left: var(--y, 0); padding: 0 14px 1px 28px; background: var(--art) center / 100% 100% no-repeat; color: var(--ink); font: 700 12.5px/1 var(--font-hand); text-decoration: none; white-space: nowrap; transition: translate .22s cubic-bezier(.16, 1, .3, 1); }
+.cr:hover, .cr:focus-visible { translate: -8px 0; }
+.cr:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; border-radius: 6px; }
+
+/* The carton the crayons sit in. */
+.cb-carton { position: absolute; right: 0; bottom: -7px; top: 37px; width: 22px; background: url(/wax/carton.webp) center / 100% 100% no-repeat; pointer-events: none; display: grid; place-items: center; }
+.cb-carton span { writing-mode: vertical-rl; font: 700 12px/1 var(--font-hand); color: var(--gold); letter-spacing: .04em; }
+
+.cb-draw { position: relative; isolation: isolate; display: flex; align-items: center; justify-content: center; gap: 5px; width: calc(100% - 8px); height: 34px; margin: 0 0 8px; padding: 0; border: 0; background: none; cursor: pointer; color: var(--ink); font: 700 14px/1 var(--font-hand); filter: drop-shadow(1px 2px 0 rgb(16 26 66 / .3)); transition: translate .16s cubic-bezier(.22, 1, .36, 1), rotate .16s ease; }
+.cb-draw::before { content: ''; position: absolute; inset: 0; z-index: -1; border: 12px solid transparent; border-image: url(/wax/btn-gold.webp) 18 fill round; }
+.cb-draw svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.cb-draw:hover { translate: -1px -2px; rotate: -1deg; }
+.cb-draw:active { translate: 1px 1px; rotate: 0deg; }
+.cb-draw:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 6px; }
+
+@media (max-height: 360px) and (min-width: 1280px) { .cb { top: auto; bottom: 8px; translate: 0 0; } .cb-tray { gap: 1px; } .cr { height: 26px; } }
+
+@media (max-width: 1279px) {
+  .cb { --w: 148px; width: 0; }
+  .cb-tab { position: absolute; right: 0; top: 50%; translate: 0 -50%; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; width: 24px; padding: 11px 0 12px 2px; border: 0; cursor: pointer; background: url(/wax/tab.webp) center / 100% 100% no-repeat; color: var(--gold); font: 700 12px/1 var(--font-hand); letter-spacing: .03em; transition: translate .22s cubic-bezier(.16, 1, .3, 1), right .22s cubic-bezier(.16, 1, .3, 1); }
+  .cb-tab span { writing-mode: vertical-rl; }
+  .cb-tab:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; border-radius: 6px; }
+  .cb-tips { display: block; width: 16px; height: 26px; background: url(/wax/tips.webp) center / contain no-repeat; }
+  /* Something tappable is under the tab: it slides off and lets the tap through, leaving a sliver to show it's still there. */
+  .cb.tucked .cb-tab { translate: 19px -50%; pointer-events: none; }
+  .cb-panel { position: absolute; right: 0; top: 50%; width: var(--w); padding: 10px 8px 12px 8px; translate: 100% -50%; visibility: hidden; background: var(--panel) url(/wax/paper-white.webp); border-radius: var(--wobble); box-shadow: var(--panel-drop-hi); transition: translate .24s cubic-bezier(.16, 1, .3, 1), visibility 0s .24s; }
+  .cb-panel::after { content: ''; position: absolute; inset: 0; pointer-events: none; border: 15px solid transparent; border-image: url(/wax/frame-ink.webp) 28 round; }
+  .cb.open .cb-panel { translate: 0 -50%; visibility: visible; transition: translate .24s cubic-bezier(.16, 1, .3, 1), visibility 0s; }
+  .cb.open .cb-tab { right: var(--w); translate: 0 -50%; pointer-events: auto; }
+  .cb-carton { display: none; }
+  .cb-draw { width: 100%; height: 40px; z-index: 5; }
+  .cb-tray { z-index: 5; gap: 5px; }
+  .cr { width: 100%; height: 36px; margin-left: 0; padding: 0 14px 1px 30px; font-size: 13px; }
+  .cr:hover, .cr:focus-visible { translate: 0 0; }
+}
+/* On a phone the page's gutter is 16px, so the tab is exactly that wide: an edge strip that is easy to hit and sits over no text. */
+@media (max-width: 480px) {
+  .cb-tab { width: 16px; padding: 10px 0 11px 1px; font-size: 11px; }
+  .cb-tips { width: 11px; height: 18px; }
+  .cb.tucked .cb-tab { translate: 12px -50%; }
+}
+
+/* ---------- draw mode ---------- */
+.doodles { position: absolute; left: 0; top: 0; width: 100%; height: 0; z-index: 45; pointer-events: none; }
+.doodles canvas { position: absolute; pointer-events: none; }
+.draw-surface { position: fixed; inset: 0; z-index: 48; cursor: crosshair; touch-action: none; }
+.draw-surface canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.draw-surface[hidden], .draw-bar[hidden] { display: none; }
+body.drawing #lion { pointer-events: none; }
+body.drawing .cb { visibility: hidden; }
+
+.draw-bar { position: fixed; left: 50%; bottom: 12px; translate: -50% 0; z-index: 60; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; width: min(520px, calc(100vw - 16px)); padding: 10px 16px 12px; background: var(--panel) url(/wax/paper-white.webp); border-radius: var(--wobble); box-shadow: var(--panel-drop-hi); }
+.draw-bar::after { content: ''; position: absolute; inset: 0; pointer-events: none; border: 15px solid transparent; border-image: url(/wax/frame-ink.webp) 28 round; }
+.draw-tip { flex-basis: 100%; margin: 0; text-align: center; font: 700 14px/1.25 var(--font-hand); color: var(--ink); }
+.draw-picks { display: flex; align-items: flex-end; gap: 3px; height: 54px; }
+.pick { position: relative; z-index: 5; width: 27px; height: 46px; padding: 0; border: 0; cursor: pointer; background: var(--art) center / 100% 100% no-repeat; transition: translate .18s cubic-bezier(.16, 1, .3, 1); }
+.pick:hover { translate: 0 -3px; }
+.pick[aria-pressed="true"] { translate: 0 -8px; }
+.pick:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
+.draw-acts { position: relative; z-index: 5; display: flex; gap: 10px; }
+@media (max-width: 480px) { .draw-tip { font-size: 13px; } .draw-bar { padding: 8px 10px 12px; gap: 6px 10px; } .pick { width: 25px; } .draw-acts .btn { font-size: 14px; padding: 9px 13px; } }
+
+@media (prefers-reduced-motion: reduce) { .cr, .cb-tab, .cb-panel, .cb-draw, .pick { transition: none; } }
+
+/* Bigger crayons: the wax art scales with them, and --box-room leaves the gutter for it. */
+@media (min-width: 1280px) and (min-height: 361px) { .cb { zoom: 1.34; } }
+@media (max-width: 1279px) { .cb-panel { zoom: 1.15; } }

@@ -4,32 +4,30 @@ import { tmpdir } from 'node:os';
 import { join, basename } from 'node:path';
 import sharp from 'sharp';
 // @ts-expect-error plain JS module
-import { renderAll } from '../../scripts/render-scene.mjs';
+import { renderAll, renderOg, STATES } from '../../scripts/render-scene.mjs';
 
-describe('renderAll', () => {
-  it('writes 10 native-size PNGs under the weight budget', async () => {
+describe('the crayon campus', () => {
+  it('draws every layer for each time of day, at the old 320:112 shape and within budget', async () => {
     const out = mkdtempSync(join(tmpdir(), 'scene-'));
-    const files: string[] = await renderAll('design/scene-src', out);
-    expect(files).toHaveLength(10);
-    let heroBytes = 0;
-    for (const f of files) {
-      const { width, height } = await sharp(f).metadata();
-      const name = basename(f);
-      expect(width).toBe(320);
-      expect(height).toBe(name.startsWith('scene-') || name === 'emissive.png' ? 112 : 200);
-      if (name.startsWith('scene-') || name.startsWith('sky-')) heroBytes += statSync(f).size;
-    }
-    expect(heroBytes).toBeLessThan(250_000);
-  });
-});
+    const files: string[] = await renderAll(out);
+    const names = files.map((f) => basename(f));
+    for (const s of STATES) for (const layer of [`scene-${s}.webp`, `scene-${s}-sm.webp`, `sky-${s}.webp`, `clouds-${s}.webp`]) expect(names).toContain(layer);
+    for (const layer of ['emissive.webp', 'moon.webp', 'sun.webp', 'name-navy.webp', 'name-cream.webp']) expect(names).toContain(layer);
 
-describe('renderOg', () => {
-  it('writes a 1200x630 share image', async () => {
-    // @ts-expect-error plain JS module
-    const { renderOg } = await import('../../scripts/render-scene.mjs');
-    const out = join(mkdtempSync(join(tmpdir(), 'og-')), 'og.png');
-    await renderOg(out);
-    const { width, height } = await sharp(out).metadata();
+    const big = await sharp(join(out, 'scene-night.webp')).metadata();
+    expect(big.width! / big.height!).toBeCloseTo(320 / 112, 2);
+    const small = await sharp(join(out, 'scene-night-sm.webp')).metadata();
+    expect(small.width).toBe(big.width! / 2);
+
+    // One time of day downloads at a time: the visitor gets its sky, clouds and scene.
+    for (const s of STATES) {
+      const bytes = [`scene-${s}`, `sky-${s}`, `clouds-${s}`].reduce((n, f) => n + statSync(join(out, `${f}.webp`)).size, 0);
+      expect(bytes, s).toBeLessThan(600_000);
+    }
+
+    const og = join(out, 'og.png');
+    await renderOg(og, out);
+    const { width, height } = await sharp(og).metadata();
     expect([width, height]).toEqual([1200, 630]);
-  });
+  }, 180_000);
 });

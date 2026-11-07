@@ -1,29 +1,64 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
-body { margin: 0; background: var(--page); color: var(--body); font-family: var(--font-body); line-height: 1.5; }
+body { margin: 0; background: var(--page) url(/wax/paper.webp); color: var(--body); font-family: var(--font-body); line-height: 1.55; }
 img, svg { max-width: 100%; }
 a { color: var(--blue); }
-.pixel { font-family: var(--font-pixel); }
+.pixel { font-family: var(--font-hand); }
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 @media (max-width: 480px) { .wrap { padding: 0 16px; } }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+section[id], article[id], aside[id], main[id] { scroll-margin-top: 14px; }
+.wax-defs { position: absolute; width: 0; height: 0; }
+
+/* Wax lettering: the real text, seen through the paper's tooth, with its edges roughened. */
+.wax, .sec h2 {
+  color: var(--wax, var(--ink));
+  -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px;
+  filter: url(#wax-edge);
+}
+
 .sec { padding-top: 48px; }
-.num { display: flex; align-items: center; gap: 10px; font: 500 12px/1 var(--font-mono); text-transform: uppercase; color: var(--columbia); letter-spacing: .12em; margin: 0 0 12px; }
-.num::before { content: ''; width: 8px; height: 8px; flex: none; background: var(--gold); box-shadow: 2px 2px 0 var(--gold-deep); }
-.sec h2 { font-family: var(--font-mono); font-size: clamp(24px, 3.6vw, 32px); font-weight: 700; letter-spacing: -.03em; line-height: 1.1; margin: 0 0 18px; color: var(--ink); }
+/* Section markers: a hand-drawn star where the square used to be. */
+.num { display: flex; align-items: center; gap: 8px; font: 700 14px/1 var(--font-hand); color: var(--columbia); letter-spacing: .05em; margin: 0 0 12px; }
+.num::before { content: ''; width: 18px; height: 18px; flex: none; background: url(/wax/mark-star.webp) center / contain no-repeat; }
+.sec h2 { font-family: var(--font-body); font-size: clamp(26px, 3.8vw, 36px); font-weight: 700; letter-spacing: -.015em; line-height: 1.12; margin: 0 0 18px; }
 .body { color: var(--body); font-size: 16px; line-height: 1.6; max-width: 640px; }
+
+/* Chips and tiles: a thin crayon loop round the words. */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
-.chips span { font: 500 12px/1.2 var(--font-mono); color: var(--columbia); background: var(--panel-2); padding: 5px 10px; }
+.chips span, .tags span, .metric, .promises span { position: relative; display: inline-block; font: 600 13px/1.3 var(--font-hand); color: var(--ink); padding: 5px 11px; }
+.chips span::after, .tags span::after, .metric::after, .promises span::after { content: ''; position: absolute; inset: 0; pointer-events: none; border: 8px solid transparent; border-image: url(/wax/chip-ink.webp) 14 round; }
+
 .btns { display: flex; flex-wrap: wrap; gap: 10px; }
-/* Arcade keys: square, a hard offset shadow, a lift on hover and a full press on click. */
-.btn { display: inline-block; background: var(--gold); color: #1a1405; font: 700 13px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; padding: 11px 16px; text-decoration: none; border: 0; cursor: pointer; box-shadow: 4px 4px 0 var(--gold-deep); transition: translate .1s steps(2), box-shadow .1s steps(2); }
-.btn:hover { translate: -1px -1px; box-shadow: 5px 5px 0 var(--gold-deep); }
-.btn:active { translate: 3px 3px; box-shadow: 1px 1px 0 var(--gold-deep); }
-.btn.alt { background: var(--page); color: var(--columbia); box-shadow: inset 0 0 0 2px var(--columbia), 4px 4px 0 #060b18; }
-.btn.alt:hover { color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold), 5px 5px 0 #060b18; }
-.btn.alt:active { box-shadow: inset 0 0 0 2px var(--gold), 1px 1px 0 #060b18; }
-.btn:focus-visible { outline: 3px solid var(--columbia); outline-offset: 3px; }
-.panel { background: var(--panel); box-shadow: inset 0 0 0 2px var(--panel-edge), var(--panel-drop); }
+/* Crayon buttons: a wobbly shape coloured in by hand, that lifts on hover and presses on click. The filter also anchors the shape to the button. */
+.btn, .cs-btn { display: inline-block; isolation: isolate; background: none; color: #fff; font: 700 15px/1.2 var(--font-hand); padding: 11px 17px; text-decoration: none; border: 0; cursor: pointer;
+  filter: drop-shadow(1px 2px 0 rgb(16 26 66 / .3)); transition: translate .16s cubic-bezier(.22, 1, .36, 1), rotate .16s ease, filter .16s ease; }
+.btn::before, .cs-btn::before { content: ''; position: absolute; inset: -1px; z-index: -1; border: 12px solid transparent; border-image: url(/wax/btn-ink.webp) 18 fill round; background-color: var(--ink); background-clip: padding-box; }
+.btn:hover, .cs-btn:hover { translate: -1px -3px; rotate: -.8deg; filter: drop-shadow(2px 5px 0 rgb(16 26 66 / .28)); }
+.btn:active, .cs-btn:active { translate: 1px 2px; rotate: 0deg; filter: drop-shadow(0 0 0 rgb(16 26 66 / .3)); }
+.btn.alt { color: var(--ink); }
+.btn.alt::before { border-image-source: url(/wax/btn-line.webp); background-color: transparent; }
+.btn.alt:hover::before { background-color: rgb(255 255 255 / .45); }
+.btn:focus-visible, .cs-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+
+/* Paper panels with a hand-drawn edge. The edge is its own layer, so it never changes a panel's size. */
+.panel, .bento .card2, .tuck-brand, .head-card, .glance div { background: var(--panel) url(/wax/paper-white.webp); border-radius: var(--wobble); box-shadow: var(--panel-drop); }
+.panel { position: relative; }
+.panel::after, .bento .card2::after, .tuck-brand::after, .head-card::after, .glance div::after, .td-stage::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 4;
+  border: 15px solid transparent; border-image: url(/wax/frame-ink.webp) 28 round;
+}
+/* Crayon lines between rows */
+.wax-rule { background: url(/wax/rule-ink.webp) 0 100% / auto 8px repeat-x; }
+
+/* The little previews keep each product's own look, whatever the page around them is wearing. */
+.vig { --ink: #f2f5fb; --body: #c9d4e8; --muted: #a3b2cf; --panel: #131d38; --panel-2: #1a2747; --panel-edge: #2a3b66; --columbia: #b9d9eb; --gold: #f5c04a; --gold-deep: #a9761b; --gold-soft: #2c2612;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; color-scheme: dark; color: var(--body); font-family: var(--font-body); }
+
+@media (forced-colors: active) {
+  .wax, .sec h2 { -webkit-mask: none; mask: none; filter: none; }
+  .btn::before, .cs-btn::before, .panel::after { border-image: none; border: 1px solid CanvasText; }
+}

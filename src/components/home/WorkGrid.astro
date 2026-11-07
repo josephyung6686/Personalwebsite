@@ -1,4 +1,7 @@
 ---
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
 import { projects } from '../../data/projects';
 import DoomDrive from './vignettes/DoomDrive.astro';
 import KwungFund from './vignettes/KwungFund.astro';
@@ -6,7 +9,7 @@ import Spade from './vignettes/Spade.astro';
 import Aikonic from './vignettes/Aikonic.astro';
 const vignettes = { 'doom-drive': DoomDrive, kwungfund: KwungFund, nutrigene: Spade, aikonic: Aikonic } as const;
 ---
-<section class="sec wrap" aria-labelledby="more-h">
+<section id="projects" class="sec wrap" aria-labelledby="more-h">
   <p class="num">02 · MORE WORK</p>
   <h2 id="more-h">More work</h2>
   <div class="bento">
@@ -28,19 +31,20 @@ const vignettes = { 'doom-drive': DoomDrive, kwungfund: KwungFund, nutrigene: Sp
 </section>
 <style is:global>
   .bento { display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px; }
-  .bento .card2 { position: relative; display: flex; flex-direction: column; overflow: hidden; background: var(--panel); box-shadow: 0 0 0 2px var(--panel-edge), var(--panel-drop); transition: transform .1s steps(2), box-shadow .1s steps(2); }
-  .bento .card2:hover { transform: translate(-2px, -2px); box-shadow: 0 0 0 2px var(--gold), var(--panel-drop-hi); }
-  .bento .card2:active { transform: translate(3px, 3px); box-shadow: 0 0 0 2px var(--gold), 1px 1px 0 #060b18; }
-  .bento .card2:focus-within { box-shadow: 0 0 0 3px var(--gold), var(--panel-drop-hi); }
-  .bento .cap { padding: 14px 18px 18px; border-top: 2px solid var(--panel-edge); }
-  .bento h3 { margin: 0; font: 700 18px/1.2 var(--font-mono); letter-spacing: -.03em; }
+  .bento .card2 { position: relative; display: flex; flex-direction: column; overflow: hidden; transition: translate .16s cubic-bezier(.22, 1, .36, 1), rotate .16s ease, box-shadow .16s ease; }
+  .bento .card2:hover { translate: -1px -3px; rotate: -.25deg; box-shadow: var(--panel-drop-hi); }
+  .bento .card2:hover::after { border-image-source: url(/wax/frame-hot.webp); }
+  .bento .card2:active { translate: 1px 2px; rotate: 0deg; box-shadow: var(--panel-drop); }
+  .bento .card2:focus-within { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .bento .cap { padding: 14px 18px 18px; background: url(/wax/rule-ink.webp) 0 0 / auto 7px repeat-x; }
+  .bento h3 { margin: 0; font: 700 19px/1.2 var(--font-body); letter-spacing: -.015em; }
   .bento .card-title { color: var(--ink); text-decoration: none; }
-  .bento .card-title::after { content: ''; position: absolute; inset: 0; }
+  .bento .card-title::after { content: ''; position: absolute; inset: 0; z-index: 5; }
   .bento .card-title:focus-visible { outline: none; }
-  .bento .line { margin: 4px 0 8px; font-size: 14px; color: var(--body); }
+  .bento .line { margin: 4px 0 8px; font-size: 14.5px; color: var(--body); }
   .bento .metrics { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
-  .metric { font: 500 11px/1.4 var(--font-mono); text-transform: uppercase; letter-spacing: .04em; color: var(--gold); background: var(--gold-soft); padding: 5px 8px; box-shadow: inset 0 0 0 1px var(--gold-deep); }
-  .prole { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+  .metric { font-size: 12.5px; padding: 4px 10px; background: var(--gold-soft); border-radius: var(--wobble-s); }
+  .prole { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
   .vig { position: relative; height: 210px; padding: 16px; overflow: hidden; font-size: 12px; }
   .vig p { margin: 0; }
   /* KwungFund, on dark */
@@ -50,7 +54,7 @@ const vignettes = { 'doom-drive': DoomDrive, kwungfund: KwungFund, nutrigene: Sp
   .v-kf .kfrow b { flex: 1; } .v-kf .dim { background: #1a1a14; box-shadow: 0 0 0 1px #2a2a22; }
   .v-kf .pill { font-size: 10px; color: #d4ee3a; background: #2c3210; border-radius: 6px; padding: 2px 6px; }
   .v-kf .gen { background: #d4ee3a; color: #17170f; border-radius: 99px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
-  .v-kf .stamp { position: absolute; right: 16px; top: 14px; transform: rotate(8deg); border: 2px solid var(--gold); color: var(--gold); font: 9px var(--font-pixel); padding: 6px; border-radius: 4px; background: rgba(20,20,14,.8); transition: transform .3s; }
+  .v-kf .stamp { position: absolute; right: 16px; top: 14px; transform: rotate(8deg); border: 2px solid #f5c04a; color: #f5c04a; font: 700 11px var(--font-hand); padding: 5px 7px; border-radius: 4px; background: rgba(20,20,14,.8); transition: transform .3s; }
   .card2:hover .v-kf .stamp { transform: rotate(-4deg) scale(1.08); }
   @media (max-width: 720px) { .bento { grid-template-columns: 1fr; } .vig { height: auto; min-height: 180px; } }
 </style>

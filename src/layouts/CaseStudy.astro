@@ -10,6 +10,8 @@ import '@fontsource/inter/600.css';
 import '@fontsource/ibm-plex-sans/400.css';
 import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/jetbrains-mono/500.css';
+import '@fontsource/jetbrains-mono/700.css';
 import '@fontsource/playfair-display/500.css';
 import Base from './Base.astro';
 import Footer from '../components/home/Footer.astro';
@@ -24,15 +26,15 @@ interface Props {
   glance?: { label: string; value: string }[];
 }
 const { title, role, summary, chips, demo, link, theme, glance = [] } = Astro.props;
-// "Tuck: a file app people can trust" → the name, then the promise (Tuck styles the promise like its own welcome screen).
+// "Tuck: a file app people can trust" → the name, then the promise.
 const cut = title.indexOf(': ');
 const [lead, rest] = cut > 0 ? [title.slice(0, cut + 1), title.slice(cut + 2)] : [title, ''];
-// Projects with a design of their own wear it. Everything else wears the site's own game look.
+// Projects with a screen of their own lead with a paper card. Everything else gets the campus header.
 const OWN = ['tuck', 'doom-drive', 'kwungfund', 'nutrigene', 'aikonic'];
 const look = OWN.includes(theme) ? theme : 'game';
 const states = ['day', 'sunset', 'night'] as const;
 const eyebrow: Record<string, string> = {
-  tuck: 'Case study · Mac app', 'doom-drive': 'Case study · Offline drive', kwungfund: 'Case study · Desktop app',
+  tuck: 'Case study · Mac app', 'doom-drive': 'Case study · Local AI hardware', kwungfund: 'Case study · Desktop app',
   nutrigene: 'Experience · NutriGene AI', aikonic: 'Experience · Aikonic', grc: 'Experience · Global Research & Consulting Group', ey: 'Experience · Ernst & Young', morphogenesis: 'Experience · Columbia',
 };
 ---
@@ -42,8 +44,8 @@ const eyebrow: Record<string, string> = {
       {look === 'game' ? (
         <header class="cs-head game-head" data-time="night">
           <div class="cs-sky" aria-hidden="true">
-            {states.map((t) => <img class={`sky sky-${t}`} src={`/hero/sky-${t}.png`} alt="" />)}
-            {states.map((t) => <img class={`clouds cl-${t}`} src={`/hero/clouds-${t}.png`} alt="" />)}
+            {states.map((t) => <img class={`sky sky-${t}`} src={`/hero/sky-${t}.webp`} alt="" loading="lazy" />)}
+            {states.map((t) => <img class={`clouds cl-${t}`} src={`/hero/clouds-${t}.webp`} alt="" loading="lazy" />)}
           </div>
           <div class="wrap game-top">
             <nav class="site-bar" aria-label="Main">
@@ -60,7 +62,7 @@ const eyebrow: Record<string, string> = {
             </div>
           </div>
           <div class="cs-scene" aria-hidden="true">
-            {states.map((t) => <img class={`scene scene-${t}`} src={`/hero/scene-${t}.png`} alt="" />)}
+            {states.map((t) => <img class={`scene scene-${t}`} src={`/hero/scene-${t}.webp`} alt="" loading="lazy" />)}
           </div>
         </header>
       ) : (
@@ -102,128 +104,116 @@ const eyebrow: Record<string, string> = {
   if (head) head.dataset.time = sceneTime(new Date().getHours());
 </script>
 <style>
-  /* Each case study wears its own product's look: colors, type and surfaces taken from the product.
-     The slim pixel nav and the lion footer stay the same on every page, so it is still this site. */
+  /* Every case study wears the crayon page, with one crayon of its own for labels and accents.
+     The demos keep each product's own dark look inside: the [data-demo] rules below hand them their original colours. */
   .cs {
-    --bg: var(--page); --muted: var(--body); --accent: var(--gold); --accent-ink: #1a1405; --accent-deep: var(--gold);
-    --soft: var(--panel-2); --soft-ink: var(--columbia); --line: var(--panel-edge); --img-radius: 0; --img-shadow: 0 0 0 1px var(--line);
-    --f-head: "Helvetica Neue", Arial, sans-serif; --f-body: "Helvetica Neue", Arial, sans-serif; --head-weight: 800; --head-track: -.035em;
-    background: var(--bg); color: var(--ink); font-family: var(--f-body); padding-bottom: 1px;
+    --bg: var(--page); --accent: var(--c-orange); --accent-ink: var(--ink); --accent-deep: #8a3f08;
+    --soft: var(--panel-2); --soft-ink: var(--columbia); --line: var(--panel-edge); --img-radius: 10px; --img-shadow: 0 0 0 2.5px var(--ink), 0 12px 22px -12px rgb(16 26 66 / .5);
+    --f-head: var(--font-body); --f-body: var(--font-body); --head-weight: 700; --head-track: -.02em;
+    color: var(--ink); font-family: var(--f-body); padding-bottom: 1px;
   }
   .shell { padding-bottom: 8px; }
-  .site-bar { display: flex; justify-content: space-between; gap: 12px; padding-top: 18px; padding-bottom: 6px; font: 9px/1 var(--font-pixel); }
+  .site-bar { display: flex; justify-content: space-between; gap: 12px; padding-top: 18px; padding-bottom: 6px; font: 700 clamp(20px, 2vw, 28px)/1 var(--font-hand); }
   .site-bar a { color: var(--ink); text-decoration: none; display: inline-block; padding: 10px 4px; margin: -10px -4px; }
-  .site-bar a:is(:hover, :focus-visible) { text-decoration: underline; }
-  .site-bar a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-  .site-bar .links { display: flex; gap: 14px; }
+  .site-bar a:is(:hover, :focus-visible) { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .site-bar a:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .site-bar .links { display: flex; flex-wrap: wrap; gap: clamp(14px, 2vw, 26px); }
+  .site-bar a { filter: url(#wax-edge); }
 
   .cs-head { padding-top: 22px; }
   .head-card { position: relative; overflow: hidden; isolation: isolate; }
   .deco { display: none; }
-  .eyebrow { margin: 0 0 14px; font: 500 12px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-  h1 { font-family: var(--f-head); font-weight: var(--head-weight); letter-spacing: var(--head-track); font-size: clamp(34px, 6vw, 60px); line-height: 1.04; margin: 0 0 18px; max-width: 920px; color: var(--ink); }
-  .summary { font-size: clamp(16px, .5vw + 13px, 21px); line-height: 1.5; color: var(--muted); max-width: 46em; margin: 0 0 14px; }
+  .eyebrow { margin: 0 0 14px; font: 700 14px/1 var(--font-hand); letter-spacing: .04em; text-transform: uppercase; color: var(--accent-deep); }
+  h1 { font-family: var(--f-head); font-weight: var(--head-weight); letter-spacing: var(--head-track); font-size: clamp(32px, 5.6vw, 56px); line-height: 1.08; margin: 0 0 18px; max-width: 920px; color: var(--ink); -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px; filter: url(#wax-edge); }
+  .t2 { color: var(--accent-deep); }
+  .summary { font-size: clamp(16px, .5vw + 13px, 21px); line-height: 1.5; color: var(--body); max-width: 46em; margin: 0 0 14px; }
   .role { margin: 0; font-weight: 600; font-size: 15px; color: var(--ink); max-width: 760px; }
-  .label { font: 500 11px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent-deep); margin-right: 8px; }
+  .label { font: 700 13px/1 var(--font-hand); letter-spacing: .03em; text-transform: uppercase; color: var(--accent-deep); margin-right: 8px; }
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0; }
-  .tags span { font: 500 12px/1.2 var(--font-mono); color: var(--soft-ink); background: var(--soft); padding: 6px 11px; }
   .cta { margin: 20px 0 0; }
-  /* At a glance: the four facts a reader wants first. Each look sets its surface through --g-*. */
-  .glance { --g-bg: color-mix(in srgb, var(--bg) 90%, #fff); --g-edge: inset 0 0 0 1px var(--line); --g-r: 0;
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 0 0 44px; }
-  .glance div { background: var(--g-bg); border-radius: var(--g-r); padding: 14px 16px; box-shadow: var(--g-edge); }
-  .glance dt { font: 500 11px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent-deep); margin: 0 0 8px; }
+  /* At a glance: the four facts a reader wants first. */
+  .glance { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 0 0 44px; }
+  .glance div { position: relative; padding: 14px 16px; }
+  .glance dt { display: flex; align-items: center; gap: 7px; font: 700 13px/1 var(--font-hand); letter-spacing: .03em; text-transform: uppercase; color: var(--accent-deep); margin: 0 0 8px; }
+  .glance dt::before { content: ''; width: 14px; height: 14px; flex: none; background: url(/wax/mark-star.webp) center / contain no-repeat; }
   .glance dd { margin: 0; font: 600 16px/1.35 var(--f-head); color: var(--ink); letter-spacing: -.01em; }
   /* On a phone the four facts share one panel, two by two, so they read as a summary instead of a tall stack. */
   @media (max-width: 600px) {
-    .glance { grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 36px; border-radius: var(--g-r); overflow: hidden; background: var(--g-bg); box-shadow: var(--g-edge); }
+    .glance { position: relative; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 36px; border-radius: var(--wobble); overflow: hidden; background: var(--panel) url(/wax/paper-white.webp); box-shadow: var(--panel-drop); }
+    .glance::after { content: ''; position: absolute; inset: 0; pointer-events: none; border: 15px solid transparent; border-image: url(/wax/frame-ink.webp) 28 round; }
     .glance div { background: none; border-radius: 0; box-shadow: none; padding: 12px 14px; }
-    .glance div:nth-child(odd) { border-right: 1px solid var(--line); }
-    .glance div:nth-child(n + 3) { border-top: 1px solid var(--line); }
-    .glance div:last-child:nth-child(odd) { grid-column: 1 / -1; border-right: 0; }
-    .glance dt { font-size: 10px; margin-bottom: 5px; }
+    .glance div::after { display: none; }
+    .glance div:nth-child(odd) { box-shadow: inset -2px 0 0 rgb(22 34 79 / .45); }
+    .glance div:nth-child(n + 3) { background: url(/wax/rule-ink.webp) 0 0 / auto 7px repeat-x; }
+    .glance div:last-child:nth-child(odd) { grid-column: 1 / -1; box-shadow: none; }
+    .glance dt { font-size: 11.5px; margin-bottom: 5px; }
     .glance dd { font-size: 14px; line-height: 1.3; }
   }
-  .cs-btn { display: inline-block; font: 700 13px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent-ink); background: var(--accent); padding: 12px 16px; text-decoration: none; box-shadow: 4px 4px 0 color-mix(in srgb, var(--accent) 45%, #000); transition: translate .1s steps(2), box-shadow .1s steps(2); }
-  .cs-btn:hover { translate: -1px -1px; box-shadow: 5px 5px 0 color-mix(in srgb, var(--accent) 45%, #000); }
-  .cs-btn:active { translate: 3px 3px; box-shadow: 1px 1px 0 color-mix(in srgb, var(--accent) 45%, #000); }
-  .cs-btn:focus-visible { outline: 3px solid var(--accent-deep); outline-offset: 3px; }
 
   .cs-body { padding-top: 32px; }
   .demo { margin: 0 auto 56px; }
   .cs-body :global(.asof) { margin-bottom: 52px; }
-  .kicker { margin: 0 0 12px; font: 500 12px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent-deep); }
+  .kicker { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font: 700 14px/1 var(--font-hand); letter-spacing: .04em; text-transform: uppercase; color: var(--accent-deep); }
+  .kicker::before { content: ''; width: 16px; height: 16px; flex: none; background: url(/wax/mark-star.webp) center / contain no-repeat; }
   /* One centered reading column that grows with the screen, so the panel never has an empty right half. */
-  .prose { max-width: 68ch; margin-inline: auto; font-size: clamp(16px, .45vw + 12px, 19px); line-height: 1.7; color: var(--muted); counter-reset: sec; }
+  .prose { max-width: 68ch; margin-inline: auto; font-size: clamp(16px, .45vw + 12px, 19px); line-height: 1.7; color: var(--body); counter-reset: sec; }
   .prose :global(h2) { font-family: var(--f-head); font-weight: var(--head-weight); letter-spacing: calc(var(--head-track) * .6); font-size: clamp(24px, 1.2vw + 16px, 34px); line-height: 1.15; color: var(--ink); margin: 2.6em 0 .5em; counter-increment: sec; }
   .prose > :global(h2:first-child) { margin-top: 8px; }
-  .prose :global(h2)::before { content: counter(sec, decimal-leading-zero); display: block; width: fit-content; margin-bottom: 10px; font: 600 12px/1 var(--f-body); letter-spacing: .12em; color: var(--accent-deep); }
+  .prose :global(h2)::before { content: counter(sec, decimal-leading-zero); display: block; width: fit-content; margin-bottom: 10px; padding-left: 22px; font: 700 14px/18px var(--font-hand); letter-spacing: .05em; color: var(--accent-deep); background: url(/wax/mark-star.webp) 0 50% / 16px 16px no-repeat; }
   .prose :global(h3) { font-family: var(--f-head); font-weight: var(--head-weight); font-size: 1.15em; color: var(--ink); margin: 30px 0 6px; }
   .prose :global(strong) { color: var(--ink); }
-  .prose :global(img) { width: 100%; border-radius: var(--img-radius); margin: 16px 0 6px; box-shadow: var(--img-shadow); }
+  .prose :global(img) { width: 100%; border-radius: var(--img-radius); margin: 16px 0 6px; box-shadow: var(--img-shadow); rotate: -.25deg; }
   /* Phone screenshots and single cards stay at their natural size instead of filling the column */
   .prose :global(img[src*="mobile"]) { display: block; width: min(100%, 320px); margin-inline: auto; }
   .prose :global(img[src*="question"]) { display: block; width: min(100%, 480px); margin-inline: auto; }
   .prose :global(em) { color: var(--muted); font-size: .82em; font-style: normal; display: block; margin-bottom: 8px; }
   .prose :global(li) { margin: 6px 0; }
-  .prose :global(li::marker) { color: var(--accent-deep); }
-  .prose :global(a) { color: var(--accent-deep); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .prose :global(li::marker) { color: var(--c-red); }
+  .prose :global(a) { color: var(--blue); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 
-  /* ---------- Each product keeps its own face, on dark. */
-  .cs[data-theme="tuck"] { --bg: #0f1218; --ink: #f1f3f8; --muted: #b4bccd; --accent: #3d6cff; --accent-ink: #fff; --accent-deep: #8aa8ff; --soft: #1b2438; --soft-ink: #b9caff; --line: #262d3d;
-    --f-head: "Bricolage Grotesque", "Onest", sans-serif; --f-body: "Onest", -apple-system, sans-serif; --head-track: -.04em; }
-  .cs[data-theme="doom-drive"] { --bg: #151515; --ink: #f2f1ec; --muted: #b9b8b0; --accent: #e5604f; --accent-ink: #160605; --accent-deep: #f08d7f; --soft: #2a1a18; --soft-ink: #f4b2a8; --line: #2c2c2b;
-    --f-head: "Playfair Display", Georgia, serif; --f-body: "Inter", sans-serif; --head-weight: 500; --head-track: -.02em; }
-  .cs[data-theme="kwungfund"] { --bg: #14140e; --ink: #f3f2e8; --muted: #bdbbaa; --accent: #d4ee3a; --accent-ink: #17170f; --accent-deep: #d4ee3a; --soft: #2c3210; --soft-ink: #d4ee3a; --line: #33332a;
-    --f-head: "Poppins", sans-serif; --f-body: "Inter", sans-serif; --head-weight: 600; --head-track: -.03em; }
-  .cs[data-theme="nutrigene"] { --bg: #0b1a1c; --ink: #eaf6f4; --muted: #a9c4c0; --accent: #4fd1b5; --accent-ink: #06201b; --accent-deep: #7fe3cd; --soft: #12302d; --soft-ink: #9fecd9; --line: #1f3a38;
-    --f-head: "IBM Plex Sans", sans-serif; --f-body: "IBM Plex Sans", sans-serif; --head-weight: 500; --head-track: -.03em; }
-  .cs[data-theme="aikonic"] { --bg: #16110f; --ink: #f6efea; --muted: #c4b6ad; --accent: #ff8a5b; --accent-ink: #231008; --accent-deep: #ffab88; --soft: #33201a; --soft-ink: #ffc2a8; --line: #33271f;
-    --f-head: "Manrope", sans-serif; --f-body: "Manrope", sans-serif; --head-track: -.03em; }
-  /* NutriGene is backend work with no screen of its own, so biology icons carry the page. */
-  .cs[data-theme="nutrigene"] .deco { display: flex; gap: clamp(10px, 2vw, 22px); position: absolute; right: clamp(16px, 3vw, 36px); top: clamp(16px, 3vw, 32px); z-index: -1; color: var(--accent); opacity: .3; }
-  .cs[data-theme="nutrigene"] .deco :global(svg) { width: clamp(28px, 3.6vw, 50px); height: auto; }
-  .bio-ic { display: inline-block; vertical-align: -4px; margin-right: 7px; color: var(--accent); }
+  /* One crayon per project. */
+  .cs[data-theme="tuck"] { --accent: var(--c-blue); --accent-deep: #123f96; }
+  .cs[data-theme="doom-drive"] { --accent: var(--c-red); --accent-deep: #9a1a12; }
+  .cs[data-theme="kwungfund"] { --accent: var(--c-yellow); --accent-deep: #684800; }
+  .cs[data-theme="nutrigene"] { --accent: var(--c-green); --accent-deep: #14602f; }
+  .cs[data-theme="aikonic"] { --accent: var(--c-purple); --accent-deep: #4f2a85; }
+  .bio-ic { display: inline-block; vertical-align: -4px; margin-right: 7px; color: var(--accent-deep); }
   .bio-ic :global(svg) { display: block; width: 18px; height: 18px; }
-  @media (max-width: 720px) { .cs[data-theme="nutrigene"] .deco { opacity: .16; } }
-  .cs:not([data-look="game"]) .head-card { background: color-mix(in srgb, var(--bg) 88%, #fff); border-radius: 0; padding: clamp(24px, 5vw, 48px); box-shadow: inset 0 0 0 1px var(--line); }
-  .cs:not([data-look="game"]) .prose > :global(h2 + p) { font-size: 1.1em; color: var(--ink); line-height: 1.5; }
+  .cs:not([data-look="game"]) .head-card { padding: clamp(24px, 5vw, 48px); }
+  /* NutriGene is backend work with no screen of its own, so biology icons carry the page. */
+  .cs[data-theme="nutrigene"] .deco { display: flex; gap: clamp(10px, 2vw, 22px); position: absolute; right: clamp(16px, 3vw, 36px); top: clamp(16px, 3vw, 32px); z-index: -1; color: var(--accent); opacity: .35; }
+  .cs[data-theme="nutrigene"] .deco :global(svg) { width: clamp(28px, 3.6vw, 50px); height: auto; }
+  @media (max-width: 720px) { .cs[data-theme="nutrigene"] .deco { opacity: .18; } }
 
-  /* ---------- The site's own game look, for any project without a design of its own.
-     The landing page's sky and campus as the header, an RPG text box, game-key buttons, pixel labels and hard-shadow panels. */
-  .cs[data-look="game"] { --ink-c: var(--ink); --f-head: var(--font-body); --f-body: var(--font-body); }
-  .game-head { position: relative; isolation: isolate; overflow: hidden; background: #0b1226; color: #fff; }
+  /* The demos: each product's own colours and type, restored inside the crayon page. */
+
+  /* The campus header, for any project without a screen of its own: the landing page's sky and buildings behind a paper card. */
+  .game-head { --head-ink: var(--ink); position: relative; isolation: isolate; overflow: hidden; color: var(--head-ink); }
+  .game-head[data-time="night"] { --head-ink: var(--cream); background: #22376f; }
   .cs-sky { position: absolute; inset: 0; z-index: -1; }
-  .cs-sky img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  .cs-sky img { position: absolute; inset: 0; width: 100%; height: 100%; }
   .cs-sky .sky { object-fit: fill; } .cs-sky .clouds { object-fit: cover; object-position: top; }
-  .game-head :is(.sky, .clouds, .scene) { transition: opacity .8s; }
-  .game-head :is(.sky-sunset, .sky-night, .cl-sunset, .cl-night, .scene-sunset, .scene-night) { opacity: 0; }
-  .game-head[data-time="sunset"] :is(.sky-sunset, .cl-sunset, .scene-sunset), .game-head[data-time="night"] :is(.sky-night, .cl-night, .scene-night) { opacity: 1; }
-  .game-head:not([data-time="day"]) :is(.sky-day, .cl-day, .scene-day) { opacity: 0; }
+  /* Only the time of day that is showing downloads its pictures: the others are display: none with lazy loading. */
+  .game-head :is(.sky, .clouds, .scene) { display: none; }
+  .game-head[data-time="day"] :is(.sky-day, .cl-day, .scene-day), .game-head[data-time="sunset"] :is(.sky-sunset, .cl-sunset, .scene-sunset), .game-head[data-time="night"] :is(.sky-night, .cl-night, .scene-night) { display: block; }
   .game-top { position: relative; z-index: 2; }
-  .game-head .site-bar { padding-left: 0; padding-right: 0; text-shadow: 2px 2px 0 var(--blue-deep); }
-  .game-head .site-bar a { color: #fff; } .game-head .site-bar a:focus-visible { outline-color: var(--cream); }
-  .game-head .eyebrow { margin-top: 30px; font: 500 12px/1 var(--font-mono); letter-spacing: .12em; color: var(--cream); text-shadow: 2px 2px 0 var(--blue-deep); }
-  .game-head h1 { color: #fff; font-weight: 800; text-shadow: 3px 3px 0 var(--blue-deep), 6px 6px 0 rgba(6,11,24,.6); }
-  .game-head .dialog { max-width: 760px; background: var(--panel); color: var(--body); border-radius: 0; padding: 18px 20px 16px; box-shadow: inset 0 0 0 2px var(--panel-edge), var(--panel-drop); }
+  .game-head .site-bar { padding-left: 0; padding-right: 0; }
+  .game-head .site-bar a { color: var(--head-ink); } .game-head .site-bar a:focus-visible { outline-color: var(--head-ink); }
+  .game-head .eyebrow { margin-top: 30px; color: var(--head-ink); }
+  .game-head h1 { color: var(--head-ink); }
+  .game-head .dialog { max-width: 760px; color: var(--body); padding: 18px 20px 16px; }
   .game-head .summary { color: var(--body); }
   .game-head .role { color: var(--ink); }
-  .game-head .label { color: var(--gold); }
-  .game-head .tags span { font: 600 12px/1.2 var(--font-ui); color: var(--columbia); background: var(--panel-2); border-radius: 0; padding: 5px 10px; }
+  .game-head .label { color: var(--accent-deep); }
   .cs-scene { position: relative; z-index: 1; height: clamp(96px, 19vw, 250px); margin-top: 4px; overflow: hidden; }
-  .cs-scene img { position: absolute; left: 50%; top: 0; translate: -50% 0; width: max(100%, 700px); height: auto; image-rendering: pixelated; }
-  .cs[data-look="game"] .cs-body { position: relative; z-index: 3; margin-top: -34px; background: var(--page); border-radius: 0 28px 0 0; box-shadow: inset 0 2px 0 var(--panel-edge); padding-top: 34px; }
-  .cs[data-look="game"] .glance { --g-bg: var(--panel); --g-edge: inset 0 0 0 2px var(--panel-edge), 4px 4px 0 #060b18; --g-r: 0; }
-  .cs[data-look="game"] .glance dt { color: var(--gold); display: flex; align-items: center; gap: 8px; }
-  .cs[data-look="game"] .glance dt::before { content: ''; width: 7px; height: 7px; flex: none; background: var(--gold); box-shadow: 2px 2px 0 var(--gold-deep); }
-  .cs[data-look="game"] .prose :global(h2)::before { font: 500 12px/1 var(--font-mono); letter-spacing: .08em; color: var(--columbia); padding-left: 18px; background: linear-gradient(var(--gold), var(--gold)) 0 50% / 8px 8px no-repeat; }
-  .cs[data-look="game"] .prose > :global(h2 + p) { background: var(--panel); color: var(--ink); font-weight: 600; border-radius: 0; padding: 12px 16px; line-height: 1.5; box-shadow: inset 0 0 0 2px var(--panel-edge), 4px 4px 0 #060b18; }
+  .cs-scene img { position: absolute; left: 50%; top: 0; translate: -50% 0; width: max(100%, 700px); height: auto; }
+  .cs[data-look="game"] .cs-body { position: relative; z-index: 3; margin-top: -34px; background: var(--page) url(/wax/paper.webp); border-radius: 0 28px 0 0; padding-top: 34px; }
   .cs[data-look="game"] .prose :global(ul) { list-style: none; padding-left: 4px; }
   .cs[data-look="game"] .prose :global(ul li) { position: relative; padding-left: 22px; }
-  .cs[data-look="game"] .prose :global(ul li)::before { content: ''; position: absolute; left: 2px; top: .62em; width: 7px; height: 7px; background: var(--gold); box-shadow: 2px 2px 0 var(--gold-deep); }
+  .cs[data-look="game"] .prose :global(ul li)::before { content: ''; position: absolute; left: 0; top: .42em; width: 14px; height: 14px; background: url(/wax/dot-red.webp) center / contain no-repeat; }
 
   @media (max-width: 480px) {
-    .site-bar { font-size: 7px; } .site-bar .links { gap: 10px; }
+    .site-bar { font-size: 17px; flex-wrap: wrap; } .site-bar .links { gap: 10px; }
     .summary { font-size: 16px; }
   }
 </style>

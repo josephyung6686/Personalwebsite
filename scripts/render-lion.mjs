@@ -1,62 +1,73 @@
-// Rasterises the pixel lion with hard pixels. Run it to get a contact sheet of every frame, pose and wardrobe item,
-// for checking the art by eye: node scripts/render-lion.mjs [out.png] [scale]
+// Draws every part of the crayon lion with the wax engine, crops each to its marks, and writes the pictures to public/lion plus
+// a manifest saying where each one sits on the rig. Run: node scripts/render-lion.mjs
+// With an output path, it also makes a contact sheet for checking the art by eye: node scripts/render-lion.mjs sheet.png
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
-import { layer, paths, arms, body, eyes, head, legs, mouths, tails, SIZE } from '../src/assets/lion/sprites.ts';
-import { HAT_ART, TOP_ART, FACE_ART, HELD_ART } from '../src/assets/lion/items.ts';
-import { poseSvg, tinyHead } from '../src/assets/lion/poses.ts';
+import { Sheet } from '../src/lib/wax.js';
+import { PARTS, U, M, canvasFor, drawPart } from './lib/lion-art.mjs';
 
-/** Sprite markup as a PNG buffer: drawn at native size on the given viewBox, then scaled with nearest-neighbour. */
-export async function spritePng(markup, { x = 0, y = 0, w, h, scale = 1 }) {
-  const inner = markup.replace(/<svg[^>]*>/, '').replace('</svg>', '');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x} ${y} ${w} ${h}" width="${w}" height="${h}" shape-rendering="crispEdges">${inner}</svg>`;
-  return sharp(Buffer.from(svg)).ensureAlpha().resize(w * scale, h * scale, { kernel: 'nearest' }).png().toBuffer();
+const OUT = 'public/lion', MANIFEST = 'src/assets/lion/crayon.json';
+
+function crop(sheet) {
+  const { W, H, px } = sheet;
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (px[(y * W + x) * 4 + 3] > 6) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) throw new Error('nothing was drawn');
+  const pad = 2;
+  return { left: Math.max(0, x0 - pad), top: Math.max(0, y0 - pad), width: Math.min(W, x1 + pad + 1) - Math.max(0, x0 - pad), height: Math.min(H, y1 + pad + 1) - Math.max(0, y0 - pad) };
 }
 
-async function contactSheet(out, S) {
-  const CELL = SIZE * S + 10;
-  const NAVY = '#0b1226', SAND = '#e9d9a8';
-  const on = async (markup, w, h, bg, scale = S) => sharp({ create: { width: w * scale, height: h * scale, channels: 4, background: bg } })
-    .composite([{ input: await spritePng(markup, { w, h, scale }) }]).png().toBuffer();
+const raw = (sheet) => sharp(Buffer.from(sheet.px.buffer, sheet.px.byteOffset, sheet.px.byteLength), { raw: { width: sheet.W, height: sheet.H, channels: 4 } });
 
+export async function renderLion(outDir = OUT, manifestPath = MANIFEST) {
+  mkdirSync(outDir, { recursive: true });
+  const manifest = {};
+  let seed = 100;
+  for (const key of Object.keys(PARTS)) {
+    const { w, h } = canvasFor(key);
+    const sheet = new Sheet(null, (w + M * 2) * U, (h + M * 2) * U, 1);
+    drawPart(sheet, key, (seed += 37));
+    const c = crop(sheet);
+    await raw(sheet).extract(c).webp({ quality: 80, alphaQuality: 84, effort: 6 }).toFile(`${outDir}/${key}.webp`);
+    const r = (v) => Math.round(v * 100) / 100;
+    manifest[key] = { x: r(c.left / U - M), y: r(c.top / U - M), w: r(c.width / U), h: r(c.height / U) };
+  }
+  writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 0).replace(/},/g, '},\n')}\n`);
+  return manifest;
+}
+
+/** Layers stacked on the rig's canvas into one PNG buffer, for icons, the share image and the contact sheet. */
+export async function stackPng(keys, manifest, { w = 44, h = 44, scale = 8, dir = OUT } = {}) {
+  const comps = [];
+  for (const k of keys) {
+    const m = manifest[k], width = Math.round(m.w * scale), height = Math.round(m.h * scale);
+    const left = Math.round((m.x + M) * scale), top = Math.round((m.y + M) * scale);
+    comps.push({ input: await sharp(`${dir}/${k}.webp`).resize(width, height).png().toBuffer(), left, top });
+  }
+  return sharp({ create: { width: (w + M * 2) * scale, height: (h + M * 2) * scale, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite(comps).png().toBuffer();
+}
+
+async function contactSheet(out, manifest) {
+  const stand = ['tail-rest', 'legs-stand', 'body', 'arms-down'], top = ['head', 'eyes-open', 'mouth-smile'];
+  const looks = [
+    [...stand, ...top], ['tail-left', 'legs-a', 'body', 'arms-down', ...top], ['tail-right', 'legs-b', 'body', 'arms-down', 'head', 'eyes-blink', 'mouth-smile'],
+    ['tail-rest', 'legs-dangle', 'body', 'arms-up', 'head', 'eyes-squint', 'mouth-open'], ['tail-rest', 'legs-sit', 'body', 'arms-down', 'head', 'eyes-dizzy', 'mouth-wobble', 'stars'],
+    [...stand, 'scarf', ...top, 'columbia'], [...stand, 'labcoat', 'labcoat-sl-down', ...top, 'glasses', 'grad'], [...stand, 'tie', ...top, 'phones', 'grip', 'cup'], [...stand, 'hoodie', 'hoodie-sl-down', ...top, 'goggles', 'snow', 'grip', 'phone'],
+    [...stand, ...top, 'grip', 'guitar'], [...stand, ...top, 'grip', 'foil'],
+    ['tail-rest', 'body', 'head', 'eyes-down', 'mouth-smile', 'glow', 'typing-l', 'typing-r', 'lid', 'deck'], ['tail-rest', 'legs-stand', 'body', 'head', 'eyes-down', 'mouth-smile', 'phone-back', 'hold-l', 'hold-r', 'ping'], ['tail-rest', 'legs-stand', 'body', 'arm-left', 'wave-a', 'scarf', ...top],
+  ];
+  const cell = (44 + M * 2) * 5, cols = 5, rows = Math.ceil((looks.length + 2) / cols);
   const panels = [];
-  let col = 0, row = 0;
-  const add = (input, w = CELL) => { panels.push({ input, left: col, top: row }); col += w; };
-  const nextRow = () => { col = 0; row += CELL; };
-
-  const standing = (o = {}) => paths(layer(o.tail ?? tails.rest, o.legs ?? legs.stand, body, o.arms ?? arms.down, head, o.eyes ?? eyes.open, o.mouth ?? mouths.smile));
-  for (const f of [
-    standing(), standing({ legs: legs.a, tail: tails.left }), standing({ legs: legs.b, tail: tails.right }),
-    standing({ eyes: eyes.blink }), standing({ legs: legs.sit, eyes: eyes.dizzy, mouth: mouths.wobble }),
-    standing({ legs: legs.dangle, arms: arms.up, eyes: eyes.squint, mouth: mouths.open }),
-  ]) add(await on(f, SIZE, SIZE, NAVY));
-  nextRow();
-
-  for (const pose of ['laptop', 'phone', 'scarf']) add(await on(poseSvg(pose), SIZE, SIZE, pose === 'laptop' ? SAND : NAVY));
-  add(await on(poseSvg('bed'), 64, 40, NAVY), 64 * S + 10);
-  nextRow();
-
-  const dressed = (slot, a) => {
-    const lower = paths(tails.rest) + paths(legs.stand) + paths(body) + paths(arms.down);
-    const face = paths(layer(head, eyes.open, mouths.smile));
-    return on(lower + (slot === 'top' ? a.svg + face : face + a.svg), SIZE, SIZE, NAVY);
-  };
-  for (const a of Object.values(HAT_ART)) add(await dressed('hat', a));
-  for (const a of Object.values(FACE_ART)) add(await dressed('face', a));
-  nextRow();
-  for (const a of Object.values(TOP_ART)) add(await dressed('top', a));
-  nextRow();
-  for (const a of Object.values(HELD_ART)) add(await dressed('held', a));
-  add(await on(paths(tinyHead), 16, 16, NAVY, 8), 140);
-  add(await on(paths(tinyHead), 16, 16, NAVY, 1), 30);
-  nextRow();
-
-  await sharp({ create: { width: CELL * 6 + 40, height: row, channels: 4, background: '#333' } }).composite(panels).png().toFile(out);
+  for (const [i, l] of looks.entries()) panels.push({ input: await stackPng(l, manifest, { scale: 5 }), left: (i % cols) * cell, top: Math.floor(i / cols) * cell });
+  const bed = await stackPng(['bed-frame', 'pillow', 'sleep-head', 'bed-tail-a', 'blanket-a', 'z1', 'z2', 'z3'], manifest, { w: 64, h: 40, scale: 5 });
+  panels.push({ input: bed, left: (looks.length % cols) * cell, top: Math.floor(looks.length / cols) * cell });
+  await sharp({ create: { width: cols * cell + 100, height: rows * cell, channels: 4, background: '#a9d3ef' } }).composite(panels).png().toFile(out);
 }
 
 if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
-  const out = process.argv[2] ?? 'lion-sheet.png';
-  await contactSheet(out, Number(process.argv[3] ?? 5));
-  console.log(`wrote ${out}`);
+  const manifest = await renderLion();
+  console.log(`wrote ${Object.keys(manifest).length} parts`);
+  if (process.argv[2]) await contactSheet(process.argv[2], manifest);
 }

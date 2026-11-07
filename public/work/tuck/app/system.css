@@ -1,0 +1,207 @@
+/* Tuck prototype 38: one design system for Finder mode, Tuck mode and Tuck Brain.
+   Palette and buttons follow the owner's prototype 34; Finder chrome follows macOS 26 Finder.
+   Fonts: Onest (UI), Bricolage Grotesque 800 (rare display moments only). Icons: Phosphor 2.1.1, regular weight
+   for UI, fill for selected sidebar items. Radius scale: window 12 (native), panes 10, cards 14, controls 8-10,
+   chips 8, capsules only for counters. Motion: state only, 150-250 ms, --ease; Tuck is the one playful element. */
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Onest:wght@400;500;600;700&display=swap");
+
+:root{
+  /* parts of your life: the same colour everywhere (Brain, Edit Folders, Needs You, Finder) */ --a-study:#2f6fe6;--a-work:#7f5be6;--a-job:#e86f1f;--a-home:#e6438a;--a-photo:#169fd0;--a-proj:#d8ac12;--a-health:#e63950;--a-none:#6b7280;
+  --f:"Onest",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --fd:"Bricolage Grotesque","Onest",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --spring:cubic-bezier(.34,1.56,.64,1); /* Tuck only (his peek and pop, from prototype 34). Never on UI controls. */
+
+  /* surfaces */
+  --desk:#e7e9ee;
+  --win:#ffffff;            /* content */
+  --side:#f4f5f9;           /* sidebar (Finder's translucent sidebar, solid here) */
+  --bar:#fbfbfd;            /* toolbar */
+  --soft:#f5f6fc;--soft2:#e9edf8;
+  --line:#e6e9f2;--line2:#d9deea;
+  --hov:rgba(30,45,90,.06);--sel:#dfe7ff;--sel-ink:#0a3fd6;
+  --stripe:#f8f9fc;
+
+  /* ink: lowest passes 4.5:1 on white and --soft */
+  --ink:#1e2131;--ink2:#4a4f63;--ink3:#666c7f;--deco:#b7bccb;
+
+  /* accent and states */
+  --ac:#0a4bff;--ac-ink:#2b6cc4;--ac-btn:#1f5bff;--ac-btn-hi:#2a64ff;
+  --ac-fill:rgba(10,75,255,.09);--ac-fill2:rgba(10,75,255,.16);
+  --brand:linear-gradient(120deg,#0a4bff,#7fa3f8);
+  --ok:#2b6cc4;--ok-fill:rgba(10,75,255,.09);
+  --warn:#8a5a00;--warn-fill:rgba(224,160,58,.16);
+  --danger:#c4311f;--danger-fill:rgba(196,49,31,.10);
+  --lock:#3f5f94;--lock-fill:rgba(63,95,148,.12);
+  --pill-edge:rgba(30,45,90,.07);
+
+  /* file kinds (Finder-like icon tints) */
+  --k-folder:#5b8dff;--k-pdf:#e5383b;--k-doc:#2f6bff;--k-xls:#5b5fe0;--k-img:#1ea7e8;--k-code:#8b5cf6;--k-txt:#8a90a3;
+
+  --sh-pop:0 0 0 1px var(--line),0 14px 36px -12px rgba(20,30,60,.35);
+  --sh-win:0 0 0 .5px rgba(0,0,0,.18),0 30px 80px -30px rgba(30,45,90,.38),0 8px 24px -12px rgba(30,45,90,.18);
+
+  /* z scale */
+  --z-sticky:10;--z-pop:40;--z-sheet:60;--z-toast:70;--z-tuck:80;--z-tip:90;
+
+  font:14px/1.45 var(--f);color:var(--ink);-webkit-font-smoothing:antialiased;
+}
+:root[data-theme="dark"]{
+  --a-study:#4d8dff;--a-work:#9d7bff;--a-job:#ff8a3d;--a-home:#ff5fa2;--a-photo:#3fc4f2;--a-proj:#f5cf4a;--a-health:#ff5468;--a-none:#7d8597;
+  --desk:#0e0f12;
+  --win:oklch(0.20 0.007 255);--side:oklch(0.175 0.008 255);--bar:oklch(0.215 0.007 255);
+  --soft:oklch(0.245 0.009 255);--soft2:oklch(0.28 0.01 255);
+  --line:oklch(0.30 0.01 255);--line2:oklch(0.35 0.01 255);
+  --hov:rgba(255,255,255,.06);--sel:rgba(80,140,255,.26);--sel-ink:#b9ceff;--stripe:rgba(255,255,255,.025);
+  --ink:oklch(0.96 0.004 255);--ink2:oklch(0.80 0.01 255);--ink3:oklch(0.68 0.01 255);--deco:oklch(0.45 0.01 255);
+  --ac:#3b6dff;--ac-ink:#8fb0ff;--ac-btn:#3368ff;--ac-btn-hi:#3f72ff;
+  --ac-fill:rgba(80,140,255,.18);--ac-fill2:rgba(80,140,255,.28);
+  --ok:#8fb0ff;--ok-fill:rgba(80,140,255,.18);--warn:#f0b74a;--warn-fill:rgba(240,183,74,.14);
+  --danger:#ff6b5a;--danger-fill:rgba(255,107,90,.14);--lock:#a9bfe6;--lock-fill:rgba(140,170,230,.16);
+  --pill-edge:rgba(0,0,0,.35);
+  --sh-pop:0 0 0 1px var(--line),0 14px 36px -12px rgba(0,0,0,.6);
+  --sh-win:0 0 0 .5px rgba(255,255,255,.1),0 30px 80px -30px rgba(0,0,0,.7);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  /* parts of your life: the same colour everywhere (Brain, Edit Folders, Needs You, Finder) */ --a-study:#4d8dff;--a-work:#9d7bff;--a-job:#ff8a3d;--a-home:#ff5fa2;--a-photo:#3fc4f2;--a-proj:#f5cf4a;--a-health:#ff5468;--a-none:#7d8597;
+  --desk:#0e0f12;
+  --win:oklch(0.20 0.007 255);--side:oklch(0.175 0.008 255);--bar:oklch(0.215 0.007 255);
+  --soft:oklch(0.245 0.009 255);--soft2:oklch(0.28 0.01 255);
+  --line:oklch(0.30 0.01 255);--line2:oklch(0.35 0.01 255);
+  --hov:rgba(255,255,255,.06);--sel:rgba(80,140,255,.26);--sel-ink:#b9ceff;--stripe:rgba(255,255,255,.025);
+  --ink:oklch(0.96 0.004 255);--ink2:oklch(0.80 0.01 255);--ink3:oklch(0.68 0.01 255);--deco:oklch(0.45 0.01 255);
+  --ac:#3b6dff;--ac-ink:#8fb0ff;--ac-btn:#3368ff;--ac-btn-hi:#3f72ff;
+  --ac-fill:rgba(80,140,255,.18);--ac-fill2:rgba(80,140,255,.28);
+  --ok:#8fb0ff;--ok-fill:rgba(80,140,255,.18);--warn:#f0b74a;--warn-fill:rgba(240,183,74,.14);
+  --danger:#ff6b5a;--danger-fill:rgba(255,107,90,.14);--lock:#a9bfe6;--lock-fill:rgba(140,170,230,.16);
+  --pill-edge:rgba(0,0,0,.35);
+  --sh-pop:0 0 0 1px var(--line),0 14px 36px -12px rgba(0,0,0,.6);
+  --sh-win:0 0 0 .5px rgba(255,255,255,.1),0 30px 80px -30px rgba(0,0,0,.7);
+}}
+
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--desk);font-family:var(--f);color:var(--ink);overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{border:0;background:none;cursor:default}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:6px}
+.ph{line-height:1}
+
+/* ---------- window (a real Mac window: native radius, real-looking traffic lights) */
+.win{position:fixed;inset:28px 32px;background:var(--win);border-radius:12px;box-shadow:var(--sh-win);overflow:hidden;display:grid;grid-template-columns:var(--side-w,232px) minmax(0,1fr)}
+.lights{display:flex;gap:8px;padding:18px 16px 0}
+.lights i{width:12px;height:12px;border-radius:50%;background:#ff5f57;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.18)}
+.lights i:nth-child(2){background:#febc2e}.lights i:nth-child(3){background:#28c840}
+
+/* ---------- buttons: one family. A physical bottom rim; pressing pushes onto it. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:30px;padding:0 12px;border-radius:9px;font:600 13px/1 var(--f);white-space:nowrap;
+  background:var(--win);color:var(--ink);box-shadow:inset 0 -2px 0 var(--pill-edge),0 0 0 1px var(--line);
+  transition:transform .15s var(--ease),box-shadow .2s var(--ease),background .2s}
+.btn:hover{background:var(--soft)}
+.btn:active{transform:translateY(1px);box-shadow:inset 0 -1px 0 var(--pill-edge),0 0 0 1px var(--line)}
+.btn .ph{font-size:16px}
+.btn.pri{background:var(--ac-btn);color:#fff;box-shadow:inset 0 -2px 0 rgba(10,30,110,.22),0 1px 2px rgba(16,36,94,.14),0 6px 14px -8px rgba(31,91,255,.45)}
+.btn.pri:hover{background:var(--ac-btn-hi)}
+.btn.pri:active{box-shadow:inset 0 -1px 0 rgba(10,30,110,.22),0 1px 1px rgba(16,36,94,.14)}
+.btn.ghost{background:transparent;box-shadow:none;color:var(--ink2)}
+.btn.ghost:hover{background:var(--hov);color:var(--ink)}
+.btn.link{background:transparent;box-shadow:none;color:var(--ac-ink);padding:0 6px}
+.btn.danger{color:var(--danger)}
+.btn.sm{height:26px;padding:0 9px;border-radius:8px;font-size:12px}
+.btn.lg{height:40px;padding:0 18px;border-radius:12px;font-size:14px}
+.btn:disabled,.btn.dis{opacity:.5;pointer-events:none}
+.btn.pri:disabled,.btn.pri.dis{opacity:1;background:var(--soft);color:var(--ink3);box-shadow:none}
+.ib{width:30px;height:30px;border-radius:8px;display:inline-grid;place-items:center;color:var(--ink2);font-size:18px}
+.ib:hover{background:var(--hov);color:var(--ink)}
+.ib.on{background:var(--soft2);color:var(--ink)}
+/* anything that opens a menu looks like a macOS pop-up button: a small ⌄ at its end, the pointer, a hover highlight.
+   .popchip is the soft rounded chip for a value you can change (Needs You's folder path); buttons that already look like
+   buttons just add the ⌄ (.pcaret). Nothing opens a menu without one. */
+[aria-haspopup="menu"]{cursor:pointer}
+.pcaret{flex:none;font-size:10px;line-height:1;margin-left:3px;opacity:.6}
+.ib:has(.pcaret){width:auto;min-width:30px;padding:0 7px;display:inline-flex;align-items:center;justify-content:center;gap:1px}
+.ib .pcaret{font-size:9px;margin-left:1px}
+.popchip{display:inline-flex;align-items:center;gap:5px;max-width:100%;min-width:0;height:28px;padding:0 8px 0 9px;border-radius:8px;background:var(--win);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);font:500 13.5px/1 var(--f);text-align:left;cursor:pointer;transition:background .15s var(--ease),box-shadow .15s var(--ease)}
+.popchip:hover,.popchip[aria-expanded="true"]{background:var(--soft2);box-shadow:inset 0 0 0 1px var(--line2,var(--line))}
+.popchip:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.popchip .pth{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.popchip .last{flex:none;white-space:nowrap}
+.popchip .sep{flex:none;font-size:10px;margin:0 3px;color:var(--ink3);vertical-align:0}
+.popchip .pcaret{margin-left:2px;opacity:.7}.popchip .tag{flex:none;margin-left:2px}
+.btn .pcaret{margin-left:-2px}.fp-q .ph.pcaret{font-size:9px;margin-left:2px;vertical-align:1px;color:inherit}
+@media (prefers-reduced-motion:reduce){.popchip{transition:none}}
+.kbd{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:5px;background:var(--soft2);color:var(--ink3);font:600 10.5px/1 var(--f)}
+
+/* segmented control (Finder view switcher, Finder/Tuck switch) */
+.seg{display:inline-flex;padding:2px;border-radius:9px;background:var(--soft2);gap:2px}
+.seg button{height:26px;min-width:30px;padding:0 9px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;gap:6px;color:var(--ink2);font:600 12.5px var(--f)}
+.seg button .ph{font-size:16px}
+.seg button.on{background:var(--win);color:var(--ink);box-shadow:0 0 0 .5px var(--line2),0 1px 2px rgba(20,30,60,.12)}
+
+/* fields */
+.field{height:30px;border-radius:8px;background:var(--soft);border:1px solid transparent;padding:0 10px;font:500 13px var(--f);color:var(--ink);width:100%}
+.field::placeholder{color:var(--ink3)}
+.field:focus{outline:0;border-color:var(--ac);background:var(--win)}
+.search{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:9px;background:var(--soft2);color:var(--ink3);min-width:190px}
+.search input{border:0;background:none;outline:0;width:100%;font:500 13px var(--f);color:var(--ink)}
+
+/* chips / tags / badges */
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:8px;background:var(--soft);color:var(--ink2);font:600 12px/1 var(--f);white-space:nowrap}
+.chip.ac{background:var(--ac-fill);color:var(--ac-ink)}
+.chip.lock{background:var(--lock-fill);color:var(--lock)}
+.chip.ok{background:var(--ok-fill);color:var(--ok)}
+.chip.warn{background:var(--warn-fill);color:var(--warn)}
+.count{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--ac);color:#fff;font:700 11px/1 var(--f)}
+.count.quiet{background:transparent;color:var(--ink3);font-weight:500}
+
+/* switch */
+.sw{position:relative;width:34px;height:20px;border-radius:10px;background:var(--soft2);box-shadow:inset 0 0 0 1px var(--line2);flex:none;transition:background .2s var(--ease)}
+.sw::after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s var(--ease)}
+.sw.on{background:var(--ac);box-shadow:none}.sw.on::after{left:16px}
+
+/* menus, popovers, toasts */
+.menu{position:fixed;z-index:var(--z-pop);min-width:220px;max-height:min(420px,calc(100vh - 24px));overflow-y:auto;overscroll-behavior:contain;padding:5px;border-radius:10px;background:var(--win);box-shadow:var(--sh-pop);font:500 13px var(--f)}
+.menu button{display:flex;align-items:center;gap:8px;width:100%;height:26px;padding:0 9px;border-radius:6px;text-align:left}
+.menu button:hover{background:var(--ac);color:#fff}
+.menu hr{border:0;height:1px;background:var(--line);margin:4px 6px}
+.toast{position:fixed;left:50%;bottom:28px;z-index:var(--z-toast);transform:translate(-50%,16px);opacity:0;display:flex;align-items:center;gap:12px;padding:10px 12px 10px 14px;border-radius:12px;background:var(--ink);color:var(--win);font:500 13px var(--f);transition:opacity .25s var(--ease),transform .25s var(--ease);pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast .btn{height:26px;background:rgba(255,255,255,.14);color:inherit;box-shadow:none}
+
+/* skeleton */
+.skel{background:linear-gradient(90deg,var(--soft) 0%,var(--soft2) 50%,var(--soft) 100%);background-size:200% 100%;animation:skel 1.4s linear infinite;border-radius:6px}
+@keyframes skel{to{background-position:-200% 0}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* Tuck's memory of you (memory.js): same look in Tuck Brain and Settings › About You */
+.memv{display:grid;gap:14px}
+.mhead{display:flex;align-items:center;gap:10px}.mhead b{display:block;font:650 14px var(--f)}.mhead small{display:block;font:500 12px var(--f);color:var(--ink3)}
+.mav{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--ac);color:#fff;font:700 12px var(--f);flex:none}
+.msum{font:500 14.5px/1.7 var(--f);color:var(--ink);margin:0}.msum.muted{color:var(--ink3)}
+.mf{all:unset;cursor:pointer;font-weight:650;background:color-mix(in srgb,var(--ac) 12%,transparent);border-radius:5px;padding:0 4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.mf:hover{background:color-mix(in srgb,var(--ac) 24%,transparent)}.mf:focus-visible{outline:2px solid var(--ac)}.mf.cls{background:color-mix(in srgb,var(--a-study) 14%,transparent)}
+.mgrp h4{font:600 12px var(--f);color:var(--ink3);margin:0 0 6px}
+.mgrp ul{list-style:none;padding:0;margin:0;display:grid}
+.mrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}.mrow:first-child{border-top:0}
+.mrow .mk{width:104px;flex:none;font:600 12.5px var(--f);color:var(--ink2)}
+.mrow .mv{flex:1;min-width:0;font:500 13px/1.4 var(--f);color:var(--ink)}.mrow .mv .field{width:100%}
+.msrc{display:block;font:500 11.5px var(--f);margin-top:2px}.msrc em{font-style:normal;color:var(--ink3)}
+.msrc.s-told{color:var(--ac-ink)}.msrc.s-files{color:var(--ok)}.msrc.s-answer{color:var(--warn)}
+.mrow .ma{display:flex;gap:2px;flex:none;opacity:.55;transition:opacity .15s var(--ease)}.mrow:hover .ma,.mrow:focus-within .ma{opacity:1}
+.mrow.gone .mv{text-decoration:line-through;color:var(--ink3)}.mrow.gone .msrc{display:none}
+.madd{display:flex;gap:6px;margin-top:6px}.madd .field{flex:1;min-width:0}
+.memv textarea.field{width:100%;min-height:56px;padding:8px 10px;resize:vertical;font:500 13px/1.45 var(--f)}
+.mnote{display:block;margin-top:5px;font:500 11.5px var(--f);color:var(--ink3)}
+.mfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:500 12px var(--f);color:var(--ink3)}.mfoot a{color:var(--ac-ink);font-weight:600;text-decoration:none}
+.mwipe{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.mwipe p{flex-basis:100%;margin:0 0 4px;font:500 12.5px var(--f);color:var(--ink2)}
+.btn.ghost.danger{color:var(--danger)}
+
+/* the 4 starter replies: one layout in the side chat and on the Chats page (tuck-art.js TuckChat.startersHtml) */
+.tk-starters{display:grid;gap:8px;margin-top:8px;max-width:360px}
+.tk-starters button{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:12px;background:var(--win);box-shadow:inset 0 0 0 1px var(--line);text-align:left;font:500 14px var(--f);color:var(--ink);transition:background .15s var(--ease);min-width:0}
+.tk-starters button span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tk-starters button:hover{background:color-mix(in srgb,var(--h,var(--ac)) 9%,var(--soft))}
+.tk-starters button i{flex:none;color:var(--h,var(--ac));font-size:16px}

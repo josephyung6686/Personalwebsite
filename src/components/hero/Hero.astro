@@ -1,10 +1,7 @@
 ---
 import Lion from '../Lion.astro';
 import { site } from '../../data/site';
-import sun from './sun.svg?raw';
 import birds from './birds.svg?raw';
-import nightsky from './nightsky.svg?raw';
-import shadows from './shadows.svg?raw';
 import './hero.css';
 
 const states = ['day', 'sunset', 'night'] as const;
@@ -12,15 +9,18 @@ const hide = (svg: string) => svg.replace('<svg', '<svg aria-hidden="true" focus
 ---
 <header id="hero" class="hero" data-time="night">
   <div class="layer sky-layer" aria-hidden="true">
-    {states.map((s) => <img class={`sky sky-${s}`} src={`/hero/sky-${s}.png`} alt="" />)}
+    {states.map((s) => <img class={`sky sky-${s}`} src={`/hero/sky-${s}.webp`} alt="" loading="lazy" />)}
   </div>
-  <div class="layer sun-layer" set:html={hide(sun)} />
+  <div class="layer sun-layer" aria-hidden="true"><img class="sun" src="/hero/sun.webp" alt="" loading="lazy" /></div>
   <div class="layer clouds-layer" aria-hidden="true">
-    {states.map((s) => <img class={`clouds cl-${s}`} src={`/hero/clouds-${s}.png`} alt="" />)}
+    {states.map((s) => <img class={`clouds cl-${s}`} src={`/hero/clouds-${s}.webp`} alt="" loading="lazy" />)}
   </div>
   <div class="layer birds-layer" set:html={hide(birds)} />
   <div class="layer rays" aria-hidden="true"></div>
-  <div class="layer night-layer" set:html={hide(nightsky)} />
+  <div class="layer night-layer" aria-hidden="true">
+    <i class="stars tw1"></i><i class="stars tw2"></i><i class="stars tw3"></i>
+    <img class="moon" src="/hero/moon.webp" alt="" loading="lazy" />
+  </div>
 
   <nav class="hero-nav" aria-label="Main">
     <span>{site.location}</span>
@@ -31,9 +31,13 @@ const hide = (svg: string) => svg.replace('<svg', '<svg aria-hidden="true" focus
   <a class="prompt" href="#work">▶ VIEW WORK</a>
 
   <div class="px-scene" aria-hidden="true">
-    {states.map((s) => <img class={`scene scene-${s}`} src={`/hero/scene-${s}.png`} alt="" />)}
-    <Fragment set:html={hide(shadows)} />
-    <img class="emissive" src="/hero/emissive.png" alt="" />
+    {states.map((s) => (
+      <picture>
+        <source media="(max-width: 720px)" srcset={`/hero/scene-${s}-sm.webp`} />
+        <img class={`scene scene-${s}`} src={`/hero/scene-${s}.webp`} alt="" loading="lazy" />
+      </picture>
+    ))}
+    <img class="emissive" src="/hero/emissive.webp" alt="" loading="lazy" />
   </div>
   <div class="hero-lion">
     <Lion pose="laptop" class="lion" />

@@ -3,8 +3,8 @@
   "short_name": "Joseph Yung",
   "start_url": "/",
   "display": "browser",
-  "background_color": "#0b1226",
-  "theme_color": "#0b1226",
+  "background_color": "#a9d3ef",
+  "theme_color": "#a9d3ef",
   "icons": [
     {
       "src": "/icon-192.png",

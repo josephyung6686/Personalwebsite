@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="en">
+<head><script>try{if(!localStorage.getItem('tuckTheme'))localStorage.setItem('tuckTheme','dark')}catch(e){}</script><script>/* one Light/Dark choice for every page: remembered and applied when you move between Finder, Tuck and Brain */(function(){var k="tuckTheme",d=document.documentElement,t=null,ready=false;try{t=localStorage.getItem(k)}catch(e){}if(t)d.dataset.theme=t;new MutationObserver(function(){if(!ready)return;var v=d.dataset.theme;try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}).observe(d,{attributes:true,attributeFilter:["data-theme"]});function apply(){if(t&&d.dataset.theme!==t){if(typeof window.setTheme==="function"){try{window.setTheme(t)}catch(e){d.dataset.theme=t}}else d.dataset.theme=t}ready=true}if(document.readyState==="complete")apply();else addEventListener("load",apply)})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tuck Brain</title>
+<link rel="stylesheet" href="system.css"><link rel="stylesheet" href="phosphor.css">
+
+<link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,500,1,0&display=swap">
+<script src="brain-layout.js"></script>
+<script src="d3.min.js"></script>
+<script src="tuck-art.js"></script>
+<script src="sample.js"></script>
+<script src="memory.js"></script>
+<script src="composer.js"></script>
+<script src="plan.js"></script>
+<script src="folderpanel.js"></script>
+<script src="resort.js"></script>
+<script src="chatbot.js"></script>
+<style>
+/* Page-level area hues (not system tokens). Muted so the map reads as one system; Private uses --lock. */
+
+.win{inset:22px 32px 60px;--side-w:240px}
+/* outside-window controls */
+.outside{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:12px;align-items:center;color:var(--ink2);font:500 12px var(--f)}
+
+/* sidebar */
+.side{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.side .seg{margin:14px 12px 6px;display:flex}
+.side .seg button{flex:1}
+.nav{flex:1;overflow:auto;padding:4px 10px 10px}
+.nav h6{font:600 11.5px/1 var(--f);color:var(--ink3);padding:16px 10px 6px}
+.row{display:flex;align-items:center;gap:9px;width:100%;height:30px;padding:0 8px 0 10px;border-radius:8px;color:var(--ink);font:500 13.5px/1 var(--f);text-decoration:none;text-align:left}
+.row:hover{background:var(--hov)}
+.row .ph,.row .ph-fill{font-size:17px;color:var(--ac-ink);width:18px;text-align:center}
+.row span.l{flex:1}
+.row.on{background:var(--sel);color:var(--sel-ink)}
+.row.on .ph-fill{color:var(--sel-ink)}
+.row .ext{font-size:13px;color:var(--ink3)}
+.prof{display:flex;align-items:center;gap:10px;padding:10px 10px 12px 14px;border-top:1px solid var(--line)}
+.ava{width:30px;height:30px;border-radius:50%;background:var(--ac-fill2);color:var(--ac-ink);display:grid;place-items:center;font:700 12px var(--f);flex:none}
+.prof .t{flex:1;min-width:0;line-height:1.25}
+.prof b{font:600 13px var(--f);display:block}
+.prof small{font:500 12px var(--f);color:var(--ink3)}
+.side .lights{padding:18px 16px 0}
+
+/* main */
+.main{display:grid;grid-template-rows:52px minmax(0,1fr);min-width:0;min-height:0}
+.top{display:flex;align-items:center;gap:12px;padding:0 14px 0 18px;background:var(--bar);border-bottom:1px solid var(--line);min-width:0}
+.top h1{font:700 15px var(--f);letter-spacing:-.01em;white-space:nowrap}
+.top .sub{font:500 12px var(--f);color:var(--ink3);white-space:nowrap}
+.top .grow{flex:1}
+.top .search{position:relative;min-width:230px}
+.zoomc{display:flex;align-items:center;gap:2px}
+.zoomc output{min-width:44px;text-align:center;font:600 12px var(--f);color:var(--ink2);font-variant-numeric:tabular-nums}
+.ib{font-size:17px}
+.results{position:absolute;left:0;top:36px;width:300px;max-height:340px;overflow:auto;padding:5px;border-radius:10px;background:var(--win);box-shadow:var(--sh-pop);z-index:var(--z-pop);display:none}
+.results.on{display:block}
+.results button{display:flex;align-items:center;gap:9px;width:100%;min-height:34px;padding:4px 9px;border-radius:7px;text-align:left;font:500 13px var(--f);color:var(--ink)}
+.results button:hover,.results button.hi{background:var(--hov)}
+.results button small{margin-left:auto;color:var(--ink3);font-size:11.5px;white-space:nowrap}
+.results .none{padding:14px 12px;font:500 13px var(--f);color:var(--ink2)}
+.results .none b{display:block;color:var(--ink);margin-bottom:2px}
+.results .hd{font:600 11px var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);padding:8px 9px 4px}
+.seg button:disabled{opacity:.45}
+.kdot{width:9px;height:9px;border-radius:50%;flex:none}
+
+/* canvas stage */
+.stage{position:relative;overflow:hidden;min-height:0;--sky:linear-gradient(165deg,#fbf7ff 0%,#f3f0fb 38%,#fdf1ea 100%);background:var(--sky)}
+/* the map is a sky: soft dawn in light, deep night in dark (stars, nebula and drifting motes are drawn on #bg and #cv) */
+:root[data-theme="dark"] .stage{--sky:linear-gradient(170deg,#070b1a 0%,#0c1230 45%,#150f2c 100%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stage{--sky:linear-gradient(170deg,#070b1a 0%,#0c1230 45%,#150f2c 100%)}}
+#bg{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#cv.pointing{cursor:pointer}#cv.dragging{cursor:grabbing}
+.crumbs{position:absolute;left:16px;top:14px;display:flex;align-items:center;gap:2px;padding:3px;border-radius:10px;background:var(--win);box-shadow:0 0 0 1px var(--line);opacity:0;transform:translateY(-4px);transition:opacity .2s var(--ease),transform .2s var(--ease);pointer-events:none;z-index:5}
+.crumbs.on{opacity:1;transform:none;pointer-events:auto}
+.crumbs button{height:24px;padding:0 8px;border-radius:7px;font:600 12.5px var(--f);color:var(--ink2);display:inline-flex;align-items:center;gap:5px}
+.crumbs button:hover{background:var(--hov);color:var(--ink)}
+.crumbs button:last-child{color:var(--ink)}
+.crumbs .sep{color:var(--ink3);font-size:12px}
+.crumbs .esc{margin-left:4px}
+.hint{position:absolute;left:16px;bottom:14px;font:500 12px var(--f);color:var(--ink3);display:flex;gap:14px;z-index:4;pointer-events:none}
+.hint span{display:inline-flex;align-items:center;gap:5px}
+.legend{position:absolute;left:16px;top:14px;display:flex;gap:14px;padding:5px 10px;border-radius:9px;background:var(--win);box-shadow:0 0 0 1px var(--line);font:500 12px var(--f);color:var(--ink3);z-index:4;transition:opacity .2s}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend svg{display:block}
+.crumbs.on~.legend{opacity:0;pointer-events:none}
+.tip{position:absolute;z-index:var(--z-tip);pointer-events:none;padding:7px 10px;border-radius:9px;background:var(--win);box-shadow:var(--sh-pop);font:500 12px/1.35 var(--f);color:var(--ink2);opacity:0;transition:opacity .12s;max-width:260px}
+.tip.on{opacity:1}
+.tip b{display:block;color:var(--ink);font-weight:600;font-size:13px}
+.tip .c{display:flex;gap:8px;align-items:center;margin-top:2px}
+.tip .dash{display:inline-flex;align-items:center;gap:4px}
+
+/* Tuck */
+.tuck{position:absolute;right:18px;bottom:10px;width:58px;z-index:6;transition:right .3s var(--ease)}
+.tuck img{width:58px;height:64px;display:block;transform-origin:50% 100%}
+.tuck img.tkhop{animation:pop .5s var(--spring)}
+@keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.06)}100%{transform:scale(1)}}
+.bubble{position:absolute;right:52px;bottom:52px;white-space:nowrap;padding:8px 12px;border-radius:12px 12px 4px 12px;background:var(--win);box-shadow:var(--sh-pop);font:500 13px var(--f);color:var(--ink);opacity:0;transform:translateY(6px);transition:opacity .25s var(--ease),transform .25s var(--ease);pointer-events:none}
+.bubble.on{opacity:1;transform:none}
+.stage.insp-open .tuck{right:354px}
+
+/* inspector: one panel, sections divided by hairlines (no nested cards) */
+.insp{position:absolute;top:12px;right:12px;bottom:12px;width:320px;z-index:7;background:var(--win);border-radius:12px;box-shadow:var(--sh-pop);display:flex;flex-direction:column;transform:translateX(calc(100% + 24px));transition:transform .28s var(--ease);min-height:0}
+.insp.on{transform:none}
+.ihead{display:flex;align-items:flex-start;gap:10px;padding:14px 12px 12px 16px;border-bottom:1px solid var(--line)}
+.ihead .ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-size:17px;flex:none;color:#fff}
+.ihead .ico.file{background:var(--soft);color:var(--ink2)}
+.ihead .t{flex:1;min-width:0}
+.ihead h2{font:700 15.5px/1.25 var(--f);letter-spacing:-.01em;word-break:break-word}
+.ihead .meta{font:500 12px var(--f);color:var(--ink3);margin-top:2px}
+.ibody{flex:1;overflow:auto;padding:4px 16px 16px;min-height:0}
+/* the You panel: the panel header already says who this is, so memory starts with its summary; nothing runs past the right edge */
+.ibody{overflow-x:hidden}.ibody>*{min-width:0}#memhost .mhead{display:none}#memhost .mfoot{display:grid;gap:4px}
+.isec{padding:14px 0;border-bottom:1px solid var(--line)}
+.isec:last-child{border-bottom:0}
+.isec h3{font:600 11px var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.isec p{font:500 13.5px/1.5 var(--f);color:var(--ink)}
+.isec p.lead{font-size:14px}
+.isec p .m{color:var(--ink2)}
+.ev{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:2px}
+.ev li{display:flex;gap:9px;align-items:flex-start;padding:6px 6px;margin:0 -6px;border-radius:8px}
+.ev li.clk:hover{background:var(--hov)}
+.ev .ph{font-size:16px;margin-top:2px;flex:none}
+.ev b{display:block;font:600 13px var(--f);color:var(--ink)}
+.ev small{display:block;font:500 12px/1.4 var(--f);color:var(--ink2)}
+.ev em{margin-left:auto;font:500 12px var(--f);color:var(--ink3);font-style:normal;white-space:nowrap}
+.conf{display:flex;align-items:center;gap:10px}
+.conf .bar{flex:1;height:6px;border-radius:3px;background:var(--soft2);overflow:hidden}
+.conf .bar i{display:block;height:100%;width:100%;border-radius:3px;background:var(--ok);transform-origin:0 50%;transition:transform .4s var(--ease)}
+.conf.unsure .bar i{background:var(--warn)}
+.conf b{font:600 13px var(--f);font-variant-numeric:tabular-nums}
+.path{font:500 12.5px var(--mono);color:var(--ink2);word-break:break-all}
+.crumbpath{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font:500 13px var(--f);color:var(--ink2)}
+.crumbpath .ph{font-size:12px;color:var(--ink3)}
+.acts{display:flex;flex-wrap:wrap;gap:6px}
+.ask{display:flex;flex-direction:column;gap:10px;padding:12px 0}
+.ask p{font:600 13.5px/1.4 var(--f)}
+.ask small{font:500 12.5px/1.45 var(--f);color:var(--ink2)}
+.ask .yn{display:flex;gap:6px}
+.qrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.qrow:last-child{border-bottom:0}
+.qrow .q{flex:1;min-width:0}
+.qrow .q b{display:block;font:600 13px/1.35 var(--f);cursor:pointer}
+.qrow .q b:hover{color:var(--ac-ink)}
+.qrow .q small{display:block;font:500 12px/1.4 var(--f);color:var(--ink2);margin-top:2px}
+.qrow .yn{display:flex;gap:4px;flex:none}
+.qrow.done{opacity:.55}
+[hidden]{display:none!important}
+#filt button{white-space:nowrap}
+.search{min-width:0;flex:0 1 230px}
+.nbar{position:absolute;left:0;top:0;z-index:5;display:flex;align-items:center;gap:2px;padding:3px;border-radius:12px;background:var(--win);box-shadow:0 0 0 1px var(--line),0 6px 18px -8px rgba(20,30,60,.35);animation:nbin .22s var(--ease)}
+@keyframes nbin{from{opacity:0;margin-top:-4px}}
+.nbar button{display:flex;align-items:center;gap:5px;height:28px;padding:0 9px;border-radius:9px;font:600 12px var(--f);color:var(--ink2);white-space:nowrap}
+.nbar button:hover{background:var(--hov);color:var(--ink)}
+.nbar button.on{background:var(--ac-fill,var(--soft));color:var(--ac-ink)}
+.nbar button.on[data-nb=private]{color:var(--lock);background:var(--lock-fill,var(--soft))}
+.nbar button.on[data-nb=names]{color:var(--ink);background:var(--soft)}
+.nbar .ph,.nbar .ph-fill{font-size:15px}
+.nbar .sep{width:1px;height:18px;background:var(--line);margin:0 3px}
+.links{list-style:none;padding:0;margin:0;display:grid;gap:2px}
+.links li{display:flex;align-items:flex-start;gap:10px;padding:8px 0}
+.links li>.ph{font-size:17px;color:var(--ac-ink);margin-top:1px}
+.links li span{flex:1;min-width:0;font:500 12.5px/1.45 var(--f);color:var(--ink2)}
+.links li b{display:block;font:600 13px var(--f);color:var(--ink)}
+.links li a{flex:none;font:600 12px var(--f);color:var(--ac-ink);text-decoration:none;padding-top:2px}.links li a:hover{text-decoration:underline}
+@media (prefers-reduced-motion:reduce){.nbar{animation:none}}
+.btn.ghost.danger{color:var(--danger)}
+.isec p.rnote{font-size:12.5px;color:var(--ink2);margin-top:8px}
+.lnk{all:unset;cursor:pointer;color:var(--ac-ink);font-weight:600}.lnk:hover{text-decoration:underline}
+.ipop{display:inline-flex;align-items:center;gap:3px;height:22px;margin:0 -4px;padding:0 4px;border-radius:6px;font:inherit;color:inherit}.ipop:hover,.ipop[aria-expanded=true]{background:var(--hov);color:var(--ink)}.ipop .pcaret{font-size:10px;opacity:.7}
+.isec h3 .sp{flex:1}.isec h3 .ipop{font:600 12px var(--f);color:var(--ink2);text-transform:none;letter-spacing:0;margin:-4px 0;height:24px;padding:0 6px}.isec h3 .ipop .ph:first-child{font-size:13px}
+.iname{font:inherit;color:inherit;text-align:left;padding:0 4px;margin:0 -4px;border-radius:6px;cursor:text}.iname:hover{background:var(--hov)}
+#menu button.dis{pointer-events:none;color:var(--ink3)}#menu button.dis .ph{opacity:.5}#menu button:has(small){height:auto;min-height:26px;padding-block:4px;align-items:flex-start}
+#menu button span{display:grid;gap:1px}#menu small{font:500 11.5px/1.35 var(--f);color:var(--ink3);white-space:normal;max-width:220px}#menu .ck{color:var(--ac-ink);width:14px}#menu button:hover .ck{color:#fff}
+.rrow{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.rrow:first-of-type{margin-top:10px}
+.rrow span{flex:1;min-width:0}.rrow b{display:block;font:600 13px var(--f)}.rrow small{display:block;font:500 12px/1.4 var(--f);color:var(--ink2)}
+.rrow.dis{opacity:.55}
+.isec p.sref{font-size:12px;color:var(--ink3);margin-top:10px}.sref a{color:var(--ac-ink);font-weight:600;text-decoration:none}.sref a:hover{text-decoration:underline}
+.rsel{height:26px;border-radius:7px;border:0;background:var(--soft);color:var(--ink);font:500 12px var(--f);padding:0 6px;box-shadow:inset 0 0 0 1px var(--line)}
+.mini{list-style:none;padding:0;margin:0}
+.mini li{display:flex;align-items:center;gap:9px;padding:6px 6px;margin:0 -6px;border-radius:8px;font:500 13px var(--f);cursor:pointer}
+.mini li:hover{background:var(--hov)}
+.mini li em{margin-left:auto;font-style:normal;color:var(--ink3);font-variant-numeric:tabular-nums}
+.mini .tdot{width:10px;height:10px;border-radius:50%}
+.mini .tdot.uns{background:transparent!important;border:1.5px dashed currentColor}
+.form{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.form label.opt{display:flex;align-items:center;gap:8px;font:500 13px var(--f);color:var(--ink)}
+.form textarea.field{height:64px;padding:8px 10px;resize:none}
+.form .acts{justify-content:flex-end}
+.note{display:flex;gap:8px;align-items:flex-start;font:500 12.5px/1.45 var(--f);color:var(--ink2)}
+.note .ph{font-size:15px;margin-top:1px;color:var(--lock)}
+.renamer{display:flex;gap:6px;margin-top:6px}
+
+/* states */
+.state{position:absolute;inset:0;display:none;place-items:center;z-index:8;background:var(--win)}
+.state.on{display:grid}
+.empty{text-align:center;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty img{width:96px;height:106px;margin-bottom:6px}
+.empty h2{font:800 24px/1.15 var(--fd);letter-spacing:-.01em}
+.empty p{font:500 14px/1.5 var(--f);color:var(--ink2)}
+.empty .acts{justify-content:center;margin-top:8px}
+.loadwrap{position:relative;width:520px;height:520px}
+.loadwrap .skel{position:absolute;border-radius:50%}
+.loadmsg{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;font:500 13px var(--f);color:var(--ink2);white-space:nowrap}
+.loadmsg img{width:34px;height:38px}
+
+/* app switch above the window (same as every page) */
+.appsw{display:flex;margin:10px 12px 8px;position:static}.appsw button{flex:1;justify-content:center}/* Finder | Tuck: inside the window, top of the sidebar, full width */
+/* chips: the same look as Tuck's Edit Folders (new / renamed / removed / private / unsure) */
+.tag{display:inline-flex;align-items:center;gap:3px;height:20px;padding:0 7px;border-radius:6px;font:650 11px/1 var(--f);flex:none;white-space:nowrap}
+.tag .ph,.tag .ph-fill{font-size:11px}
+.tag.new{background:var(--ok-fill);color:var(--ok)}
+.tag.ren{background:var(--ac-fill);color:var(--ac-ink)}
+.tag.rem{background:var(--danger-fill);color:var(--danger)}
+.tag.mov{background:var(--warn-fill);color:var(--warn)}
+.tag.lock{background:var(--lock-fill);color:var(--lock)}
+.tag.q{background:var(--soft);color:var(--ink2)}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+/* the one "AI can read" switch */
+.airead{display:flex;align-items:center;gap:12px;padding:10px 12px;margin:0 -4px;border-radius:10px;background:var(--soft)}
+.airead.off{background:var(--lock-fill)}
+.airead span{flex:1;min-width:0}.airead b{display:flex;align-items:center;gap:6px;font:650 13px var(--f)}
+.airead small{display:block;font:500 12px/1.4 var(--f);color:var(--ink2);margin-top:2px}
+.airead.off b{color:var(--lock)}
+.airead .sw.lockon{background:var(--soft2)}
+/* node bar: switch + settings that apply here */
+.nbar .sw{width:28px;height:16px;border-radius:8px;margin-left:2px}.nbar .sw::after{width:12px;height:12px}.nbar .sw.on::after{left:14px}
+.nbar button.off{color:var(--lock)}
+.nbar .nchip{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;margin:0 2px;border-radius:7px;font:600 11.5px var(--f);white-space:nowrap;background:var(--soft);color:var(--ink2)}
+.nbar .nchip.lock{background:var(--lock-fill);color:var(--lock)}
+.nbar .nchip .ph{font-size:13px}
+/* selected folder column (same as Edit Folders) */
+.insp{width:360px}
+.stage.insp-open .tuck{right:394px}
+@media (max-width:1180px){.insp{width:320px}.stage.insp-open .tuck{right:342px}}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font:500 13px var(--f);margin:0}
+.dl dt{color:var(--ink3)}.dl dd{margin:0;color:var(--ink);min-width:0}
+.fgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 6px}
+.th{min-width:0;text-align:center;cursor:grab;border-radius:8px;padding:2px}
+.th:hover{background:var(--hov)}.th:active{cursor:grabbing}
+.th .pg{position:relative;height:58px;border-radius:7px;background:var(--win);box-shadow:0 0 0 1px var(--line2),0 2px 6px -3px rgba(20,30,60,.25);display:grid;place-items:center;overflow:hidden}
+.th .pg .ph{font-size:22px}
+.th .pg .lk{position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:5px;display:grid;place-items:center;background:var(--lock);color:var(--win);font-size:10px}
+.th small{display:block;margin-top:4px;font:500 10.5px/1.25 var(--f);color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.th.more{cursor:pointer}.th.more .pg{background:var(--soft);box-shadow:none;color:var(--ink2);font:650 13px var(--f)}
+.th.dragging{opacity:.4}
+.facts{display:grid;gap:2px}
+.facts button.btn{justify-content:flex-start;width:100%}
+.alist{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.alist .btn{justify-content:flex-start}
+.confirm{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--soft);display:grid;gap:8px;animation:nbin .2s var(--ease)}
+.confirm p{font:500 12.5px/1.45 var(--f)!important;color:var(--ink)}
+.confirm .row2{display:flex;gap:6px;align-items:center}.confirm .row2 .field,.confirm select.field{flex:1;min-width:0}
+.confirm .acts{justify-content:flex-end}
+.asktuck{display:grid;gap:8px}
+.asktuck .row2{display:flex;gap:6px}.asktuck .row2 .field{flex:1;min-width:0}
+.asktuck .qa{display:grid;gap:6px}
+.asktuck .me{justify-self:end;max-width:85%;padding:6px 10px;border-radius:10px 10px 3px 10px;background:var(--ac-fill);color:var(--ac-ink);font:500 12.5px/1.4 var(--f)}
+.asktuck .it{display:flex;gap:8px;align-items:flex-start;font:500 12.5px/1.45 var(--f);color:var(--ink)}
+.asktuck .it img{width:22px;height:24px;flex:none}
+.asktuck .it .btn{margin-top:6px}
+/* time scrubber */
+/* two fixed rows: the day's words on top, the slider below at one width, so a long day never moves the slider under your finger */
+.scrub{position:absolute;left:16px;bottom:12px;z-index:4;width:min(560px,calc(100% - 120px));display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"when when back" "from range to";align-items:center;gap:4px 10px;padding:8px 12px;border-radius:12px;background:var(--win);box-shadow:0 0 0 1px var(--line),0 6px 18px -10px rgba(20,30,60,.35);font:500 12px var(--f);color:var(--ink3)}
+.stage.insp-open .scrub{width:min(560px,calc(100% - 520px))}
+.scrub input[type=range]{grid-area:range;width:100%;min-width:0;margin:0;accent-color:var(--ac)}
+.scrub .when{grid-area:when;display:flex;align-items:baseline;gap:8px;min-width:0;line-height:1.25}
+.scrub #scrub0{grid-area:from}.scrub #scrubto{grid-area:to}.scrub #scrubback{grid-area:back;justify-self:end}.scrub #scrubback.off{visibility:hidden}
+.scrub .when b{font:650 12.5px var(--f);color:var(--ink)}
+.scrub .when span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink2)}
+.scrub .btn{flex:none}
+.scrub small{flex:none;white-space:nowrap}
+/* a map narrowed by the panel and the docked chat: the time bar steps aside rather than crush its labels */
+.stage{container-type:inline-size}@container (max-width:779px){.stage.insp-open .scrub{display:none}}
+.hint{bottom:62px}
+.aiplist{list-style:none;padding:0;margin:0}
+.aiplist li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.aiplist li:first-child{border-top:0}
+.aiplist li .n{flex:1;min-width:0;font:600 13px var(--f);display:flex;align-items:center;gap:8px}
+.aiplist li small{display:block;font:500 11.5px var(--f);color:var(--ink3);margin-top:1px}
+.aiplist li.clk{cursor:pointer}.aiplist li.clk:hover .n{color:var(--ac-ink)}
+@media (prefers-reduced-motion:reduce){.confirm{animation:none}}
+/* item 28/29: one state language, minimal panel in four parts, sentence-case headings, two text sizes, 8px rhythm */
+.stage .toast{position:absolute;left:16px;right:auto;bottom:66px;z-index:9;transform:translateY(8px);max-width:min(520px,calc(100% - 140px))}
+.stage.insp-open .toast{max-width:min(520px,calc(100% - 520px))}
+.stage .toast.on{transform:none}
+.bubble{transition:none}.bubble.on{transition:opacity .25s var(--ease),transform .25s var(--ease)}
+.isec{padding:16px 0}
+.isec h3{font:650 13px var(--f);text-transform:none;letter-spacing:0;color:var(--ink);margin-bottom:8px}
+.isec h3 .h3n{font:500 12px var(--f);color:var(--ink3)}
+.isec p.lead{font:500 13.5px/1.5 var(--f);color:var(--ink)}
+.rnote,.isec p.rnote{font:500 12px/1.45 var(--f);color:var(--ink2);margin-top:8px}
+.ihead .sure{display:flex;align-items:center;gap:8px;margin-top:8px;font:600 12px var(--f);color:var(--ac-ink)}
+.ihead .sure i{flex:1;max-width:120px;height:4px;border-radius:2px;background:var(--soft2);overflow:hidden;display:block}
+.ihead .sure b{display:block;height:100%;background:var(--ac);transform-origin:0 50%}
+.ihead .sure.uns{color:var(--warn)}.ihead .sure.uns b{background:var(--warn)}
+.conn,.flist{list-style:none;padding:0;margin:0;display:grid;gap:0}
+.conn li,.flist li{display:flex;align-items:center;gap:8px;padding:8px;margin:0 -8px;border-radius:8px;font:500 13.5px/1.35 var(--f);color:var(--ink)}
+.conn li>span:not(.tdot):not(.yn),.flist li>span:not(.fa){flex:1;min-width:0}
+.conn li small,.flist li small{display:block;font:500 12px/1.4 var(--f);color:var(--ink2);margin-top:2px}
+.flist li small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flist li b{font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conn li.clk,.flist li{cursor:pointer}.conn li.clk:hover,.flist li:hover{background:var(--hov)}
+.conn li>.ph{font-size:16px;color:var(--ink3);flex:none}.conn li .go{font-size:12px}
+.conn li.off span{color:var(--ink3)}
+.conn .tdot,.mini .tdot{width:10px;height:10px;border-radius:50%;flex:none}
+.conn .yn{display:flex;gap:4px;flex:none}
+.flist li>.ph{font-size:17px;flex:none}
+.flist .fa{display:flex;gap:2px;opacity:0;transition:opacity .15s var(--ease)}.flist li:hover .fa,.flist li:focus-within .fa{opacity:1}
+.flist .fa .ib{width:26px;height:26px;font-size:14px}
+.flist li.dragging{opacity:.4}
+.rseg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:3px;border-radius:10px;background:var(--soft)}
+.rseg button{display:flex;align-items:center;justify-content:center;gap:4px;height:30px;padding:0 6px;border-radius:8px;font:600 12px var(--f);color:var(--ink2);white-space:nowrap}
+.rseg button:hover{color:var(--ink)}
+.rseg button.on{background:var(--win);color:var(--ink);box-shadow:0 0 0 1px var(--line),0 1px 3px rgba(20,30,60,.12)}
+.rseg button.on[data-rd=private]{color:var(--lock)}
+.isec .acts{margin-top:8px}
+.ihead .t{min-width:0}.ihead .meta{font:500 12px var(--f)}
+.ibody{padding:0 16px 24px}
+.pop{position:absolute;z-index:8;width:280px;padding:12px;border-radius:12px;background:var(--win);box-shadow:var(--sh-pop);display:none;gap:8px}
+.pop.on{display:grid;animation:nbin .18s var(--ease)}
+.pop .pt{font:650 13px var(--f)}
+.pop p{font:500 12px/1.45 var(--f);color:var(--ink2)}
+.pop .field{width:100%}.pop .acts{display:flex;justify-content:flex-end;gap:6px}
+.pop .mini li{cursor:default}
+@media (prefers-reduced-motion:reduce){.pop.on{animation:none}}
+.nav .count[hidden]{display:none}
+@media (max-width:1200px){#fit .lbl{display:none}#fit{padding:0 8px}.top{gap:8px}.top .search{min-width:120px;flex:0 1 180px}.zoomc output{min-width:38px}}
+.stage.insp-open .scrub .when span{display:none}
+/* the side chat docks as a column: the toolbar fits the narrower map */
+.main{container-type:inline-size}
+@container (max-width:860px){#fit .lbl{display:none}#fit{padding:0 8px}.top{gap:8px}.top .search{min-width:110px;flex:0 1 160px}}
+@container (max-width:720px){.top .sub{display:none}.zoomc output{display:none}}
+/* the side chat docked at 1100: the bar keeps search, the filter and Fit to View whole (zoom in and out stay on the wheel and pinch) */
+@container (max-width:600px){.top{padding:0 10px 0 14px}.zoomc #zout,.zoomc #zin{display:none}.top .search{min-width:96px;flex:1 1 140px}}
+.ibody{padding-bottom:32px}
+.conn li.qask{align-items:flex-start}
+.conn small a{color:var(--ac-ink);font-weight:600;text-decoration:none}.conn small a:hover{text-decoration:underline}
+.conn li.qask .yn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.conn li.qask .yn .btn{justify-content:center}
+/* ===== Look D (flat near-black, colour on the parts of life): a serious, quiet analysis graph on one flat ground (no gradients, grain or fog).
+   Parts of life: seven clean hues at one lightness and chroma (OKLCH), no greens; files carry their folder's hue, fainter.
+   The accent is only You, selection and focus. Page-scoped overrides, system.css untouched. */
+:root{--a-proj:oklch(0.56 0.14 232);--a-study:oklch(0.56 0.14 266);--a-work:oklch(0.56 0.14 300);--a-home:oklch(0.56 0.14 334);--a-photo:oklch(0.56 0.14 8);--a-job:oklch(0.56 0.14 42);--a-health:oklch(0.56 0.14 76);--a-none:oklch(0.56 0 0);--c-bg:#f6f6f7;--c-fog:246,246,247}
+:root[data-theme="dark"]{--a-proj:oklch(0.72 0.13 232);--a-study:oklch(0.72 0.13 266);--a-work:oklch(0.72 0.13 300);--a-home:oklch(0.72 0.13 334);--a-photo:oklch(0.72 0.13 8);--a-job:oklch(0.72 0.13 42);--a-health:oklch(0.72 0.13 76);--a-none:oklch(0.72 0 0);--c-bg:#0c0d10;--c-fog:12,13,16}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--a-proj:oklch(0.72 0.13 232);--a-study:oklch(0.72 0.13 266);--a-work:oklch(0.72 0.13 300);--a-home:oklch(0.72 0.13 334);--a-photo:oklch(0.72 0.13 8);--a-job:oklch(0.72 0.13 42);--a-health:oklch(0.72 0.13 76);--a-none:oklch(0.72 0 0);--c-bg:#0c0d10;--c-fog:12,13,16}}
+.stage{--sky:#f6f6f7;--dk:0}
+:root[data-theme="dark"] .stage{--sky:#0c0d10;--dk:1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stage{--sky:#0c0d10;--dk:1}}
+.stage{font-variant-numeric:tabular-nums}
+.legend{gap:12px;padding:4px 10px;border-radius:7px;background:color-mix(in srgb,var(--win) 72%,transparent);box-shadow:0 0 0 .5px var(--line);backdrop-filter:blur(8px);font:500 11px var(--f);letter-spacing:.02em;color:var(--ink3)}
+.legend svg line{stroke-width:1}.legend svg circle[stroke]{stroke-width:1.2}.legend i{font-size:11px}
+.tip{border-radius:7px;padding:6px 9px;font:500 11.5px/1.4 var(--f);box-shadow:0 0 0 .5px var(--line2),0 8px 24px rgba(0,0,0,.28);font-variant-numeric:tabular-nums}
+.tip b{font-size:12.5px;letter-spacing:-.005em}
+.hint{font-size:11px;letter-spacing:.02em}
+/* the mascot keeps its colour; no hop */
+.tuck img.tkhop{animation:none}
+/* ===== Look F: the design reference's graph (IBM Plex, flat ground, curved weighted links, labels that never overlap, Key chip,
+   settings, hover card) inside the Tuck window. Light = the same drawing with light tokens. Page-scoped; system.css untouched. */
+:root{--g-bg:#ffffff;--g-panel:#ffffff;--g-line:#e3e5ea;--g-ink:#14161c;--g-ink2:#4a5162;--g-ink3:#8a91a0;--g-sh:0 2px 8px rgba(20,24,35,.10);--a-study:#2f6fe6;--a-work:#7f5be6;--a-job:#e86f1f;--a-home:#e6438a;--a-photo:#169fd0;--a-proj:#d8ac12;--a-health:#e63950;--a-none:#6b7280;--fk-pdf:#e5323f;--fk-doc:#3d6fe8;--fk-xls:#7462e6;--fk-img:#1aa7dc;--fk-other:#6b7280}
+:root[data-theme="dark"]{--g-bg:#0b0d12;--g-panel:#12151c;--g-line:#232837;--g-ink:#eef1f7;--g-ink2:#a3abbd;--g-ink3:#5f6779;--g-sh:0 8px 24px rgba(0,0,0,.45);--a-study:#4d8dff;--a-work:#9d7bff;--a-job:#ff8a3d;--a-home:#ff5fa2;--a-photo:#3fc4f2;--a-proj:#f5cf4a;--a-health:#ff5468;--a-none:#7d8597;--fk-pdf:#ff4757;--fk-doc:#5b8cff;--fk-xls:#8f7dff;--fk-img:#62d4ff;--fk-other:#7d8597}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--g-bg:#0b0d12;--g-panel:#12151c;--g-line:#232837;--g-ink:#eef1f7;--g-ink2:#a3abbd;--g-ink3:#5f6779;--g-sh:0 8px 24px rgba(0,0,0,.45);--a-study:#4d8dff;--a-work:#9d7bff;--a-job:#ff8a3d;--a-home:#ff5fa2;--a-photo:#3fc4f2;--a-proj:#f5cf4a;--a-health:#ff5468;--a-none:#7d8597;--fk-pdf:#ff4757;--fk-doc:#5b8cff;--fk-xls:#8f7dff;--fk-img:#62d4ff;--fk-other:#7d8597}}
+.stage{--sky:var(--g-bg);--dk:0;--gf:"IBM Plex Sans",system-ui,-apple-system,sans-serif;--gm:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+:root[data-theme="dark"] .stage{--dk:1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stage{--dk:1}}
+.legend,.hint{display:none!important}
+.tuck{opacity:1;filter:none}
+.fms{font-family:"Material Symbols Rounded";font-size:18px;line-height:1;color:var(--g-ink2);font-weight:normal;font-style:normal;letter-spacing:normal;text-transform:none;white-space:nowrap;-webkit-font-feature-settings:"liga";font-feature-settings:"liga"}
+/* settings, top right */
+.fset{position:absolute;top:14px;right:16px;z-index:6;transition:right .28s var(--ease)}
+.fset>button{background:var(--g-panel);border:1px solid var(--g-line);color:var(--g-ink2);border-radius:8px;width:34px;height:32px;display:grid;place-items:center;cursor:pointer}
+.fset>button:hover,.fset>button[aria-expanded=true]{color:var(--g-ink);border-color:var(--a-study)}
+.fmenu{position:absolute;right:0;top:40px;width:220px;background:var(--g-panel);border:1px solid var(--g-line);border-radius:10px;padding:12px;display:none;gap:10px;font-family:var(--gf)}
+.fmenu.on{display:grid}
+.fmenu h3{margin:0;font:500 10px var(--gm);letter-spacing:.1em;text-transform:uppercase;color:var(--g-ink3)}
+.fseg{display:flex;border:1px solid var(--g-line);border-radius:7px;overflow:hidden}
+.fseg button{flex:1;background:none;border:0;color:var(--g-ink2);font:500 12px var(--gf);padding:6px 4px;cursor:pointer}
+.fseg button[aria-pressed=true]{background:var(--g-line);color:var(--g-ink)}
+.fmenu label{display:flex;justify-content:space-between;align-items:center;font:400 12px var(--gf);color:var(--g-ink2);cursor:pointer}
+.fmenu input[type=range]{width:100%;accent-color:var(--a-study)}
+/* Key: one chip bottom left; the pop-up opens above it */
+.fkeyw{position:absolute;left:16px;bottom:16px;z-index:5;display:grid;gap:8px;justify-items:start;max-width:calc(100% - 32px);font-family:var(--gf)}
+.fchip{display:flex;align-items:center;gap:10px;background:var(--g-panel);border:1px solid var(--g-line);border-radius:999px;padding:6px 8px 6px 12px;color:var(--g-ink2);font:500 12px var(--gf)}
+.fchip .dots{display:flex;gap:4px}
+.fchip .dots button{width:14px;height:14px;border-radius:50%;border:0;padding:0;cursor:pointer;outline-offset:2px}
+.fchip .dots button:hover,.fchip .dots button:focus-visible{transform:scale(1.25)}
+.fchip .more{background:none;border:0;color:var(--g-ink2);font:500 12px var(--gf);cursor:pointer;display:flex;align-items:center;gap:2px;padding:2px 4px;border-radius:6px}
+.fchip .more:hover,.fchip .more[aria-expanded=true]{color:var(--g-ink);background:var(--g-line)}
+.fkpop{background:var(--g-panel);border:1px solid var(--g-line);border-radius:10px;padding:10px;display:none;gap:2px;width:250px;max-width:calc(100vw - 32px)}
+.fkpop.on{display:grid}
+.fkpop h3{margin:6px 6px 4px;font:500 10px var(--gm);letter-spacing:.1em;text-transform:uppercase;color:var(--g-ink3)}
+.fkpop button,.fkpop .row{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;border-radius:6px;padding:5px 6px;color:var(--g-ink2);font:400 12.5px var(--gf);text-align:left;cursor:default}
+.fkpop button{cursor:pointer}.fkpop button:hover,.fkpop button:focus-visible{background:var(--g-line);color:var(--g-ink);outline:none}
+.fkpop .ic{width:18px;display:grid;place-items:center;flex:none}
+.fkpop small{margin-left:auto;font:500 11px var(--gm);color:var(--g-ink3)}
+.fsw{width:10px;height:10px;border-radius:50%;flex:none}.fsw.ring{background:none!important;border:1.5px dashed var(--g-ink2)}
+/* the time bar moves to the bottom right, clear of the Key chip */
+.scrub{left:auto!important;right:88px;width:min(480px,calc(100% - 470px))!important}
+/* hover card: follows the pointer */
+.tip.fcard{width:250px;max-width:calc(100% - 32px);background:var(--g-panel);border:1px solid var(--g-line);border-radius:10px;padding:12px 14px;display:grid;gap:7px;box-shadow:var(--g-sh);font:400 13px/1.4 var(--gf);color:var(--g-ink);transition:none}
+.fcard .path{font:400 11px var(--gm);color:var(--g-ink3)}
+.fcard h2{margin:0;font:600 15px var(--gf);color:var(--g-ink)}
+.fcard .meta{display:flex;gap:12px;font:500 11px var(--gm);color:var(--g-ink2);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.fcard .bar{display:flex;height:6px;border-radius:3px;overflow:hidden;gap:1px}
+.fcard .note{font-size:12px;color:var(--g-ink2)}
+.fcard .tag{display:inline-flex;align-items:center;gap:4px;font:500 11px var(--gf);color:var(--g-ink);border:1px solid var(--g-line);border-radius:5px;padding:2px 6px;justify-self:start}
+/* test only (?mono=1): every colour black on white, to compare light and dark structure */
+.mono .stage{--sky:#fff!important;background:#fff!important}.mono .fset,.mono .fkeyw,.mono .scrub,.mono .tuck,.mono .tip{visibility:hidden!important}
+</style>
+<style>.win{inset:10px 12px!important}.outside{display:none!important}</style>
+</head>
+<body>
+
+
+<div class="win" id="win">
+ <aside class="side">
+  <div class="lights"><i></i><i></i><i></i></div><div class="seg appsw" role="group" aria-label="App"><button onclick="location.href='finder.html'"><i class="ph ph-folder-simple"></i>Finder</button><button class="on" aria-pressed="true"><i class="ph ph-sparkle"></i>Tuck</button></div>
+  <nav class="nav" id="nav"><h6>Tuck</h6><a class="row" href="tuck.html#today"><i class="ph ph-sun-horizon"></i><span class="l">Today</span></a><a class="row" href="tuck.html#needs"><i class="ph ph-hand-tap"></i><span class="l">Needs You</span><span class="count" id="navNeeds"></span></a><a class="row on" href="brain.html" aria-current="page"><i class="ph-fill ph-brain"></i><span class="l">Tuck Brain</span></a><a class="row" href="tuck.html#chats"><i class="ph ph-chats-circle"></i><span class="l">Chats</span></a><a class="row" href="tuck.html#diary"><i class="ph ph-book-open-text"></i><span class="l">Diary</span></a>
+ <h6>Your folder plan</h6><a class="row" href="tuck.html#edit"><i class="ph ph-tree-structure"></i><span class="l">Edit Folders</span><span class="count quiet" id="navChg"></span></a><a class="row" href="tuck.html#resort"><i class="ph ph-arrows-clockwise"></i><span class="l">Re-sort</span></a>
+ <h6>Library</h6><a class="row" href="tuck.html#history"><i class="ph ph-clock-counter-clockwise"></i><span class="l">History</span></a><a class="row" href="tuck.html#tidy"><i class="ph ph-broom"></i><span class="l">Tidy Up</span><span class="count quiet" id="navTidy"></span></a></nav>
+  <div class="prof"><span class="ava">JY</span><span class="t"><b>Joseph</b><small id="meline">Student · AI on</small></span><a class="ib" href="tuck.html#prefs" aria-label="Settings"><i class="ph ph-gear-six"></i></a></div>
+ </aside>
+ <main class="main">
+  <header class="top">
+   <h1>Tuck Brain</h1><span class="sub" id="subt"></span>
+   <span class="grow"></span>
+   <div class="search" role="search"><i class="ph ph-magnifying-glass"></i><input id="q" placeholder="Find a topic or file" aria-label="Find a topic or file" autocomplete="off"><div class="results" id="results" role="listbox"></div></div>
+   <div class="seg" id="filt" role="group" aria-label="Show">
+    <button class="on" data-f="all">Everything</button>
+    <button data-f="unsure">Unsure <span class="count" id="ucount" style="margin-left:2px">0</span></button>
+   </div>
+   <div class="zoomc" aria-label="Zoom">
+    <button class="ib" id="zout" aria-label="Zoom out"><i class="ph ph-minus"></i></button>
+    <output id="zval">100%</output>
+    <button class="ib" id="zin" aria-label="Zoom in"><i class="ph ph-plus"></i></button>
+    <button class="btn sm" id="fit" aria-label="Fit to View" title="Fit to View"><i class="ph ph-arrows-in-simple"></i><span class="lbl">Fit to View</span></button>
+    <button class="btn sm" id="relayout" hidden title="Unpin everything and let the map settle"><i class="ph ph-push-pin-slash"></i>Unpin all</button>
+   </div>
+  </header>
+
+  <section class="stage" id="stage">
+   <canvas id="bg" aria-hidden="true"></canvas>
+   <canvas id="cv" aria-label="Map of what Tuck knows: you, your parts of life, topics and files. Use search to find items."></canvas>
+   <nav class="crumbs" id="crumbs" aria-label="Focus path"></nav>
+   <div class="fset" id="fset"><button type="button" id="fdbtn" aria-expanded="false" aria-label="Graph settings"><span class="fms">tune</span></button>
+    <div class="fmenu" id="fdpop" role="dialog" aria-label="Graph settings">
+     <h3>Colour by</h3><div class="fseg" id="fcol"><button type="button" data-c="part" aria-pressed="true">Part of life</button><button type="button" data-c="type" aria-pressed="false">File type</button></div>
+     <h3>Show</h3><label>Files <input type="checkbox" id="fshowf" checked></label><label>People <input type="checkbox" id="fshowp" checked></label><label>Unsure only <input type="checkbox" id="funs"></label>
+     <h3>Lines</h3><div class="fseg" id="fline"><button type="button" data-v="curved" aria-pressed="true">Curved</button><button type="button" data-v="straight" aria-pressed="false">Straight</button></div>
+     <h3>Spacing</h3><input type="range" id="fspread" min="0.6" max="1.8" step="0.1" value="1" aria-label="Spacing"></div></div>
+   <div class="fkeyw" id="fkeyw"><div class="fkpop" id="fkey" role="dialog" aria-label="Key"></div><div class="fchip" id="fkchip"></div></div>
+   <div class="legend" id="legend" aria-label="Legend">
+    <span><svg width="20" height="6"><line x1="1" y1="3" x2="19" y2="3" stroke="var(--ink3)" stroke-width="1.5"/></svg>Sure</span>
+    <span><svg width="20" height="6"><line x1="1" y1="3" x2="19" y2="3" stroke="var(--ink3)" stroke-width="1.5" stroke-dasharray="4 3"/></svg>Unsure</span>
+    <span><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="var(--ac)" stroke-width="2"/></svg>Selected</span>
+    <span><svg width="16" height="16"><defs><radialGradient id="lgGlow"><stop offset="35%" stop-color="var(--ink3)" stop-opacity=".9"/><stop offset="100%" stop-color="var(--ink3)" stop-opacity="0"/></radialGradient></defs><circle cx="8" cy="8" r="6.5" fill="var(--ink3)" opacity=".28"/><circle cx="8" cy="8" r="3" fill="var(--ink2)"/></svg>Hover</span>
+    <span><i class="ph ph-lock-simple" style="color:var(--lock)"></i>Private</span>
+    <span><i class="ph-fill ph-push-pin"></i>Pinned</span>
+   </div>
+   <div class="scrub" id="scrub"><div class="when" aria-live="polite"><b id="scrubday">Today</b><span id="scrubwhat">Your map as it is now</span></div><small id="scrub0">61 days ago</small><input type="range" id="scrubr" min="0" max="61" value="61" aria-label="Show the map as it was on a day"><small id="scrubto">Today</small><button class="btn sm off" id="scrubback" tabindex="-1"><i class="ph ph-arrow-u-up-right"></i>Back to today</button></div>
+   <div class="tip" id="tip"></div>
+   <div class="pop" id="pop" role="dialog" aria-label="Change this folder"></div>
+   <div class="toast" id="toast" role="status"><span id="toastmsg"></span><button class="btn sm" id="toastundo">Undo</button></div>
+   <div class="tuck" id="tuck" role="button" tabindex="0" aria-label="Tuck: sort, clean up, needs you, edit folders, or ask"><img id="tuckimg" alt=""></div>
+   <aside class="insp" id="insp" aria-label="Inspector"></aside>
+   <div class="state" id="loading"><div class="loadwrap" id="loadwrap"></div><div class="loadmsg"><img id="loadimg" alt=""><span id="loadtxt">Tuck is reading your files in Downloads, Desktop and Documents</span></div></div>
+   <div class="state" id="empty"><div class="empty">
+    <img id="emptyimg" alt="Tuck resting">
+    <h2>Tuck hasn't read anything yet</h2>
+    <p>Pick the folders Tuck may read. It builds this map from what it finds, shows you why, and you can correct anything.</p>
+    <div class="acts"><button class="btn pri lg" id="startread"><i class="ph ph-folder-open"></i>Choose folders to read</button><button class="btn ghost lg">What Tuck reads</button></div>
+   </div></div>
+  </section>
+ </main>
+</div>
+
+<div class="outside">
+ <div class="seg" id="theme" aria-label="Theme"><button data-t="light">Light</button><button data-t="dark">Dark</button></div><button class="btn sm ghost" id="resetdemo" title="Clear changes made in this prototype and reload the designed map" onclick="(()=>{try{Object.keys(localStorage).forEach(k=>{if(k!=='tuckTheme')localStorage.removeItem(k)});sessionStorage.clear()}catch(e){}location.reload()})()">Reset demo</button>
+ <div class="seg" id="pstate" aria-label="Prototype state"><button class="on" data-s="ready">Map</button><button data-s="loading">Loading</button><button data-s="empty">First run</button></div>
+</div>
+
+<div class="menu" id="menu" style="display:none"></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pf=(n,w)=>`${n} ${w}${n===1?'':'s'}`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ================= data: You -> parts of life -> folders -> files, built from the one plan (plan.js) =================
+   Every node, dot and count comes from Plan.view() (pending changes included), so Brain shows the same numbers as Finder
+   and Edit Folders. It rebuilds on Plan.subscribe and Memory.onChange; nothing here adds a file on its own. */
+const AREA_SUM={study:'Your courses at Columbia this term, plus registration papers.',work:'Your internship at GRC Associates: the website project, invoices, meeting notes and timesheets.',
+ job:'Applications for summer 2027 internships: resumes, cover letters and interview prep.',home:'Taxes, IDs, your lease, monthly bills and online orders.',photo:'Trips, family photos, whiteboards and screenshots.',
+ proj:'Things you build for yourself: your portfolio site, the robotics club and music.',health:'Your student health plan, appointments and a running log.',
+ inst:'Installers for apps you already have. Tidy Up can move them to the Trash.',loose:'Files Tuck hasn’t found a folder for yet. New ones from Downloads and Desktop wait here.'};
+const KNOW={phys:'your physics course this term, with Prof. Alvarez.',lb:'your PHYS 1401 lab handouts, reports and data sheets.',econ:'an economics course: problem sets and weekly notes.',coms:'intro to computer science in Python.',
+ engi:'a design studio with CAD files and a team charter.',writ:'essay drafts and readings for your writing seminar.',reg:'your schedule, transcript, tuition bill and aid award.',grc:'your internship at GRC Associates.',
+ wp:'the website proposal you are building for GRC.',inv:'invoices you bill to GRC, about one a month.',meet:'standups, client calls and your 1-on-1s with Dana Ruiz.',time:'weekly timesheets for GRC.',
+ res:'every version of your resume. Resume (6).pdf is the newest.',oldres:'earlier versions of your resume.',cov:'one cover letter per company.',apps:'applications and offers, by company.',intv:'interview prep and practice cases.',
+ tax:'your 2025 tax forms and return drafts.',ids:'your passport scan and student ID.',lease:'your lease and renters papers.',bills:'monthly Con Ed and Verizon bills, plus budgets.',orders:'receipts from online orders.',
+ trips:'photos from trips.',wb:'photos of whiteboards from lectures.',shots:'screenshots from your Mac.',fam:'photos with your family.',port:'pages and images for your portfolio site.',robo:'the robotics club arm project and minutes.',
+ music:'demos, lyrics and chord charts.',ins:'your health plan and insurance papers.',appt:'appointment forms and receipts.',fit:'a running log and gym papers.'};
+const KIND=f=>/\.(pdf)$/i.test(f)?'pdf':/\.(docx|pptx)$/i.test(f)?'doc':/\.(xlsx|csv)$/i.test(f)?'xls':/\.(png|jpe?g|heic|svg)$/i.test(f)?'img':/\.(py|js|html|css|json|md|step)$/i.test(f)?'code':'txt';
+const KICON={pdf:'file-pdf',doc:'file-doc',xls:'file-xls',img:'file-image',code:'file-code',txt:'file-text'};
+/* the day each file arrived (days after the scrubber's first day), for the time scrubber */
+/* the scrubber spans the last 61 days on the one clock (Plan.NOW): day 61 is today, day 0 is 61 days back */
+const TODAY=61,DAYNAME=d=>{const t=new Date(Plan.NOW);t.setDate(t.getDate()-(TODAY-d));return `${t.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][t.getMonth()]}`};
+const fday=f=>Math.max(0,TODAY-f.age);
+/* people in your memory (memory.js) link you to the folders they appear in */
+const TOPS={'p-alv':['phys'],'p-maya':['phys','lb'],'p-dana':['grc','meet'],'p-theo':['fam','trips']};
+const PFILES={'p-alv':['Lecture 1 Kinematics.pdf','Lecture 2 Forces.pdf','Midterm review.pdf'],'p-maya':['Lab 3.pdf','Lab 3 data.xlsx','Lab 4 handout.pdf'],'p-dana':['1-on-1 with Dana.docx','Standup Oct 28.docx','Client call notes Oct.docx'],'p-theo':['IMG_3014.HEIC','IMG_3013.HEIC','IMG_4424.HEIC']};
+const SORTNEW={};
+let N=[],byId=new Map(),AREAS=[],LAID=false;
+/* layout and motion state a node keeps when the plan changes under it */
+const KEEP=new Set(['x','y','px','py','vx','vy','fx','fy','a','tv','tv0','tv1','pin','ang','sd','rip','lp','flying','allFiles','r','index','sx0','sy0','delay']);
+function fromPlan(){const v=Plan.view(),old=byId,NEED=Plan.needs();const wait=new Map(),done=new Map();NEED.forEach(x=>(x.done?done:wait).set(x.target,x));
+ const nn=[],nb=new Map(),moved=[],added=[];
+ const put=o=>{const was=old.get(o.id),n=was||{};const prevParent=was&&was.parent;if(was)for(const k of Object.keys(n))if(!KEEP.has(k))delete n[k];Object.assign(n,o);nn.push(n);nb.set(n.id,n);
+  if(!was)added.push(n);else if(prevParent!==n.parent&&n.kind!=='root')moved.push(n);return n};
+ const lv=id=>{const l=v.level(id);return {lv:l.level,lvOwn:l.own,lvFrom:l.from,pkind:l.level==='private'?l.kind||null:null}};
+ const needOf=id=>{const w=wait.get(id),d=done.get(id);const x=w||d;return x?{q:x.q,qwhy:x.why,need:x.id,answered:!!d,ans:d?d.done:null}:{}};
+ put({id:'you',kind:'root',label:'You',r:30});AREAS=[];
+ const addFile=(f,pid,ar,k)=>{const w=wait.get(f.id);
+  put(Object.assign({id:f.id,kind:'file',label:f.name,parent:pid,area:ar,conf:w?'unsure':'sure',p:w?(w.pct||58)/100:.86+((k*13)%13)/100,fk:KIND(f.name),order:k,day:fday(f),
+   pk:!!f.priv,path:'~/'+String(f.where||f.from).split(' › ').join('/')+'/'+f.name,from:f.from,age:f.age},lv(f.id),needOf(f.id)))};
+ const walk=(pid,ar)=>{v.kids(pid).forEach((id,i)=>{const pn=v.node(id),w=wait.get(id),fs=v.files(id,true);
+   put(Object.assign({id,kind:'topic',label:pn.name,parent:pid,area:ar,conf:w?'unsure':'sure',p:w?(w.pct||62)/100:pn.sure!=='sure'&&Plan.conf?Plan.conf(id).pct/100:.9+((i*7)%9)/100,
+    know:KNOW[id]||'',why:pn.why||'',pk:!!pn.priv,order:i,day:fs.length?Math.min(...fs.map(fday)):TODAY,sug:!!pn.sug,nl:!!pn.hidden,kept:!!pn.kept},lv(id),needOf(id)));
+   v.files(id).forEach((f,k)=>addFile(f,id,ar,k));walk(id,ar)});
+  if(pid===ar)v.files(pid).forEach((f,k)=>addFile(f,pid,ar,k))};
+ v.roots().forEach((rid,ai)=>{const pn=v.node(rid),a=v.area(rid),life=LIFE_AREAS.find(x=>x.id===rid);
+  const ps=window.partStyle?partStyle(rid):{ic:a.ic||'folder-simple',hue:life?life.hue:'--a-none'};/* one colour and icon per part (sample.js PART_STYLE) */
+  const meta={id:rid,n:pn.name,ic:ps.ic,hue:ps.hue,sum:AREA_SUM[rid]||'',src:pn.why?`Why: ${pn.why}.`:'',get sortNew(){return SORTNEW[rid]!==false}};AREAS.push(meta);
+  put(Object.assign({id:rid,kind:'area',label:pn.name,parent:'you',area:rid,conf:'sure',p:.97,ic:meta.ic,hue:meta.hue,meta,order:ai,nl:!!pn.hidden,extra:!life,pk:!!pn.priv},lv(rid)));walk(rid,rid)});
+ PROFILE.lines.filter(l=>l.g==='People'&&!MEMSTATE.gone.has(l.id)).forEach((l,i)=>{const tops=(TOPS[l.id]||[]).filter(t=>nb.has(t));if(!tops.length)return;
+  put({id:l.id,kind:'person',label:l.k,parent:'you',area:null,conf:'sure',p:1,tops,order:i,r:7})});
+ nn.forEach(n=>{n.priv=n.lv==='private';n.dash=n.conf==='unsure'?0:1;if(n.a===undefined){n.a=LAID?1:0;n.tv=1}});
+ N=nn;byId=nb;return {moved,added}}
+fromPlan();
+const kids=id=>N.filter(n=>n.parent===id);
+const live=()=>N;
+const areasL=()=>kids('you').filter(n=>n.kind==='area');
+const anc=n=>{const o=[];let c=n;while(c&&c.parent){c=byId.get(c.parent);if(!c)break;o.unshift(c)}return o};
+const desc=n=>{const o=[];const st=[n];while(st.length){const c=st.pop();kids(c.id).forEach(k=>{o.push(k);st.push(k)})}return o};
+const areaOf=n=>byId.get(n.area);
+const filesOf=n=>n.kind==='file'?[n]:n.kind==='person'?[]:desc(n).filter(d=>d.kind==='file');
+
+/* ================= what Tuck may do: Read everything / Names only / Private (the plan's levels, same as Settings) ================= */
+const READS=Object.entries(Plan.LEVELS).map(([k,o])=>[k,o.label,o.line]);
+const effRead=n=>!n||n.kind==='root'||n.kind==='person'?'read':n.lv||'read';
+const effAI=n=>effRead(n)!=='private';
+/* Hide (Never look in): the plan's hide; the folder stays on the map, faint */
+const effNL=n=>{let c=n;while(c&&c.kind!=='root'&&c.kind!=='person'){if(c.nl)return true;c=byId.get(c.parent)}return false};
+const kindsOf=n=>[...new Set([n.pkind,...filesOf(n).map(f=>f.pkind)].filter(Boolean))];
+/* time scrubber: what the map looked like on a day */
+let DAY=TODAY;{const e=document.getElementById('scrub0');if(e)e.textContent=DAYNAME(0)}
+const atDay=n=>n.kind==='file'?(n.day??TODAY)<=DAY:n.kind==='topic'?(n.day??0)<=DAY:true;
+const nowFiles=n=>filesOf(n).filter(atDay);
+
+/* ================= how things connect across your life ================= */
+/* [from folder, to folder, short label, the file that makes the link (optional)] */
+const REL=[['tax','grc','W-2 from GRC','W-2 GRC Associates 2025.pdf'],['tax','reg','1098-T from your school','1098-T Columbia 2025.pdf'],['meet','grc','Check-ins with Dana Ruiz'],['inv','time','Hours billed on invoices'],
+ ['port','grc','Case study of the GRC site','Case study GRC.docx'],['wb','phys','Whiteboard photos from PHYS lectures','IMG_2210.HEIC'],['robo','engi','CAD parts like ENGI 1006','Arm CAD v3.step'],['cov','apps','One letter per application'],
+ ['res','apps','Resume sent with each application'],['intv','apps','Prep for the same companies'],['trips','fam','Same summer trip'],['ins','appt','Claims for your visits'],['bills','lease','Same apartment'],
+ ['reg','econ','Your Economics major','Fall 2026 schedule.pdf'],['shots','port','Screenshots of your site']];
+let RL=[];
+function buildRel(){RL=[];REL.forEach(([a,b,lab,f])=>{const A=byId.get(a),B=byId.get(b);if(!A||!B)return;const fn=f&&N.find(x=>x.kind==='file'&&x.label===f&&x.parent===a);RL.push({a:fn||A,b:B,ta:A,lab})});
+ N.filter(n=>n.kind==='person').forEach(p=>p.tops.forEach(t=>{const T=byId.get(t);if(T)RL.push({a:p,b:T,ta:p,lab:`${p.label} appears in ${T.label}`,person:true})}))}
+const relOf=n=>RL.filter(l=>l.ta===n||l.b===n||l.a===n);
+/* profile lines (memory.js, PROFILE.lines) that relate to each node */
+const PROF={study:['school','study','year'],work:['job','pl-grc'],job:['search'],photo:['h-ss'],phys:['c-phys','p-alv','p-maya'],econ:['c-econ','study'],coms:['c-coms'],engi:['c-engi'],writ:['c-writ'],reg:['school','year'],
+ grc:['job','p-dana','pl-grc'],meet:['p-dana'],inv:['job'],time:['job'],tax:['job','school'],res:['search','h-res'],apps:['search'],cov:['search'],intv:['search'],shots:['h-ss'],wb:['p-maya'],lb:['p-maya'],
+ 'p-alv':['p-alv'],'p-maya':['p-maya'],'p-dana':['p-dana'],'p-theo':['p-theo']};
+const profOf=n=>(PROF[n.id]||[]).map(id=>PROFILE.lines.find(l=>l.id===id)).filter(l=>l&&!MEMSTATE.gone.has(l.id));
+/* what Tuck learned from you (the same rules as Settings › Memory), each with Stop Using */
+const LEARN={phys:[['r-phys','Files that say PHYS 1401 on page 1 go here','Learned from 12 of your answers']],
+ shots:[['r-shots','Screenshots go here','You moved 3 like this']],inv:[['r-inv','Invoices billed to GRC go here','Learned from your folders']],res:[['r-res','Keep every resume version together','You typed this in setup']]};
+const STOPPED=new Set();
+
+/* ================= colours from tokens ================= */
+let KEYUI=()=>{};let C={};let COLBY='part',SHOWF=true,SHOWP=true,CURVED=true,SPREAD=1,KEYPART=null,KEYSTICK=false,FL=[],NB=new Map(),FS=null;const LOOK={spread:6.2,labA:.5,fvis:.42,hubGlow:.20,fileA:.78,link:.13,drift:.55,hubInk:0};
+function readColors(){const cs=getComputedStyle(document.documentElement);const g=v=>cs.getPropertyValue(v).trim();
+ C={g:{bg:g('--g-bg'),panel:g('--g-panel'),line:g('--g-line'),ink:g('--g-ink'),ink2:g('--g-ink2'),ink3:g('--g-ink3')},fk:{pdf:g('--fk-pdf'),doc:g('--fk-doc'),xls:g('--fk-xls'),img:g('--fk-img'),other:g('--fk-other')},bgc:g('--g-bg'),ink:g('--ink'),ink2:g('--ink2'),ink3:g('--ink3'),win:g('--win'),line:g('--line2'),soft:g('--soft2'),ac:g('--ac'),acink:g('--ac-ink'),lock:g('--lock'),warn:g('--warn'),ok:g('--ok'),
+  k:{pdf:g('--k-pdf'),doc:g('--k-doc'),xls:g('--k-xls'),img:g('--k-img'),code:g('--k-code'),txt:g('--k-txt')}};
+ AREAS.forEach(a=>C[a.hue]=g(a.hue));if(/[?&]mono=1/.test(location.search)){const K='#000';document.documentElement.classList.add('mono');Object.keys(C).forEach(k=>{if(typeof C[k]==='string')C[k]=K});Object.keys(C.g).forEach(k=>C.g[k]=K);C.g.bg='#fff';C.bgc='#fff';Object.keys(C.fk).forEach(k=>C.fk[k]=K);Object.keys(C.k||{}).forEach(k=>C.k[k]=K)}
+ if(typeof drawBg==='function'&&Wd)drawBg()}
+const partOf=n=>C[(AREAS.find(a=>a.id===n.area)||{}).hue]||C.fk.other,fkOf=n=>({pdf:'pdf',doc:'doc',xls:'xls',img:'img'})[n.fk]||'other';
+const hueOf=n=>n.kind==='root'||n.kind==='person'?C.ac:partOf(n);
+const nodeCol=n=>n.kind==='file'?(n.priv?C.fk.other:COLBY==='type'?C.fk[fkOf(n)]:partOf(n)):n.kind==='root'?C.g.ink:n.kind==='person'?C.g.ink2:partOf(n);
+const GLYPH={};
+function readGlyphs(){[...AREAS.map(a=>a.ic),'user','push-pin'].forEach(ic=>{const i=document.createElement('i');i.className='ph-fill ph-'+ic;i.style.cssText='position:absolute;opacity:0;pointer-events:none';document.body.appendChild(i);
+ const s=getComputedStyle(i,'::before');GLYPH[ic]={ch:(s.content||'').replace(/["']/g,''),font:s.fontFamily};i.remove()})}
+
+/* ================= layout: a live d3-force graph =================
+   Link distance by level, charge, collision that leaves room for each label, gentle centring.
+   Files sit in a tidy ring around their topic, joined by a hairline. Dragged nodes ease back unless pinned. */
+const R1=215;
+const ringR=t=>t.r;const GA=Math.PI*(3-Math.sqrt(5));
+let LW=new Map();/* label widths, for collision */
+function measure(){ctx.font='600 12.5px Onest';live().forEach(n=>{if(n.kind==='topic'||n.kind==='area'||n.kind==='person')LW.set(n.id,ctx.measureText(n.label).width+(n.kind==='topic'?22:8))})}
+const fcount=n=>kids(n.id).filter(f=>f.kind==='file').length;
+function sizes(){live().forEach(n=>{n.r=n.kind==='root'?13:n.kind==='area'?15:n.kind==='topic'?4+Math.sqrt(fcount(n))*1.6:n.kind==='file'?2.2:5.5})}
+function seed(){/* start from a balanced wheel so the forces only have to tidy up */
+ const A=areasL(),W=A.map(a=>Math.max(1,kids(a.id).length));const tot=W.reduce((s,w)=>s+w,0);let ang=-Math.PI/2;
+ const you=byId.get('you');you.x=0;you.y=0;you.fx=0;you.fy=0;
+ A.forEach((a,i)=>{const sp=W[i]/tot*2*Math.PI,mid=ang+sp/2;a.ang=mid;if(a.x===undefined||a.reseed){a.x=R1*Math.cos(mid);a.y=R1*Math.sin(mid)}
+  kids(a.id).forEach((t,j,ts)=>{const ta=mid-sp/2+sp*(j+.5)/ts.length;t.ang=ta;if(t.x===undefined){t.x=(R1+150)*Math.cos(ta);t.y=(R1+150)*Math.sin(ta)}
+   kids(t.id).forEach((f,k,fs)=>{if(f.x===undefined){const th=k/fs.length*2*Math.PI;f.x=t.x+ringR(t)*Math.cos(th);f.y=t.y+ringR(t)*Math.sin(th)}})});ang+=sp});
+ live().filter(n=>n.kind==='person').forEach((p,i)=>{if(p.x===undefined){const T=byId.get(p.tops[0]);p.x=T.x*.5;p.y=T.y*.5}})}
+let SIM=null,TREE=[];
+/* files are not free bodies: each sits in a tidy ring around its topic (so clusters never smear into each other) */
+/* files are nodes in the simulation; this only gives a new file a starting place next to its folder */
+function placeFiles(){for(const f of live()){if(f.kind!=='file'||(f.x!==undefined&&!isNaN(f.x)))continue;const t=byId.get(f.parent);if(!t||t.x===undefined)continue;const a=seedOf(f)*7;f.x=t.x+8*Math.cos(a);f.y=t.y+8*Math.sin(a)}}
+const LD={part:110,folder:62,file:14,person:120};
+function build(){sizes();buildRel();const L=live();FL=[];NB=new Map();
+ L.forEach(n=>{if(n.kind==='person'){(n.tops||[]).forEach(t=>{const b=byId.get(t);if(b&&!b.gone)FL.push({source:n,target:b,kind:'person'})});return}
+  const p=n.parent&&byId.get(n.parent);if(!p||p.gone)return;FL.push({source:p,target:n,kind:n.kind==='file'?'file':p.kind==='root'?'part':'folder'})});
+ /* link strength 0..1: parts by their share of files, folders by size, people by how many folders they share */
+ const maxPart=Math.max(1,...L.filter(n=>n.kind==='area').map(n=>filesOf(n).length)),maxFolder=Math.max(1,...L.filter(n=>n.kind==='topic').map(fcount));
+ FL.forEach(l=>{l.w=l.kind==='part'?filesOf(l.target).length/maxPart:l.kind==='folder'?Math.sqrt(fcount(l.target)/maxFolder):l.kind==='person'?Math.min(1,(l.source.tops||[]).length/3):0;
+  for(const[a,b]of[[l.source,l.target],[l.target,l.source]]){if(!NB.has(a.id))NB.set(a.id,new Set());NB.get(a.id).add(b.id)}});
+ if(SIM)SIM.stop();const sp=SPREAD;
+ SIM=d3.forceSimulation(L).alphaDecay(.025)
+  .force('link',d3.forceLink(FL.map(l=>({source:l.source,target:l.target,kind:l.kind}))).distance(l=>LD[l.kind]*sp).strength(l=>l.kind==='person'?.04:l.kind==='file'?.9:.6))
+  .force('charge',d3.forceManyBody().strength(n=>n.kind==='file'?-6*sp:n.kind==='topic'?-90*sp:n.kind==='person'?-60:-260*sp).distanceMax(500))
+  .force('collide',d3.forceCollide(n=>n.r+(n.kind==='file'?.6:4)))
+  .force('x',d3.forceX(0).strength(.02)).force('y',d3.forceY(0).strength(.02))
+  .on('tick',onTick).stop();
+ return SIM}
+function onTick(){placeFiles();if(!ENTR)for(const n of live()){if(n.flying)continue;n.px=n.x;n.py=n.y}req()}
+const LAYK='tuckBrainLayoutF3';function layout(){measure();sizes();seed();let P=null;try{P=JSON.parse(localStorage.getItem(LAYK)||'null')}catch(e){}
+ P=P||window.TUCK_BRAIN_LAYOUT||null;
+ const held=[];if(P)live().forEach(n=>{const q=P[n.id];if(q&&n.kind!=='root'&&!n.pin&&n.fx==null){n.x=q[0];n.y=q[1];n.fx=q[0];n.fy=q[1];held.push(n)}});
+ if(P)live().forEach(n=>{if(!P[n.id]&&n.kind!=='root'){const p=byId.get(n.parent)||byId.get('you'),a=seedOf(n)*7;n.x=(p.x||0)+20*Math.cos(a);n.y=(p.y||0)+20*Math.sin(a)}});
+ const settled=P&&live().every(n=>n.kind==='root'||n.pin||P[n.id]);build();if(!settled){SIM.alpha(1);for(let i=0;i<600;i++)SIM.tick();SIM.alpha(.3);for(let i=0;i<300;i++)SIM.tick()}SIM.alpha(0);held.forEach(n=>{n.fx=n.fy=null});live().forEach(n=>{n.px=n.x;n.py=n.y});
+ try{const Q={};live().forEach(n=>{Q[n.id]=[Math.round(n.x*10)/10,Math.round(n.y*10)/10]});localStorage.setItem(LAYK,JSON.stringify(Q))}catch(e){}}
+/* after any change: let the graph find its balance again (a little overshoot comes from the forces themselves) */
+const SETTLE=d3.easeCubicOut;
+function resettle(a=.5){if(!SIM)return;sizes();build();if(RM){SIM.alpha(1);for(let i=0;i<200;i++)SIM.tick();SIM.alpha(0);placeFiles();live().forEach(n=>{n.px=n.x;n.py=n.y});req()}else SIM.alpha(a).restart();updateCounts()}
+
+/* ================= canvas, camera ================= */
+const cv=$('#cv'),ctx=cv.getContext('2d'),stage=$('#stage');
+let Wd=0,Ht=0,dpr=1,Tr=d3.zoomIdentity;
+let refitT=0;
+function size(){const b=stage.getBoundingClientRect();const w0=Wd,h0=Ht;Wd=b.width;Ht=b.height;dpr=window.devicePixelRatio||1;cv.width=Wd*dpr;cv.height=Ht*dpr;drawBg();
+ const q=document.getElementById('q');if(q)q.placeholder=Wd<600?'Find':'Find a topic or file';
+ /* the canvas changed size (side chat docked or closed, window resized): fit the map again once it stops changing */
+ if(LAID&&w0&&(Math.abs(w0-Wd)>40||Math.abs(h0-Ht)>40)){clearTimeout(refitT);refitT=setTimeout(()=>{if(DRAG)return;const ns=FOCUS&&FSET?live().filter(n=>FSET.has(n.id)&&n.kind!=='file'):live();fitTo(ns.length>1?ns:live(),FOCUS?2.2:5,RM?0:420);capZoom()},120)}
+ if(PENDFIT&&Wd-PANW()>60&&Ht>140){const[ns,mk]=PENDFIT;fitTo(ns,mk,0);capZoom()}
+ req()}
+new ResizeObserver(size).observe(stage);
+const zoom=d3.zoom().scaleExtent([.25,6]).filter(e=>(!e.ctrlKey||e.type==='wheel')&&!e.button&&e.type!=='dblclick').on('zoom',e=>{Tr=e.transform;if(e.sourceEvent||HOVER){HOVER=null;HLINK=null;HF.mix=0;HF.set=null}$('#zval').textContent=Math.round(Tr.k/fitK*100)+'%';hideTip();req()});
+let fitK=1;
+const sel=d3.select(cv);
+const dur=ms=>RM?0:ms;
+function camTo(t,ms=650){if(RM||!ms){sel.call(zoom.transform,t)}else sel.transition().duration(ms).ease(d3.easeCubicInOut).call(zoom.transform,t)}
+const NARROW=()=>Wd<900;const PANW=()=>INSP?(NARROW()?332:384):0;
+function boundsOf(ns){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;ns.forEach(n=>{const r=n.kind==='topic'?ringR(n)+18:n.kind==='area'?n.r+34:n.kind==='root'?40:(n.r||4)+8;x0=Math.min(x0,n.x-r-(n.kind==='topic'?(LW.get(n.id)||0)/2:0));x1=Math.max(x1,n.x+r+(n.kind==='topic'?(LW.get(n.id)||0)/2:0));y0=Math.min(y0,n.y-r);y1=Math.max(y1,n.y+r+(n.kind==='area'||n.kind==='topic'?16:0))});return[x0,y0,x1,y1]}
+let PENDFIT=null;/* a window too small (or still hidden) to fit into: fit once it has room */
+function fitTo(ns,maxK=5,ms=650){if(ns.length>=live().length-2){const aw=Wd-PANW();if(aw<60||Ht<140){PENDFIT=[ns,maxK];return fitK}PENDFIT=null;let k=Math.min(aw,Ht)/900;const hh=Ht-64;ns.forEach(n=>{if(n.x===undefined)return;const r=(n.r||3)+28;k=Math.min(k,(aw/2-16)/(Math.abs(n.x)+r),(hh/2-16)/(Math.abs(n.y)+r))});fitK=k;camTo(d3.zoomIdentity.translate(aw/2,hh/2).scale(k),ms);return k}
+ const[x0,y0,x1,y1]=boundsOf(ns);const availW=Wd-PANW(),padT=52,padB=70;
+ const k=Math.min(maxK,(availW-48)/(x1-x0),(Ht-padT-padB)/(y1-y0));if(!(k>0&&isFinite(k))){PENDFIT=[ns,maxK];return fitK}PENDFIT=null;const cx=(x0+x1)/2,cy=(y0+y1)/2;if(ns.length>=live().length-2)fitK=k;/* "fit" is the zoom where the whole map fits: level of detail is measured from it */
+ camTo(d3.zoomIdentity.translate(availW/2-cx*k,padT+(Ht-padT-padB)/2-cy*k).scale(k),ms);return k}
+
+/* ================= state ================= */
+let FOCUS=null,FSET=null,HOVER=null,HLINK=null,FILTER='all',DRAG=null,INSP=null,MATCH=null,ENTR=false;
+const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)};
+/* in focus: the selected node and what it connects to */
+function neighbourhood(n){const s=new Set([n.id]);if(n.kind!=='root')s.add('you');anc(n).forEach(a=>s.add(a.id));kids(n.id).forEach(k=>s.add(k.id));
+ if(n.kind==='area')kids(n.id).forEach(t=>kids(t.id).forEach(f=>s.add(f.id)));if(n.kind==='file')kids(n.parent).forEach(k=>s.add(k.id));
+ const t=n.kind==='file'?byId.get(n.parent):n;relOf(t).concat(relOf(n)).forEach(l=>{s.add(l.a.id);s.add(l.b.id);s.add(l.ta.id)});return s}
+function filterSet(){if(FILTER==='unsure'){const s=new Set(['you']);live().filter(n=>n.conf==='unsure'||n.answered).forEach(n=>{s.add(n.id);anc(n).forEach(a=>s.add(a.id));if(n.kind==='topic')kids(n.id).forEach(k=>s.add(k.id))});return s}return null}
+let FILT=null;
+
+/* ================= drawing ================= */
+let drawQueued=false;
+function req(){if(!drawQueued){drawQueued=true;requestAnimationFrame(()=>{drawQueued=false;draw()})}}
+/* always alive: every node drifts a little around its balance point, like Obsidian's graph */
+const seedOf=n=>n.sd??=(()=>{let h=0;for(const c of n.id)h=(h*31+c.charCodeAt(0))|0;return (h>>>0)%1000/159})();
+const DAMP=n=>0;
+const dX=n=>{const a=DAMP(n);return a&&a*Math.sin(BT*.22+seedOf(n))},dY=n=>{const a=DAMP(n);return a&&a*Math.cos(BT*.18+seedOf(n)*1.7)};
+const sx=n=>Tr.x+(n.px+dX(n))*Tr.k, sy=n=>Tr.y+(n.py+dY(n))*Tr.k;
+function rs(n){return (n.r||3)*Tr.k}
+/* level of detail: far = parts of life; mid = topics; near = file dots */
+const KR=()=>Tr.k/fitK;
+function vis(n){return n.kind==='file'?(SHOWF?1:0):n.kind==='person'?(SHOWP?1:0):1}
+const HF={set:null,mix:0};
+function hovSetOf(n){return new Set([n.id,...(NB.get(n.id)||[])])}
+function dimOf(n){let d=1;if(FSET&&!FSET.has(n.id))d=DARK?.28:.62;if(FILT&&!FILT.has(n.id))d=Math.min(d,DARK?.18:.45);if(HF.set&&HF.mix>.01&&!HF.set.has(n.id)&&!DRAG)d=Math.min(d,1-.86*HF.mix);return d}
+function alphaOf(n){return n.a*vis(n)*(n.tv??1)*(effNL(n)?.4:1)}
+let BT=0;const breath=n=>1;
+/* one cheap loop (~30 fps) for drift, breathing, hover fades and the sky; it stops when the tab is hidden or nobody has touched the map for a while */
+let bLast=0,bOn=false,lastAct=performance.now();const IDLE=45000;
+function breathe(now){if(document.hidden||now-lastAct>IDLE){bOn=false;return}bOn=true;requestAnimationFrame(breathe);if(now-bLast<33)return;bLast=now;BT=now/1000;
+ const tgt=(HOVER||HLINK)&&!DRAG?1:0;HF.mix+=(tgt-HF.mix)*.2;if(!tgt&&HF.mix<.01){HF.mix=0;HF.set=null}
+ if(!looping&&!DRAG)draw()}
+function wake(){lastAct=performance.now();if(!RM&&!bOn&&!document.hidden){bOn=true;requestAnimationFrame(breathe)}}
+if(!RM){requestAnimationFrame(breathe);document.addEventListener('visibilitychange',wake);['pointermove','pointerdown','wheel','keydown'].forEach(ev=>addEventListener(ev,wake,{passive:true}))}
+const backOut=t=>1-Math.pow(1-t,3);
+/* the sky: gradient (CSS), nebula glow and stars (#bg, drawn once per size and theme), slow motes (#cv) */
+const bg=$('#bg'),bctx=bg.getContext('2d');let DARK=false,MOTES=[];
+const rnd=(()=>{let x=7;return()=>(x=(x*16807)%2147483647)/2147483647})();
+function drawBg(){const w=Wd,h=Ht;if(!w)return;bg.width=w*dpr;bg.height=h*dpr;bctx.setTransform(dpr,0,0,dpr,0,0);bctx.clearRect(0,0,w,h);
+ DARK=getComputedStyle(stage).getPropertyValue('--dk').trim()==='1';MOTES=[]}
+function drawMotes(){}
+function relHot(l){const f=FOCUS,h=HOVER;const on=x=>x&&(l.ta===x||l.b===x||l.a===x||(x.kind==='area'&&(l.ta.area===x.id||l.b.area===x.id)));return on(f)||on(h)||HLINK===l}
+function focusSet(cur){let fs=null;if(cur)fs=hovSetOf(cur);
+ else if(KEYPART)fs=new Set(live().filter(n=>n.kind==='root'||(COLBY==='type'?n.kind==='file'&&fkOf(n)===KEYPART:n.area===KEYPART)).map(n=>n.id));
+ else if(MATCH&&MATCH.size)fs=new Set(MATCH);
+ if(FILT)fs=fs?new Set([...fs].filter(id=>FILT.has(id))):FILT;return fs}
+function draw(){
+ {const e=document.getElementById('fset'),r=(PANW()?PANW()+16:16)+'px';if(e&&e.style.right!==r)e.style.right=r}
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.globalAlpha=1;ctx.fillStyle=C.g.bg;ctx.fillRect(0,0,Wd,Ht);
+ const L=live(),k=Tr.k,cur=HOVER&&!DRAG?HOVER:FOCUS,fs=FS=focusSet(cur),V=n=>alphaOf(n)>.01;ctx.lineCap='round';
+ /* links: thin grey like Obsidian; the hovered node's links take its colour. Long links bow outward, away from the middle, so they
+    stop crossing clusters; person links bow out and are dotted. Weight = how strongly two things are linked. */
+ for(const l of FL){const a=l.source,b=l.target;if(a.gone||b.gone||!V(a)||!V(b))continue;
+  const on=fs&&fs.has(a.id)&&fs.has(b.id)&&(a===cur||b===cur),x1=sx(a),y1=sy(a),x2=sx(b),y2=sy(b);ctx.beginPath();ctx.moveTo(x1,y1);
+  if(l.kind==='person'){ctx.quadraticCurveTo((x1+x2)/2-(y2-y1)*.25,(y1+y2)/2+(x2-x1)*.25,x2,y2);ctx.setLineDash([3,3])}
+  else if(CURVED&&l.kind!=='file'){const ax=a.px,ay=a.py,dx=b.px-ax,dy=b.py-ay,len=Math.hypot(dx,dy)||1,mx=(ax+b.px)/2,my=(ay+b.py)/2;let nx=-dy/len,ny=dx/len;
+   if((mx+nx)*(mx+nx)+(my+ny)*(my+ny)<mx*mx+my*my){nx=-nx;ny=-ny}const off=Math.min(60,len*(l.kind==='part'?.22:.18));ctx.quadraticCurveTo(Tr.x+(mx+nx*off)*k,Tr.y+(my+ny*off)*k,x2,y2)}
+  else ctx.lineTo(x2,y2);
+  const w=l.w||0,B={part:[1.3,2.6,.42,.42],folder:[.7,1.5,.28,.4],file:[.45,0,.22,0],person:[.6,.7,.18,.3]}[l.kind],lw=B[0]+B[1]*w,la=B[2]+B[3]*w,unsure=l.kind==='folder'&&b.dash<1;
+  if(unsure)ctx.setLineDash([4,3]);
+  const ta=Math.min(alphaOf(a),alphaOf(b));
+  ctx.globalAlpha=ta*Math.min(1,on?la+.45:fs?.06:la*(unsure?.6:1)*1.6);ctx.strokeStyle=on?nodeCol(l.kind==='person'?b:a.kind==='root'?b:a):C.g.ink3;
+  ctx.lineWidth=on?lw+.4:lw;ctx.stroke();ctx.setLineDash([])}
+ if(DRAG&&DRAG.moved&&DRAG.over){ctx.globalAlpha=.8;ctx.strokeStyle=C.ac;ctx.lineWidth=1.5;ctx.setLineDash([2,4]);ctx.beginPath();ctx.moveTo(sx(DRAG.n),sy(DRAG.n));ctx.lineTo(sx(DRAG.over),sy(DRAG.over));ctx.stroke();ctx.setLineDash([])}
+ /* nodes */
+ for(const kind of['file','topic','person','area','root'])for(const n of L){if(n.kind!==kind||!V(n))continue;const c=nodeCol(n),dim=fs&&!fs.has(n.id),me=n===cur,x=sx(n),y=sy(n),r=n.r*k;
+  ctx.globalAlpha=alphaOf(n)*(dim?.12:1);
+  if(n.kind==='person'){ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r,y);ctx.closePath();ctx.fillStyle=C.g.ink2;ctx.fill()}
+  else{ctx.beginPath();ctx.arc(x,y,r,0,7);
+   if(n.kind==='topic'&&n.dash<1){const ga=ctx.globalAlpha;ctx.globalAlpha=ga*.18;ctx.fillStyle=c;ctx.fill();ctx.globalAlpha=ga;ctx.setLineDash([3*k,2*k]);ctx.strokeStyle=c;ctx.lineWidth=1.4*k;ctx.stroke();ctx.setLineDash([])}
+   else{ctx.fillStyle=n.kind==='root'?C.g.ink:c;ctx.fill()}}
+  if(me){ctx.beginPath();ctx.arc(x,y,r+3,0,7);ctx.strokeStyle=C.g.ink;ctx.lineWidth=1.5;ctx.stroke()}
+  if(n.kind==='area'){const g=GLYPH[n.ic];if(g&&g.ch){ctx.fillStyle='#fff';ctx.font=`${r*1.15}px ${g.font}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(g.ch,x,y+.5)}}
+  if(n.kind==='root'){ctx.fillStyle=C.g.bg;ctx.font=`600 ${10*k}px "IBM Plex Sans",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('JY',x,y+.5)}
+  if(n.priv&&n.kind==='topic')drawLock(x,y,r*1.15,'#fff');
+  if(n.priv&&n.kind==='area')drawLock(x+r*.8,y-r*.8,Math.max(6,r*.5),C.g.ink);
+  if(n.pin){const g=GLYPH['push-pin'];if(g&&g.ch){ctx.fillStyle=C.g.ink3;ctx.font=`9px ${g.font}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(g.ch,x+r+5,y-r-4)}}
+  ctx.globalAlpha=1}
+ const T=DRAG&&DRAG.moved?DRAG.targets:THDRAG?live().filter(t=>t.kind==='topic'&&t.id!==THDRAG.parent&&atDay(t)):null;
+ if(T){const over=DRAG?DRAG.over:DROPT;for(const t of T){const on=t===over;ctx.globalAlpha=on?.95:.22;ctx.strokeStyle=C.ac;ctx.lineWidth=on?2.5:1.2;ctx.beginPath();ctx.arc(sx(t),sy(t),rs(t)+(on?7:5),0,7);ctx.stroke()}}
+ for(const n of L)if(n.rip)drawRipple(n);
+ drawLabels(L,fs,cur);
+ ctx.globalAlpha=1}
+function glowAt(x,y,r,col,s){ctx.save();ctx.globalAlpha=s;const g=ctx.createRadialGradient(x,y,r*.6,x,y,r*2.4);g.addColorStop(0,col);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r*2.4,0,7);ctx.fill();ctx.restore()}
+function drawNode(n,a){const x=sx(n),y=sy(n),small=FSET&&!FSET.has(n.id)&&n.kind!=='root';const r=rs(n)*(small?.7:1),hue=hueOf(n);
+ /* glow only on hubs (parts of life), You, the selection, and what you point at or search for */
+ const lit=HOVER===n||(MATCH&&MATCH.has(n.id)),sel=FOCUS===n;
+ if(lit||sel){if(n.kind==='area'||n.kind==='root'){ctx.save();ctx.globalAlpha=a*(DARK?.4:.28);ctx.fillStyle=sel?C.ac:hue;ctx.beginPath();ctx.arc(x,y,r+6,0,7);ctx.fill();ctx.restore()}else halo(x,y,Math.max(r*1.15,n.kind==='file'?2.6:4),sel?C.ac:hue,a*(DARK?.42:.3))}
+ else if((n.kind==='area'||n.kind==='root')&&!small){ctx.save();ctx.globalAlpha=a*(DARK?LOOK.hubGlow:LOOK.hubGlow*.6);ctx.fillStyle=n.kind==='root'?C.ac:hue;ctx.beginPath();ctx.arc(x,y,r+4,0,7);ctx.fill();ctx.restore()}
+ ctx.globalAlpha=a;
+ if(n.kind==='root'){ctx.fillStyle=C.ac;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font=`700 ${Math.max(9,r*.62)}px Onest`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('JY',x,y+1)}
+ else if(n.kind==='area'){/* a hub: a solid disc in its part's hue with the part's icon in white */
+  ctx.fillStyle=hue;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+  const g=GLYPH[n.ic];if(g&&g.ch&&r>7){ctx.fillStyle='#fff';ctx.font=`${Math.round(r*.95)}px ${g.font}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(g.ch,x,y+.5)}
+  if(n.priv&&r>8){const bx=x-r*.72,by=y+r*.72,br=Math.max(5,r*.3)*lockS(n);ctx.fillStyle=C.lock;ctx.beginPath();ctx.arc(bx,by,br,0,7);ctx.fill();drawLock(bx,by,br*1.1,'#fff')}}
+ else if(n.kind==='topic'){const t=n.dash;ctx.fillStyle=C.bgc;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+  if(t>0){ctx.globalAlpha=a*t*.85;ctx.fillStyle=hue;ctx.beginPath();ctx.arc(x,y,r*.48,0,7);ctx.fill();ctx.globalAlpha=a}
+  ctx.strokeStyle=hue;ctx.lineWidth=.8;if(t<1)ctx.setLineDash([1.4,1.6]);ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.stroke();ctx.setLineDash([]);
+  if(n.priv&&Tr.k>.5){drawLock(x+r+4,y-r-1,Math.max(4.5,r*1.1)*lockS(n),C.lock)}}
+ else if(n.kind==='person'){ctx.fillStyle=C.bgc;ctx.strokeStyle=C.acink;ctx.lineWidth=.8;const d=r*1.15;ctx.beginPath();ctx.moveTo(x,y-d);ctx.lineTo(x+d,y);ctx.lineTo(x,y+d);ctx.lineTo(x-d,y);ctx.closePath();ctx.fill();ctx.stroke()}
+ else{/* a file: a fine point; hollow while Tuck is unsure */
+  if(n.dash>0){ctx.globalAlpha=a*n.dash*LOOK.fileA;ctx.fillStyle=hue;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.globalAlpha=a}
+  if(n.dash<1){ctx.globalAlpha=a*(1-n.dash)*.9;ctx.strokeStyle=hue;ctx.lineWidth=.6;ctx.beginPath();ctx.arc(x,y,r+.4,0,7);ctx.stroke();ctx.globalAlpha=a}
+  if(n.priv&&Tr.k>1.1){drawLock(x+r+3,y-r-2,4.5*lockS(n),C.lock)}}
+ /* one accent ring = selected */
+ if(sel&&n.kind!=='root'){ctx.globalAlpha=Math.min(1,a+.2);ctx.strokeStyle=C.ac;ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,r+(n.kind==='file'?2.6:3.6),0,7);ctx.stroke()}
+ if(n.pin){const g=GLYPH['push-pin'];if(g&&g.ch){ctx.globalAlpha=a*.8;ctx.fillStyle=C.ink3;ctx.font=`9px ${g.font}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(g.ch,x+r+5,y-r-4)}}}
+function drawRipple(n){const x=sx(n),y=sy(n),r=rs(n),t=n.rip.t;ctx.globalAlpha=(1-t)*.45;ctx.strokeStyle=n.rip.col;ctx.lineWidth=.8;ctx.beginPath();ctx.arc(x,y,r+3+t*(n.kind==='area'?22:14),0,7);ctx.stroke();ctx.globalAlpha=1}
+function ripple(ns,col){if(RM)return;ns.forEach((n,i)=>{const go=()=>{const R={t:0,col};n.rip=R;anim(620,t=>{R.t=t},()=>{if(n.rip===R)n.rip=null;req()})};i?setTimeout(go,Math.min(i,12)*35):go()})}
+const lockS=n=>n.lp===undefined?1:Math.max(.01,backOut(n.lp));
+function drawLock(x,y,s,col){ctx.save();ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=Math.max(1.2,s*.14);
+ const w=s*.9,h=s*.7;ctx.beginPath();ctx.roundRect(x-w/2,y-h*.15,w,h,s*.12);ctx.fill();ctx.beginPath();ctx.arc(x,y-h*.15,w*.3,Math.PI,0);ctx.stroke();ctx.restore()}
+
+/* labels: parts of life always; topics from mid zoom; in focus only the selected node and what it connects to.
+   Greedy placement by priority with collision, so no two labels (or a label and a node) ever overlap. File names show on hover only. */
+let LABS=[],PLACED=[];
+/* labels fade in with zoom; each is placed in priority order and skipped if it would touch one already placed, a dot, an icon,
+   the hover card or a control floating over the map, so words never overlap at any zoom */
+function drawLabels(L,fs,cur){const k=Tr.k,placed=PLACED=[];LABS=[];L.forEach(n=>n._lab=null);const RW=Wd-PANW()-2;
+ {const cb=cv.getBoundingClientRect();['#fset','#fdpop.on','#fkeyw','#scrub','#tip.on','#crumbs.on','#toast.on'].forEach(q=>{const e=document.querySelector(q);if(!e||!e.offsetParent)return;const r=e.getBoundingClientRect();if(r.width&&r.height)placed.push({x:r.left-cb.left,y:r.top-cb.top,w:r.width,h:r.height,own:null,ui:1})})}
+ const cand=[];
+ for(const n of L){if(alphaOf(n)<=.05)continue;const me=n===cur,inF=fs&&fs.has(n.id);
+  let a=n.kind==='area'||n.kind==='root'?1:n.kind==='topic'||n.kind==='person'?Math.min(1,Math.max(0,(k-.55)/.35)):Math.min(1,Math.max(0,(k-2.4)/.8));
+  if(fs)a=inF?Math.max(a,n.kind==='file'?(me?1:0):1):a*.15;if(me)a=1;if(a<.03)continue;
+  const pr=me?0:fs&&inF?1:n.kind==='area'?2:n.kind==='root'?3:n.kind==='topic'?4-fcount(n)/1000:n.kind==='person'?5:6;cand.push({n,a,pr:fs&&!inF?pr+10:pr})}
+ cand.sort((x,y)=>x.pr-y.pr);
+ const dots=L.filter(n=>alphaOf(n)>.01).map(n=>{const x=sx(n),y=sy(n),r=n.r*k;return {n,r:[x-r,y-r,x+r,y+r]}});
+ const over=(r,q,p)=>r[0]<q[2]+p&&r[2]>q[0]-p&&r[1]<q[3]+p&&r[3]>q[1]-p,box=q=>[q.x,q.y,q.x+q.w,q.y+q.h];
+ const hit=(r,own)=>r[0]<2||r[2]>RW||r[1]<2||r[3]>Ht-2||placed.some(q=>over(r,box(q),3))||dots.some(d=>d.n!==own&&over(r,d.r,1));
+ ctx.textAlign='left';ctx.textBaseline='top';
+ for(const{n,a}of cand){const me=n===cur,x=sx(n),y=sy(n),r=n.r*k,size=n.kind==='area'?13:n.kind==='file'?9:11;
+  ctx.font=`${n.kind==='area'||me?600:500} ${size}px "IBM Plex Sans",system-ui,sans-serif`;
+  const txt=n.kind==='root'?'You':n.label,w=ctx.measureText(txt).width,h=size*1.15,g=3;let at=null;
+  for(const d of[g,g+10,g+22]){for(const[px,py]of[[x-w/2,y+r+d],[x-w/2,y-r-d-h],[x+r+d,y-h/2],[x-r-d-w,y-h/2]]){const q=[px,py,px+w,py+h];if(!hit(q,n)){at=q;break}}if(at)break}
+  if(!at)continue;const rc={x:at[0],y:at[1],w,h,own:n};placed.push(rc);n._lab=rc;LABS.push(n.label);
+  ctx.globalAlpha=a*(n.kind==='area'?1:n.kind==='file'?.75:.9)*Math.min(1,alphaOf(n));ctx.fillStyle=n.kind==='area'?partOf(n):C.g.ink;ctx.fillText(txt,at[0],at[1])}
+ ctx.globalAlpha=1}
+const TRK='1.1px';function label(c,t,x,y,al,font,col,ls){ctx.globalAlpha=c.a;ctx.font=font;ctx.letterSpacing=ls||'0px';ctx.textAlign=al;ctx.strokeStyle=C.bgc;ctx.lineWidth=3;ctx.strokeText(t,x,y);ctx.fillStyle=col;ctx.fillText(t,x,y);ctx.letterSpacing='0px'}
+
+/* ================= animation loop: runs only while something moves ================= */
+const anims=[];let looping=false;
+function anim(ms,fn,done){if(RM||!ms){fn(1);done&&done();req();return}anims.push({t0:performance.now(),ms,fn,done});if(!looping){looping=true;requestAnimationFrame(loop)}}
+function loop(now){for(let i=anims.length-1;i>=0;i--){const A=anims[i];const t=Math.min(1,(now-A.t0)/A.ms);A.fn(t);if(t>=1){anims.splice(i,1);A.done&&A.done()}}
+ draw();if(anims.length)requestAnimationFrame(loop);else looping=false}
+const ease=d3.easeCubicOut;
+function entrance(){const L=live();const D={root:0,area:120,person:300,topic:420,file:760};
+ L.forEach(n=>{n.a=0;const p=n.parent?byId.get(n.parent):null;n.sx0=p?p.x:0;n.sy0=p?p.y:0;n.px=n.sx0;n.py=n.sy0;
+  n.delay=D[n.kind]+(n.kind==='area'?areasL().indexOf(n)*45:n.kind==='topic'?n.order*14:n.kind==='file'?(byId.get(n.parent).order||0)*14+n.order*3:(n.order||0)*40)});
+ if(RM){L.forEach(n=>{n.a=1;n.px=n.x;n.py=n.y});req();return}
+ ENTR=true;const total=1800;anim(total,t=>{const el=t*total;for(const n of L){const u=Math.max(0,Math.min(1,(el-n.delay)/650));const e=ease(u);n.a=e;n.px=n.sx0+(n.x-n.sx0)*e;n.py=n.sy0+(n.y-n.sy0)*e}},()=>{ENTR=false;L.forEach(n=>{n.a=1;n.px=n.x;n.py=n.y})})}
+
+/* ================= hit testing, hover, tooltip ================= */
+function hit(mx,my){const L=live();let best=null,bd=1e9;
+ for(const kind of['root','area','person','topic','file'])for(const n of L){if(n.kind!==kind)continue;if(alphaOf(n)<.12&&!(FSET&&FSET.has(n.id)))continue;if((n.tv??1)<.3)continue;if(n.kind==='file'&&vis(n)<.5)continue;
+  const d=Math.hypot(sx(n)-mx,sy(n)-my),r=Math.max(rs(n),n.kind==='file'?4.5:8)+3;if(d<r&&d<bd){bd=d;best=n}
+  if(best&&kind!=='file')break}
+ return best}
+function hitLink(mx,my){let best=null,bd=7;for(const l of RL){if(!l.hot||l.cx===undefined)continue;const x1=sx(l.a),y1=sy(l.a),x2=sx(l.b),y2=sy(l.b);
+ for(let i=1;i<20;i++){const t=i/20,u=1-t,x=u*u*x1+2*u*t*l.cx+t*t*x2,y=u*u*y1+2*u*t*l.cy+t*t*y2,d=Math.hypot(x-mx,y-my);if(d<bd){bd=d;best=l}}}return best}
+const tip=$('#tip');
+/* one confidence word everywhere (rule 24): Sure, Leaning or Not sure, from plan.js */
+const confOf=n=>{const p=Math.round(n.p*100);return Plan.conf?Plan.conf(p):{key:p>=90?'sure':p>=75?'leaning':'unsure',word:p>=90?'Sure':p>=75?'Leaning':'Not sure',pct:p}};
+function confWord(n){const c=confOf(n);return `${c.word}, ${c.pct}%`}
+const TYPES=[['pdf','PDF'],['doc','Word'],['xls','Spreadsheet'],['img','Image'],['other','Other']];
+function fbar(fs){const m=new Map();fs.forEach(f=>{const t=fkOf(f);m.set(t,(m.get(t)||0)+1)});const T=TYPES.filter(([t])=>m.get(t));
+ return `<div class="bar">${T.map(([t])=>`<span style="flex:${m.get(t)};background:${C.fk[t]}"></span>`).join('')}</div><div class="meta">${T.map(([t,l])=>`<span><span style="color:${C.fk[t]}">●</span> ${l} ${m.get(t)}</span>`).join('')}</div>`}
+function showTip(n,mx,my){if(n.link){hideTip();return}const E=esc,part=a=>(AREAS.find(x=>x.id===a)||{}).label||'';let h='';
+ if(n.kind==='root'){const T=live().filter(x=>x.kind==='topic').length,F=live().filter(x=>x.kind==='file'&&atDay(x)).length;h=`<div class="path">Centre</div><h2>You</h2><div class="meta"><span>${areasL().length} parts of life</span><span>${T} folders</span><span>${F} files</span></div>`}
+ else if(n.kind==='area'){const fs=nowFiles(n);h=`<div class="path">Part of life</div><h2 style="color:${partOf(n)}">${E(n.label)}</h2><div class="meta"><span>${kids(n.id).filter(x=>x.kind==='topic').length} folders</span><span>${fs.length} files</span></div>${fs.length?fbar(fs):''}${n.priv?'<span class="tag"><span class="fms" style="font-size:13px">lock</span>Private: never sent to AI</span>':''}`}
+ else if(n.kind==='topic'){const fs=nowFiles(n),last=fs.length?Math.max(...fs.map(f=>f.day)):null;
+  const note=n.priv?'<span class="tag"><span class="fms" style="font-size:13px">lock</span>Private: never sent to AI</span>':n.conf==='unsure'?'<span class="tag" style="border-style:dashed">Unsure: waiting in Needs You</span>':'<span class="tag">Sure</span>';
+  h=`<div class="path">${E(part(n.area))} › ${E(n.label)}</div><h2>${E(n.label)}</h2><div class="meta"><span>${fs.length} files</span>${last!==null?'<span>last added '+(last===TODAY?'today':DAYNAME(last))+'</span>':''}</div>${fs.length?fbar(fs):''}${note}`}
+ else if(n.kind==='file'){const F=(Plan.view().D.files||{})[n.id]||{},kb=F.size||0,t=fkOf(n),P=byId.get(n.parent);
+  h=`<div class="path">${E(part(n.area))} › ${E(P?P.label:'')}</div><h2>${E(n.label)}</h2><div class="meta"><span style="color:${C.fk[t]}">${TYPES.find(x=>x[0]===t)[1]}</span>${kb?'<span>'+(kb>1024?(kb/1024).toFixed(1)+' MB':kb+' KB')+'</span>':''}</div><div class="note">${n.priv?'Private. Placed by its folder, never read by AI.':'Why here: '+E(why(n))}</div>`}
+ else{const T=(n.tops||[]).map(t=>byId.get(t)).filter(Boolean);h=`<div class="path">Person Tuck spotted</div><h2>${E(n.label)}</h2><div class="note">Named in files in ${T.length} folder${T.length===1?'':'s'}: ${T.map(t=>E(t.label)).join(', ')}.</div>`}
+ tip.innerHTML=h;tip.classList.add('on','fcard');const w=tip.offsetWidth,hh=tip.offsetHeight,RW=Wd-PANW();let x=mx+16,y=my+16;if(x+w>RW-16)x=mx-w-16;if(y+hh>Ht-16)y=Ht-hh-16;
+ tip.style.left=Math.max(16,x)+'px';tip.style.top=Math.max(16,y)+'px'}
+function hideTip(){tip.classList.remove('on')}
+let MX=null,MY=null;
+cv.addEventListener('pointermove',e=>{{const b=cv.getBoundingClientRect();MX=e.clientX-b.left;MY=e.clientY-b.top;if(KR()>2.5)req()}if(DRAG)return;const b=cv.getBoundingClientRect();const mx=e.clientX-b.left,my=e.clientY-b.top;const n=hit(mx,my);const l=n?null:hitLink(mx,my);
+ if(n!==HOVER||l!==HLINK){HOVER=n;HLINK=l;HF.set=n?hovSetOf(n):l?new Set([l.a.id,l.b.id,l.ta.id]):HF.set;if(RM){HF.mix=n||l?1:0;if(!n&&!l)HF.set=null}cv.classList.toggle('pointing',!!(n||l));req()}
+ if(n)showTip(n,mx,my);else if(l)showTip({link:l},mx,my);else hideTip()});
+cv.addEventListener('pointerleave',()=>{MX=null;MY=null;HOVER=null;HLINK=null;if(RM){HF.mix=0;HF.set=null}hideTip();req()});
+
+/* ================= focus ================= */
+function focus(n,{cam=true}={}){
+ FOCUS=n;FSET=n?neighbourhood(n):null;crumbs();if(window.TuckChat)chatSetup();
+ if(!n){closeInsp();req();return}
+ openInsp(n);
+ if(cam){if(n.kind==='root')fitTo(live(),5);else fitTo([...FSET].map(id=>byId.get(id)).filter(x=>x&&!x.gone&&x.kind!=='root'&&(x.kind!=='file'||x.parent===n.id||x===n||n.kind==='file')),n.kind==='file'?3:2.4)}
+ req()}
+function stepOut(){if(!FOCUS){if(INSP)closeInsp();return}const p=FOCUS.parent?byId.get(FOCUS.parent):null;if(!p||p.kind==='root'){focus(null);fitTo(live(),5)}else focus(p)}
+function crumbs(){const el=$('#crumbs');if(!FOCUS){el.classList.remove('on');el.innerHTML='';return}
+ const path=[...anc(FOCUS),FOCUS];
+ el.innerHTML=path.map((n,i)=>(i?'<span class="sep"><i class="ph ph-caret-right"></i></span>':'')+`<button data-id="${n.id}">${n.kind==='root'?'<i class="ph ph-user"></i>You':esc(n.label)}${n.priv?' <i class="ph ph-lock-simple" style="color:var(--lock)" aria-label="Private: never sent to AI"></i>':''}</button>`).join('')+'<span class="kbd esc" title="Esc steps back">esc</span>';
+ el.classList.add('on');el.querySelectorAll('button').forEach(b=>b.onclick=()=>{const n=byId.get(b.dataset.id);n.kind==='root'?(focus(null),fitTo(live(),5)):focus(n)})}
+cv.addEventListener('click',e=>{const b=cv.getBoundingClientRect();const n=hit(e.clientX-b.left,e.clientY-b.top);
+ if(n){focus(n,{cam:false});const RW=Wd-PANW();if(sx(n)>RW-60||sx(n)<40||sy(n)<40||sy(n)>Ht-60)camTo(d3.zoomIdentity.translate(Tr.x+RW/2-sx(n),Tr.y+Ht/2-sy(n)).scale(Tr.k),450)}else{const l=hitLink(e.clientX-b.left,e.clientY-b.top);if(l){focus(l.b===FOCUS?l.ta:l.b);return}if(FOCUS||INSP)focus(null)}});
+/* double-click the background: reset the view */
+cv.addEventListener('dblclick',e=>{const b=cv.getBoundingClientRect();if(hit(e.clientX-b.left,e.clientY-b.top))return;focus(null);resettle(.3);fitTo(live(),5)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(POP.classList.contains('on')){closePop();return}if($('#menu').style.display==='block'){closeMenu();return}if(document.activeElement===$('#q')){$('#q').blur();$('#results').classList.remove('on');return}stepOut()}});
+
+/* ================= drag: the live graph follows; drop on a new home to refile ================= */
+const drag=d3.drag().container(()=>cv).filter(e=>!e.button)
+ .subject(e=>{const n=hit(e.x,e.y);return n&&n.kind!=='root'&&(n.tv??1)>.3?n:null})
+ .on('start',e=>{const n=e.subject;const[p0x,p0y]=d3.pointer(e.sourceEvent,cv);
+   n.hx=n.x;n.hy=n.y;DRAG={n,moved:false,sx:p0x,sy:p0y,over:null,targets:n.kind==='area'||n.kind==='person'?[]:live().filter(t=>atDay(t)&&(n.kind==='file'?t.kind==='topic'&&t.id!==n.parent:t.kind==='area'&&t.id!==n.parent))}})
+ .on('drag',ev=>{if(!DRAG)return;let[px,py]=d3.pointer(ev.sourceEvent,cv);px=Math.max(8,Math.min(px,Wd-PANW()-16));py=Math.max(8,Math.min(py,Ht-8));if(!DRAG.moved&&Math.hypot(px-DRAG.sx,py-DRAG.sy)<4)return;
+  const n=DRAG.n,lx=(px-Tr.x)/Tr.k,ly=(py-Tr.y)/Tr.k;
+  if(!DRAG.moved){DRAG.moved=true;cv.classList.add('dragging');hideTip();HOVER=null;HF.set=null;HF.mix=0;if(!RM&&SIM)SIM.alphaTarget(.25).restart()}
+  n.fx=lx;n.fy=ly;if(RM||!SIM||n.kind==='file'){n.x=n.px=lx;n.y=n.py=ly;if(n.kind!=='file'){placeFiles();kids(n.id).forEach(f=>{f.px=f.x;f.py=f.y})}req()}
+  let best=null,bd=1e9;for(const t of DRAG.targets){const d=Math.hypot(sx(t)-px,sy(t)-py);if(d<Math.max(30,rs(t)+18)&&d<bd){bd=d;best=t}}DRAG.over=best;req()})
+ .on('end',()=>{if(!DRAG)return;const D=DRAG;DRAG=null;cv.classList.remove('dragging');if(!D.moved)return;const n=D.n;
+  if(SIM)SIM.alphaTarget(0);
+  /* a dragged topic, part of life or person eases back to its place unless it is pinned (Obsidian-like, item 28) */
+  const back=false;
+  if(!n.pin&&!back){n.fx=null;n.fy=null}
+  if(back){const x0=n.fx??n.x,y0=n.fy??n.y,hx=n.hx,hy=n.hy;
+   if(RM||!SIM){n.fx=null;n.fy=null;n.x=n.px=hx;n.y=n.py=hy;placeFiles();kids(n.id).forEach(f=>{f.px=f.x;f.py=f.y});req();return}
+   const E=d3.easeCubicOut;SIM.alpha(Math.max(SIM.alpha(),.3)).restart();
+   anim(620,t=>{const e=E(t);n.fx=x0+(hx-x0)*e;n.fy=y0+(hy-y0)*e},()=>{n.fx=null;n.fy=null;SIM.alpha(Math.max(SIM.alpha(),.12)).restart()});req();return}
+  if(D.over){Changes.apply(n.kind==='file'?'move':'move',n,D.over)}
+  else if(n.kind==='file'&&!n.pin){placeFiles();const x0=n.px,y0=n.py;n.flying=true;anim(dur(520),t=>{const e=SETTLE(t);n.px=x0+(n.x-x0)*e;n.py=y0+(n.y-y0)*e},()=>{delete n.flying})}
+  else{if(RM)resettle();else SIM.alpha(Math.max(SIM.alpha(),.35)).restart()}
+  req()});
+sel.call(drag).call(zoom).on('dblclick.zoom',null);
+
+/* ================= changes, with undo: every change is written to the one plan, and the map redraws from it ================= */
+let UNDO=null;
+function did(msg,undoFn,line){UNDO=undoFn||null;toast(msg,undoFn||false);if(line!==false)happy(line||"Got it. I'll remember that.")}
+/* a folder change waits in Edit Folders' change bar (like a change made there); Undo here takes it back there too */
+function pend(op,msg,line){const o=Plan.change(op);if(!o)return null;did(msg,()=>{Plan.revert(o.id);happy('Undone. Back as it was.')},line);return o}
+function undo(){if(!UNDO)return;const f=UNDO;UNDO=null;hideToast();f()}
+function answer(n,yes){if(!n.need)return;const r=answerNeed(n.need,yes);if(!r)return;
+ did(`${r.row.text}.`,()=>{r.undo();happy('Undone. Tuck asks again.')},yes?"Got it. I'll remember that.":"Thanks. I'll keep asking less about that.")}
+function setRead(n,k){const was=new Set([n,...desc(n)].filter(x=>x.priv).map(x=>x.id));const row=Plan.setLevel(n.id,k);const m=byId.get(n.id)||n;const r=effRead(m);
+ const locked=[m,...desc(m)].filter(x=>x.priv&&!was.has(x.id)&&atDay(x));popLocks(locked);ripple([m],m.priv?C.lock:C.ac);
+ did(r==='private'?`${m.label}: private. Never sent to AI. You can still open and preview ${m.kind==='file'?'it':'them'}.`:r==='names'?`${m.label}: names only. Tuck's AI stops reading inside.`:`${m.label}: Tuck's AI can read inside again.`,
+  ()=>{Plan.undoApply(row.id);happy('Undone. Back as it was.')},r==='private'?"Locked. That never goes to AI.":r==='names'?"Okay, names only.":"Got it. I'll read those.")}
+function toggleSort(n){const id=n.area;SORTNEW[id]=SORTNEW[id]===false;const on=SORTNEW[id]!==false;toast(on?`New files that fit ${n.label} go there again.`:`Paused ${n.label}. New files that fit wait in Needs You.`,false);if(INSP)openInsp(INSP);req()}
+function popLocks(ns){ns.forEach(x=>{x.lp=0});if(RM){ns.forEach(x=>delete x.lp);return}anim(560,t=>{ns.forEach(x=>{x.lp=t})},()=>ns.forEach(x=>delete x.lp))}
+const Changes={apply(kind,n,arg){switch(kind){
+ case 'rename':return pend({ty:'rename',node:n.id,name:arg},`Renamed to ${arg}.`,"Got it. I'll use that name.");
+ case 'move':ripple([arg],C.ac);return n.kind==='file'?pend({ty:'moveFiles',files:[n.id],to:arg.id},`Moved ${n.label} to ${arg.label}.`):pend({ty:'putInside',nodes:[n.id],parent:arg.id},`Moved ${n.label} to ${arg.label}.`);
+ case 'merge':{ripple([arg],C.ac);const o=pend({ty:'merge',nodes:[n.id],into:arg.id},`Merged ${n.label} into ${arg.label}.`);const t=byId.get(arg.id);if(t)focus(t);return o}
+ case 'split':{const o=pend({ty:'split',node:n.id,parts:arg.map(p=>({name:p.name,files:p.files}))},`Split ${n.label} into ${arg.length} folders.`);return o}
+ case 'read':return setRead(n,arg);
+ case 'hide':{const on=effNL(n);return pend({ty:on?'show':'hide',nodes:[n.id]},on?`Tuck reads ${n.label} again.`:`Hidden: Tuck won't look in ${n.label}. Its files stay where they are.`)}
+ case 'keep':return pend({ty:'keep',node:n.id},`${n.label} is your folder now. Tuck won't rename, merge or split it.`);
+ case 'forget':{Memory.forget(n.id);did(`Tuck forgot ${n.label}.`,()=>{Memory.restore(n.id);happy('Undone. Back as it was.')},"Okay. I won't learn that.");return}
+ case 'pin':{const on=!(n.pin||isPinned(n));n.pin=on;if(on){n.fx=n.x;n.fy=n.y}else{n.fx=null;n.fy=null;SIM&&SIM.alpha(.3).restart()}
+  const row=n.kind!=='person'&&Plan.setKeep?Plan.setKeep(n.id,on):null;if(!row)setPinned(n,on);$('#relayout').hidden=!live().some(x=>x.pin);
+  toast(n.kind==='person'?(on?`Pinned ${n.label} here.`:`${n.label} is not pinned any more.`):on?`${n.label}: Keep As Is.`:`${n.label}: Tuck may change it again.`,row?()=>{Plan.undoApply(row.id);const m=byId.get(n.id);if(m){m.pin=isPinned(m);if(!m.pin){m.fx=null;m.fy=null}}req()}:false);req();if(INSP)openInsp(INSP);return}}}};
+/* Pin Here means the same on every page: the id is kept in localStorage 'tuckPins' (folderpanel.js and resort.js read it); on the map it also stays where you put it */
+const PINK='tuckPins',pins=()=>{try{const a=JSON.parse(localStorage.getItem(PINK)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}};
+const isPinned=n=>n.kind!=='root'&&pins().includes(n.id);
+function setPinned(n,on){const a=pins().filter(x=>x!==n.id);if(on)a.push(n.id);try{localStorage.setItem(PINK,JSON.stringify(a))}catch(e){}}
+
+/* the plan (or memory) changed, here or in another page: rebuild the map from it. Files that changed folder fly to their new place. */
+/* the panel redraws unless you are typing in it */
+const typing=()=>{const a=document.activeElement;return !!(a&&insp.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))};
+function onPlan(){if(!LAID)return;const r=fromPlan();measure();sizes();
+ r.added.forEach(n=>{const p=byId.get(n.parent)||byId.get('you');const a=seedOf(n)*7;n.x=(p.x||0)+14*Math.cos(a);n.y=(p.y||0)+14*Math.sin(a);n.px=n.x;n.py=n.y;n.a=1;n.tv=atDay(n)?1:.06});
+ if(FOCUS)FOCUS=byId.get(FOCUS.id)||null;if(INSP)INSP=byId.get(INSP.id)||null;if(HOVER)HOVER=byId.get(HOVER.id)||null;HLINK=null;
+ const from=r.moved.filter(n=>n.kind==='file').map(n=>[n,n.px,n.py]);
+ {const fresh=new Set([...r.added,...r.moved].map(n=>n.id));live().forEach(n=>{if(n.kind!=='root'&&!fresh.has(n.id)&&!fresh.has(n.parent)&&n.fx==null&&n.x!==undefined){n.fx=n.x;n.fy=n.y;n._rz=1}});
+  if(SIM)SIM.on('end.rz',()=>{live().forEach(n=>{if(n._rz){n.fx=n.fy=null;delete n._rz}});SIM.on('end.rz',null)})}
+ resettle(.3);placeFiles();
+ if(!RM)from.forEach(([n,x0,y0])=>{n.flying=true;n.px=x0;n.py=y0;anim(700,t=>{const e=SETTLE(t);n.px=x0+(n.x-x0)*e;n.py=y0+(n.y-y0)*e},()=>{delete n.flying;n.px=n.x;n.py=n.y})});
+ else from.forEach(([n])=>{n.px=n.x;n.py=n.y});
+ FSET=FOCUS?neighbourhood(FOCUS):null;FILT=filterSet();crumbs();if(INSP&&!typing())openInsp(INSP);else if(!INSP&&insp.classList.contains('on'))closeInsp();
+ updateCounts();scrubLabel();navCounts();req()}
+
+/* ================= right-click: every action for that node ================= */
+const POP=$('#pop');
+function closePop(){POP.classList.remove('on');POP.innerHTML=''}
+function popAt(n,html){POP.innerHTML=html;POP.classList.add('on');const pw=POP.offsetWidth,ph=POP.offsetHeight,x=sx(n),y=sy(n),RW=Wd-PANW();
+ let px=x+rs(n)+14,py=y-ph/2;if(px+pw>RW-8)px=x-rs(n)-14-pw;POP.style.left=Math.max(8,px)+'px';POP.style.top=Math.max(8,Math.min(Ht-ph-70,py))+'px';
+ const i=POP.querySelector('input,select');i&&i.focus();POP.querySelector('[data-pno]').onclick=closePop}
+function confirmPop(n,body,line,ok,go,cls='pri'){popAt(n,`<b class="pt">${esc(n.label)}</b>${body}<p id="pline">${line}</p><div class="acts"><button class="btn sm ghost" data-pno>Cancel</button><button class="btn sm ${cls}" data-pok>${ok}</button></div>`);
+ const b=POP.querySelector('[data-pok]');b.onclick=()=>{const r=go();if(r!==false)closePop()};POP.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'&&e.target.tagName!=='SELECT')b.click();if(e.key==='Escape')closePop()}}
+/* one action list for every page: folderpanel.js's FolderPanel.actions gives the keys, short labels, check marks and the reason an
+   item is unavailable (Plan.can). Brain keeps its own look and its in-place confirm pops on the map. Keys map to doAction's. */
+const FPKEY={putInside:'move',newInside:'newin',deleteEmpty:'delete',show:'hide',keep:'pin'};
+const selOf=n=>({type:n.kind==='file'?'file':'node',id:n.id});
+const BH={toast:(m,u)=>toast(m,u||false),refresh:()=>{if(INSP)openInsp(INSP)},open:id=>{const f=byId.get(id);toast(`${f?f.label:'It'} opens in its app.`,false)},reveal:id=>{location.href='finder.html'},quicklook:id=>{const f=byId.get(id);if(f)focus(f)}};
+function actionsFor(n){if(n.kind==='root')return [];if(n.kind==='person')return [{k:'pin',ic:'push-pin',l:n.pin||isPinned(n)?'Unpin':'Pin Here'}];
+ if(!window.FolderPanel||!Plan.view().node(n.id)&&!Plan.view().file(n.id))return [];
+ return FolderPanel.actions(selOf(n),BH).map(a=>a==='-'?'-':{k:FPKEY[a.key]||a.key,ic:a.ic,l:a.label,dis:!!a.dis,why:a.dis?a.line:'',check:a.check,run:a.run})}
+function nodeMenu(n,x,y,keys){let A=actionsFor(n);if(keys)A=keys.map(k=>A.find(a=>a!=='-'&&a.k===k)).filter(Boolean);A=A.filter((a,i,L)=>a!=='-'||(i>0&&L[i-1]!=='-'&&i<L.length-1));if(!A.filter(a=>a!=='-').length)return;
+ const chk=A.some(a=>a!=='-'&&a.check!=null),said=new Set();
+ M.innerHTML=A.map(a=>{if(a==='-')return '<hr>';const why=a.dis&&!said.has(a.why)?(said.add(a.why),a.why):'';
+  return `<button data-k="${a.k}" role="${a.check!=null?'menuitemcheckbox':'menuitem'}"${a.check!=null?` aria-checked="${!!a.check}"`:''}${a.dis?' aria-disabled="true" class="dis"':''}>${chk?`<i class="ph ph-check ck" style="visibility:${a.check?'visible':'hidden'}"></i>`:`<i class="ph ph-${a.ic}"></i>`}<span>${a.l}${why?`<small>${esc(why)}</small>`:''}</span></button>`}).join('');M.style.display='block';
+ /* stays inside the map: flips left of / above the pointer when it would run past the window's edge */
+ const W=stage.getBoundingClientRect(),mw=M.offsetWidth,mh=M.offsetHeight;let px=x,py=y;
+ if(px+mw>W.right-8)px=x-mw;if(py+mh>W.bottom-8)py=y-mh;M.style.left=Math.max(W.left+8,Math.min(px,W.right-mw-8))+'px';M.style.top=Math.max(W.top+8,Math.min(py,W.bottom-mh-8))+'px';
+ M.querySelectorAll('button:not(.dis)').forEach(b=>b.onclick=()=>{closeMenu();doAction(n,b.dataset.k)});setTimeout(()=>document.addEventListener('pointerdown',outside),0)}
+cv.addEventListener('contextmenu',e=>{e.preventDefault();const b=cv.getBoundingClientRect();const n=hit(e.clientX-b.left,e.clientY-b.top);if(!n)return;hideTip();if(FOCUS!==n)focus(n,{cam:false});nodeMenu(n,e.clientX,e.clientY)});
+function doAction(n,k,pre){const fs=nowFiles(n),here=n.kind==='area'?n:areaOf(n),cnt=`${fs.length} file${fs.length===1?'':'s'}`;
+ if(k==='rename'){confirmPop(n,`<input class="field" id="prn" value="${esc(pre||n.label)}" aria-label="New name">`,'',`Rename`,()=>{const v=$('#prn').value.trim();if(!v||v===n.label)return;Changes.apply('rename',n,v)});
+  const i=$('#prn'),L=$('#pline'),upd=()=>{L.innerHTML=`${esc(n.kind==='topic'?here.label+' › ':'')}${esc(n.label)} becomes <b>${esc(i.value.trim()||'…')}</b>. Its ${cnt} stay inside; nothing moves on disk.`};upd();i.oninput=upd;i.select();return}
+ if(k==='move'){const opts=n.kind==='topic'?areasL().filter(x=>x.id!==n.parent):live().filter(t=>t.kind==='topic'&&t.id!==n.parent&&atDay(t)).sort((x,y)=>(y.area===n.area)-(x.area===n.area));
+  confirmPop(n,`<select class="field" id="pmv" aria-label="Move to">${opts.map(o=>`<option value="${o.id}"${o.id===pre?' selected':''}>${esc(n.kind==='topic'?o.label:areaOf(o).label+' › '+o.label)}</option>`).join('')}</select>`,'','Move',()=>Changes.apply('move',n,byId.get($('#pmv').value)));
+  const s=$('#pmv'),L=$('#pline'),upd=()=>{const t=byId.get(s.value);L.innerHTML=n.kind==='topic'?`${esc(n.label)} and its ${cnt} move from ${esc(here.label)} to <b>${esc(t.label)}</b>. The folder follows in Finder.`:`${esc(n.label)} moves to <b>${esc(t.label)}</b>.${t.priv&&!n.priv?' It becomes private there.':''} Tuck learns from it.`};upd();s.onchange=upd;return}
+ if(k==='merge'){const opts=live().filter(t=>t.kind==='topic'&&t!==n&&atDay(t)).sort((x,y)=>(y.area===n.area)-(x.area===n.area));
+  confirmPop(n,`<select class="field" id="pmg" aria-label="Merge with">${opts.map(o=>`<option value="${o.id}"${o.id===pre?' selected':''}>${esc(areaOf(o).label+' › '+o.label)}</option>`).join('')}</select>`,'','Merge',()=>Changes.apply('merge',n,byId.get($('#pmg').value)));
+  const s=$('#pmg'),L=$('#pline'),upd=()=>{const t=byId.get(s.value),c=nowFiles(t).length;L.innerHTML=`Its ${cnt} join <b>${esc(t.label)}</b> (${c} → ${pf(c+fs.length,'file')}). ${esc(n.label)} goes away. Undo any time.`};upd();s.onchange=upd;return}
+ if(k==='split'){closePop();Resort.split({nodeId:n.id});return}
+ if(['subs','arrange','resort'].includes(k)){const id=n.id;closePop();k==='subs'?Resort.suggest({nodeId:id}):k==='arrange'?Resort.arrange({nodeId:id}):n.kind==='file'?Resort.open({scope:'selection',fileIds:[id]}):Resort.open({scope:Plan.view().kids(id).length?'folder_tree':'folder',nodeId:id});return}
+ if(k==='delete'){pend({ty:'deleteEmpty',node:n.id},`Deleted ${n.label}.`);return}
+ if(['open','quicklook','reveal'].includes(k)){const a=actionsFor(n).find(x=>x&&x.k===k);a&&a.run();return}
+ if(k==='keep'){Changes.apply('pin',n);return}
+ if(k==='pin'){Changes.apply('pin',n);return}
+ if(k==='hide'){const on=effNL(n);confirmPop(n,'',on?`Tuck reads ${esc(n.label)} again.`:`Tuck stops looking in ${esc(n.label)}. Its ${cnt} stay where they are, faint on the map.`,on?'Show again':'Hide',()=>Changes.apply('hide',n));return}
+ if(k==='private'){const on=n.priv;confirmPop(n,'',on?`Tuck's AI may read ${n.kind==='file'?'this file':'these '+cnt} again.${n.kind!=='file'?' Files private by kind stay locked.':''}`:`Tuck's AI stops reading ${n.kind==='file'?'this file':'these '+cnt}. ${n.kind==='file'?'It stays':'They stay'} here with a lock, and you can still open and preview ${n.kind==='file'?'it':'them'}.`,on?'Let AI read':'Make private',()=>Changes.apply('read',n,on?(n.lvOwn==='private'?'inherit':'read'):'private'));return}
+ if(k==='newin'){confirmPop(n,`<input class="field" id="pnf" value="untitled folder" aria-label="New folder name">`,'','Make Folder',()=>{const v=$('#pnf').value.trim();if(!v)return;pend({ty:'newFolder',parent:n.id,name:v},`New folder ${v} in ${n.label}.`,"Made it. Drag files in, or I'll suggest some.")});
+  const i=$('#pnf'),L=$('#pline'),upd=()=>{L.innerHTML=`A new empty folder <b>${esc(i.value.trim()||'…')}</b> inside ${esc(n.label)}. Nothing moves on disk.`};upd();i.oninput=upd;i.select();return}
+ if(k==='why'){focus(n);return}
+ if(k==='ask'){TuckChat.open({context:n.label});return}}
+
+/* ================= the panel: header, Connected to, Files, What Tuck may do here ================= */
+const insp=$('#insp');
+const nm=n=>n.kind==='root'?'You':n.label;
+function closeInsp(){const was=!!INSP;INSP=null;insp.classList.remove('on');stage.classList.remove('insp-open');if(was&&!FOCUS&&live().length&&Wd)fitTo(live(),5,450)}
+const popBtn=(id,label,title)=>`<button class="ipop" id="${id}" aria-haspopup="menu" aria-expanded="false" title="${esc(title)}">${label}<i class="ph ph-caret-down pcaret" aria-hidden="true"></i></button>`;
+function head(n){let ico,meta,sure='';
+ if(n.kind==='root'){ico=`<span class="ico" style="background:var(--ac);font:700 12px var(--f)">JY</span>`;meta='What Tuck knows about you'}
+ else if(n.kind==='person'){ico=`<span class="ico" style="background:var(--ac-fill);color:var(--ac-ink)"><i class="ph-fill ph-user"></i></span>`;const l=profOf(n)[0];meta=`Person in your files${l?' · '+esc(l.v):''}`}
+ else if(n.kind==='area'){ico=`<span class="ico" style="background:var(${n.meta.hue})"><i class="ph-fill ph-${n.ic}"></i></span>`;meta=`Part of your life · ${pf(nowFiles(n).length,'file')}`}
+ else if(n.kind==='topic'){const a=areaOf(n);ico=`<span class="ico" style="background:var(${a.meta.hue})"><i class="ph-fill ph-${a.ic}"></i></span>`;meta=`${popBtn('imove',`In ${esc(byId.get(n.parent)?byId.get(n.parent).label:a.label)}`,'Move or merge it')} · ${pf(nowFiles(n).length,'file')}`}
+ else{ico=`<span class="ico file"><i class="ph ph-${KICON[n.fk]}" style="color:var(--k-${n.fk})"></i></span>`;meta=popBtn('imove',`In ${esc(byId.get(n.parent).label)}`,'Move or re-sort it')}
+ if(n.kind==='topic'||n.kind==='file'){const c=confOf(n),p=c.pct,u=c.key==='unsure';sure=`<div class="sure${u?' uns':''}"><span>${c.word}</span><i><b style="transform:scaleX(${p/100})"></b></i></div>`}
+ /* every action on the thing it changes: the name renames, "In …" moves, Files › Arrange ⌄, the read level and Keep As Is below; ··· keeps the rare ones */
+ const rare=n.kind!=='file'&&actionsFor(n).some(a=>a&&['hide','delete'].includes(a.k));
+ const acts=rare?`<button class="ib" id="imore" aria-haspopup="menu" aria-label="More for ${esc(nm(n))}" title="More"><i class="ph ph-dots-three"></i><i class="ph ph-caret-down pcaret" aria-hidden="true"></i></button>`:n.kind==='person'&&actionsFor(n).length?`<button class="ib" id="imore" aria-haspopup="menu" aria-label="Actions for ${esc(nm(n))}" title="Actions"><i class="ph ph-dots-three"></i><i class="ph ph-caret-down pcaret" aria-hidden="true"></i></button>`:'';
+ const canRn=(n.kind==='topic'||n.kind==='area')&&!n.extra;
+ return `<div class="ihead">${ico}<div class="t"><h2 id="ititle">${canRn?`<button class="iname" data-irn title="Rename">${esc(nm(n))}</button>`:esc(nm(n))}${n.priv?' <i class="ph-fill ph-lock-simple" style="color:var(--lock);font-size:14px" aria-label="Private: never sent to AI"></i>':''}</h2><div class="meta">${meta}</div>${sure}</div>${acts}<button class="ib" id="iclose" aria-label="Close"><i class="ph ph-x"></i></button></div>`}
+/* evidence: private things are described by name and kind only, never by words from inside */
+const KWORD={pdf:'PDF',doc:'document',xls:'spreadsheet',img:'image',code:'code file',txt:'text file'};
+const cap=x=>x?x[0].toUpperCase()+x.slice(1):x;
+/* names and kinds only: the plan's evidence never quotes words from inside a file */
+function why(f){const t=byId.get(f.parent);if(f.qwhy&&f.conf==='unsure')return f.qwhy;return t&&t.why?`It fits ${t.label}: ${t.why.charAt(0).toLowerCase()+t.why.slice(1)}`:`Tuck matched its name to ${t?t.label:'this folder'}`}
+const fmeta=f=>[cap(KWORD[f.fk]),f.from,Plan.ago(f.age)].join(' · ');
+/* a panel says each thing once (rule 30): the Why line goes when it only repeats the line above it */
+const wordsOf=x=>new Set(String(x||'').toLowerCase().replace(/^why:\s*/,'').match(/[a-z0-9]+/g)||[]);
+const sameLine=(a,b)=>{const A=wordsOf(a),B=wordsOf(b);if(!A.size||!B.size)return false;let k=0;A.forEach(w=>{if(B.has(w))k++});return k/Math.min(A.size,B.size)>=.7};
+function ruleOf(t){return (t.why||`Files whose names match ${t.label}`)+(t.priv&&kindsOf(t).length?` (${kindsOf(t).join(', ')})`:'')}
+function connHtml(n){const P=profOf(n),pids=new Set(P.map(l=>l.id)),R0=n.kind==='person'?n.tops.map(t=>({other:byId.get(t),lab:`Appears in ${byId.get(t).label}`})):relOf(n.kind==='file'?n:n).map(l=>({other:l.ta===n||l.a===n?l.b:l.ta,lab:l.lab})).filter(x=>x.other!==n);const R=R0.filter(x=>!(x.other.kind==='person'&&pids.has(x.other.id)));
+ const learned=(LEARN[n.id]||[]);const Q=n.kind==='topic'?[n,...kids(n.id)].filter(x=>x.q&&x.conf==='unsure'):n.q&&n.conf==='unsure'?[n]:[];
+ const area=n.kind==='topic'||n.kind==='file'?[{other:n.kind==='file'?byId.get(n.parent):areaOf(n),lab:n.kind==='file'?'Its topic':'Part of your life'}]:n.kind==='area'?kids(n.id).filter(atDay).map(t=>({other:t,lab:`${pf(nowFiles(t).length,'file')}${t.priv?' · private':''}${t.conf==='unsure'?' · unsure':''}`})):[];
+ const rows=[...P.map(l=>`<li><i class="ph ph-user-circle"></i><span>${esc(l.k==='Class'?l.v:l.k+': '+l.v)}<small>${esc(SRC[l.src])} · ${esc(l.from)}</small></span></li>`),
+  ...[...area,...R].map(x=>`<li class="clk" data-go="${x.other.id}"><span class="tdot" style="background:${x.other.kind==='person'?'var(--ac)':'var('+((areaOf(x.other)||{}).meta||{hue:'--ac'}).hue+')'}"></span><span>${esc(x.other.label)}<small>${esc(x.lab)}</small></span><i class="ph ph-caret-right go"></i></li>`),
+  ...learned.map(([id,t,src])=>`<li class="${STOPPED.has(id)?'off':''}"><i class="ph ph-graduation-cap"></i><span>${esc(t)}<small>${esc(src)}${STOPPED.has(id)?' · stopped':''}</small></span><button class="btn sm ghost" data-stop="${id}">${STOPPED.has(id)?'Use Again':'Stop Using'}</button></li>`),
+  ...Q.map(x=>`<li class="qask"><i class="ph ph-question" style="color:var(--warn)"></i><span>${esc(x.q)}<small>${esc(x.qwhy||'')} Also in <a href="tuck.html#needs">Needs You</a>.</small><span class="yn"><button class="btn sm pri" data-qy="${x.id}">Yes</button><button class="btn sm" data-qn="${x.id}">No</button></span></span></li>`)];
+ return rows.length?`<section class="isec"><h3>Connected to</h3><ul class="conn">${rows.join('')}</ul></section>`:''}
+function filesHtml(n){const fs=(n.kind==='person'?PERSONFILES(n):kids(n.id).filter(x=>x.kind==='file')).filter(atDay).sort((a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true}));const show=n.allFiles?fs:fs.slice(0,8);
+ return `<section class="isec"><h3>Files <span class="h3n">${fs.length}</span>${n.kind==='topic'||n.kind==='area'?`<span class="sp"></span>${popBtn('iarr','<i class="ph ph-sort-ascending"></i>Arrange','Arrange, split or re-sort')}`:''}</h3><ul class="flist">${show.map(f=>`<li draggable="true" data-fid="${f.id}" data-go="${f.id}" title="Drag onto a topic on the map to move it"><i class="ph ph-${KICON[f.fk]}" style="color:var(--k-${f.fk})"></i><span><b>${esc(f.label)}${f.priv?' <i class="ph-fill ph-lock-simple" style="color:var(--lock)" aria-label="Private: never sent to AI"></i>':''}</b><small>${esc(fmeta(f))}</small></span><span class="fa"><button class="ib" data-iopen="${f.id}" title="Open" aria-label="Open ${esc(f.label)}"><i class="ph ph-arrow-square-out"></i></button><button class="ib" data-ireveal="${f.id}" title="Show in Finder" aria-label="Show ${esc(f.label)} in Finder"><i class="ph ph-finder-logo"></i></button></span></li>`).join('')}</ul>${fs.length>show.length?`<button class="btn sm ghost" data-allfiles>Show all ${fs.length}</button>`:''}</section>`}
+const PERSONFILES=p=>{const want=PFILES[p.id]||[];return live().filter(f=>f.kind==='file'&&want.includes(f.label)&&!f.priv)};
+function readHtml(n){if(n.kind==='person'||n.kind==='root')return '';const r=effRead(n),up=n.kind==='area'?null:byId.get(n.parent),own=!!n.lvOwn;
+ return `<section class="isec"><h3>What Tuck may do here</h3><div class="rseg" role="radiogroup" aria-label="What Tuck's AI may read">${READS.map(([k,l])=>`<button role="radio" aria-checked="${r===k}" class="${r===k?'on':''}" data-rd="${k}">${k==='private'?'<i class="ph ph-lock-simple"></i>':''}${l}</button>`).join('')}</div>
+  <p class="rnote">${esc(READS.find(x=>x[0]===r)[2].replace('these files',n.kind==='file'?'this file':'these files').replace('them.',n.kind==='file'?'it.':'them.'))}${kindsOf(n).length&&r==='private'?` Private kind: ${esc(kindsOf(n).join(', '))}.`:''}</p>
+  ${!own&&r==='private'&&n.lvFrom&&n.lvFrom!=='a private kind'&&up?'':''}
+  ${own&&(up||n.pk)?`<button class="lnk" data-rd="inherit">${n.pk?'Back to private by default':`Use ${esc(up.label)}'s setting`}</button>`:up&&n.lvFrom!=='a private kind'?`<p class="rnote">Same as ${esc(up.label)}.</p>`:''}
+  ${n.kind==='area'&&!n.extra?`<div class="rrow"><span><b>Sort new files here</b><small>${n.meta.sortNew?'New files that fit go here on their own.':'Paused. New files that fit wait in Needs You.'}</small></span><button class="sw${n.meta.sortNew?' on':''}" role="switch" aria-checked="${n.meta.sortNew}" aria-label="Sort new files into ${esc(n.label)}" data-sn></button></div>`:''}
+  ${n.kind==='topic'||n.kind==='file'||(n.kind==='area'&&!n.extra)?(k=>`<div class="rrow"><span><b>Keep As Is</b><small>${k?(n.kind==='file'?'Tuck won’t move it.':'Tuck won’t rename, move or reshape it.'):(n.kind==='file'?'Tuck may move it to a better folder.':'Tuck may rename, move or reshape it.')}</small></span><button class="sw${k?' on':''}" role="switch" aria-checked="${k}" aria-label="Keep As Is" data-ikeep></button></div>`)(!!(Plan.isKept&&Plan.isKept(n.id))):''}
+  ${effNL(n)?`<p class="rnote"><i class="ph ph-eye-slash"></i> Hidden: Tuck doesn't look in here. <button class="lnk" data-unhide>Show again</button></p>`:''}</section>`}
+function openInsp(n){
+ if(n===null){closeInsp();return}
+ INSP=n;let b='';
+ if(n.kind==='root'){const us=live().filter(x=>x.conf==='unsure').length;
+  b=`<section class="isec" id="memhost"></section><section class="isec"><h3>Connected to</h3><ul class="conn">${areasL().map(a=>`<li class="clk" data-go="${a.id}"><span class="tdot" style="background:var(${a.meta.hue})"></span><span>${esc(a.label)}<small>${pf(nowFiles(a).length,'file')} · ${kids(a.id).filter(atDay).length} topics${a.priv?' · private':''}</small></span><i class="ph ph-caret-right go"></i></li>`).join('')}
+   ${live().filter(p=>p.kind==='person').map(p=>`<li class="clk" data-go="${p.id}"><span class="tdot" style="background:var(--ac)"></span><span>${esc(p.label)}<small>${esc((profOf(p)[0]||{}).v||'')}</small></span><i class="ph ph-caret-right go"></i></li>`).join('')}</ul></section>
+  <section class="isec"><h3>How it connects</h3><ul class="links">
+   <li><i class="ph ph-hand-tap"></i><span><b>Needs You</b>Each card is a dashed line here. Answer it and the line turns solid.</span><a href="tuck.html#needs">${us} open</a></li>
+   <li><i class="ph ph-folder-simple"></i><span><b>Your folders</b>Every topic is a folder. Rename or move a topic here and the folder follows.</span><a href="finder.html">Finder</a></li>
+   <li><i class="ph ph-shield-check"></i><span><b>Privacy and AI</b>What Tuck may do here is the same setting as in Settings.</span><a href="tuck.html#prefs/privacy">Settings</a></li>
+   <li><i class="ph ph-clock-counter-clockwise"></i><span><b>History</b>Every change is logged and can be undone. Slide the timeline to see an earlier day.</span><a href="tuck.html#history">Open</a></li></ul></section>`}
+ else if(n.kind==='area')b=`<section class="isec"><p class="lead">${esc(n.meta.sum)}</p>${n.meta.src&&!sameLine(n.meta.sum,n.meta.src)?`<p class="rnote">${esc(n.meta.src)}</p>`:''}</section>${connHtml(n)}${readHtml(n)}`;
+ else if(n.kind==='topic')b=`<section class="isec">${n.know?`<p class="lead">${esc(cap(n.know))}</p>`:''}${n.know&&sameLine(n.know,ruleOf(n))?'':`<p class="rnote">Why: ${esc(ruleOf(n))}.</p>`}</section>${connHtml(n)}${filesHtml(n)}${readHtml(n)}`;
+ else if(n.kind==='person')b=`${connHtml(n)}${filesHtml(n)}<section class="isec"><h3>What Tuck may do here</h3><p class="rnote">Tuck uses this name to group files. It's part of your memory, never a folder. <button class="lnk" data-forgetp>Forget ${esc(n.label)}</button></p></section>`;
+ else b=`<section class="isec"><p class="lead">${esc(why(n))}.</p><p class="rnote">${esc(fmeta(n))} · ${esc(n.path)}${n.priv?' · opens and previews as usual':''}</p><div class="acts"><button class="btn sm" data-iopen="${n.id}"><i class="ph ph-arrow-square-out"></i>Open</button><button class="btn sm ghost" data-ireveal="${n.id}"><i class="ph ph-finder-logo"></i>Show in Finder</button></div></section>${connHtml(n)}${readHtml(n)}`;
+ if(FILTER==='unsure'&&n.kind==='root')b=unsurePanel();
+ insp.innerHTML=(n.kind==='root'&&FILTER!=='all'?`<div class="ihead"><span class="ico" style="background:var(--warn)"><i class="ph-fill ph-question"></i></span><div class="t"><h2>Tuck is unsure</h2><div class="meta">Answer to teach it</div></div><button class="ib" id="iclose" aria-label="Close"><i class="ph ph-x"></i></button></div>`:head(n))+`<div class="ibody">${b}</div>`;
+ insp.classList.add('on');stage.classList.add('insp-open');bindInsp(n);
+ if(n.kind==='root'&&FILTER==='all')Memory.render($('#memhost'),MEMHOOKS)}
+const MEMHOOKS={toast:(m,undoFn)=>toast(m,undoFn||false),happy:l=>happy(l),go:name=>{const t=live().find(x=>x.kind==='topic'&&x.label===name);if(t)focus(t)},other:{href:'tuck.html#prefs/you',label:'Same as Settings › About You'}};
+function unsurePanel(){const Q=N.filter(x=>x.q&&(x.conf==='unsure'||x.answered));const tag=x=>x.ans==='yes'?'<span class="chip ok">Yes</span>':x.ans==='no'?'<span class="chip">No</span>':'<span class="chip ok">Answered</span>';
+ return `<section class="isec"><p>Each answer teaches Tuck. Dashed lines turn solid when you say yes.</p></section><div>${Q.map(x=>`<div class="qrow${x.answered?' done':''}"><div class="q"><b data-go="${x.id}">${esc(x.q)}</b><small>${esc(x.qwhy||'')}</small></div>${x.answered?tag(x):`<div class="yn"><button class="btn sm pri" data-qy="${x.id}" aria-label="Yes"><i class="ph ph-check"></i></button><button class="btn sm" data-qn="${x.id}" aria-label="No"><i class="ph ph-x"></i></button></div>`}</div>`).join('')}</div>`}
+function bindInsp(n){
+ const c=$('#iclose');if(c)c.onclick=()=>{focus(null)};
+ const pop=(b,keys)=>{if(!b)return;b.onclick=e=>{e.stopPropagation();const r=b.getBoundingClientRect();nodeMenu(n,r.left,r.bottom+4,keys)}};
+ pop($('#imore'),n.kind==='person'?null:['hide','delete']);pop($('#imove'),n.kind==='file'?['move','resort']:['move','merge']);pop($('#iarr'),['arrange','split','resort']);
+ const rn=insp.querySelector('[data-irn]');if(rn)rn.onclick=()=>{const c=Plan.can('rename',n.id);if(!c.ok){FolderPanel.refusal(c.why);return}doAction(n,'rename')};
+ insp.querySelectorAll('[data-iopen]').forEach(b=>b.onclick=e=>{e.stopPropagation();BH.open(b.dataset.iopen)});insp.querySelectorAll('[data-ireveal]').forEach(b=>b.onclick=e=>{e.stopPropagation();BH.reveal(b.dataset.ireveal)});
+ const kp=insp.querySelector('[data-ikeep]');if(kp)kp.onclick=()=>Changes.apply('pin',n);
+ insp.querySelectorAll('[data-go]').forEach(el=>el.onclick=e=>{if(e.target.closest('.fa'))return;e.stopPropagation();const t=byId.get(el.dataset.go);if(t)focus(t)});
+ insp.querySelectorAll('[data-qy]').forEach(b=>b.onclick=()=>{answer(byId.get(b.dataset.qy),true)});
+ insp.querySelectorAll('[data-qn]').forEach(b=>b.onclick=()=>{answer(byId.get(b.dataset.qn),false)});
+ insp.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>{if(b.dataset.rd!==effRead(n)||b.dataset.rd==='inherit')Changes.apply('read',n,b.dataset.rd)});
+ const sn=insp.querySelector('[data-sn]');if(sn)sn.onclick=()=>toggleSort(n);
+ const uh=insp.querySelector('[data-unhide]');if(uh)uh.onclick=()=>Changes.apply('hide',n);
+ const fp=insp.querySelector('[data-forgetp]');if(fp)fp.onclick=()=>{focus(null);Changes.apply('forget',n)};
+ insp.querySelectorAll('[data-stop]').forEach(b=>b.onclick=()=>{const id=b.dataset.stop,was=STOPPED.has(id);was?STOPPED.delete(id):STOPPED.add(id);toast(was?'Tuck uses this rule again.':'Stopped. Tuck won\'t use this rule any more.',()=>{was?STOPPED.add(id):STOPPED.delete(id);openInsp(n)});openInsp(n)});
+ const all=insp.querySelector('[data-allfiles]');if(all)all.onclick=()=>{n.allFiles=true;openInsp(n)};
+ insp.querySelectorAll('.flist li[data-fid]').forEach(el=>{
+  el.ondragstart=e=>{e.dataTransfer.setData('text/x-tuck-file',el.dataset.fid);e.dataTransfer.effectAllowed='move';el.classList.add('dragging');THDRAG=byId.get(el.dataset.fid);req()};
+  el.ondragend=()=>{el.classList.remove('dragging');THDRAG=null;DROPT=null;req()}})}
+
+/* files dragged from the panel onto a topic on the map move there */
+let THDRAG=null,DROPT=null;
+function topicAt(mx,my){let best=null,bd=1e9;for(const t of live()){if(t.kind!=='topic'||!atDay(t)||(THDRAG&&t.id===THDRAG.parent))continue;const d=Math.hypot(sx(t)-mx,sy(t)-my);if(d<Math.max(30,rs(t)+18)&&d<bd){bd=d;best=t}}return best}
+cv.addEventListener('dragover',e=>{if(!THDRAG)return;e.preventDefault();e.dataTransfer.dropEffect='move';const b=cv.getBoundingClientRect();const t=topicAt(e.clientX-b.left,e.clientY-b.top);if(t!==DROPT){DROPT=t;req()}});
+cv.addEventListener('dragleave',()=>{if(DROPT){DROPT=null;req()}});
+cv.addEventListener('drop',e=>{e.preventDefault();const f=THDRAG||byId.get(e.dataTransfer.getData('text/x-tuck-file'));const b=cv.getBoundingClientRect();const t=DROPT||topicAt(e.clientX-b.left,e.clientY-b.top);THDRAG=null;DROPT=null;
+ if(f&&t&&t.id!==f.parent)Changes.apply('move',f,t);else req()});
+
+/* menu */
+const M=$('#menu');
+function outside(e){if(!M.contains(e.target))closeMenu()}
+function closeMenu(){M.style.display='none';document.removeEventListener('pointerdown',outside)}
+
+/* toast (one at a time, bottom-left of the map, never over the panel) + Tuck */
+let tt=0;const TO=$('#toast');let UNDOFN=null;
+/* undoable: true = the map's own snapshot undo; a function = run that (e.g. memory.js) */
+function toast(msg,undoable){UNDOFN=typeof undoable==='function'?undoable:null;$('#toastmsg').textContent=msg;$('#toastundo').style.display=undoable?'':'none';TO.classList.add('on');clearTimeout(tt);tt=setTimeout(hideToast,5200)}
+function hideToast(){TO.classList.remove('on');clearTimeout(tt)}
+$('#toastundo').onclick=()=>{if(UNDOFN){const f=UNDOFN;UNDOFN=null;hideToast();f();return}undo()};
+$('#relayout').onclick=()=>{live().forEach(n=>{if(n.pin){n.pin=false;n.fx=null;n.fy=null;setPinned(n,false)}});$('#relayout').hidden=true;resettle(.6);toast('Unpinned everything. The map finds its balance again.',false)};
+const timg=$('#tuckimg');let ht=0,happyNow=false;
+timg.src=POSES.idle;$('#emptyimg').src=POSES.rest;$('#loadimg').src=POSES.carry||POSES.idle;
+function blink(){if(!happyNow){timg.src=POSES.blink;setTimeout(()=>{if(!happyNow)timg.src=POSES.idle},150)}setTimeout(blink,3200+Math.random()*2600)}
+if(!RM)setTimeout(blink,2400);
+/* clicking Tuck opens the shared side chat (tuck-art.js); it answers from what this map knows */
+function findNodes(q){const t=q.toLowerCase(),L=live().filter(n=>n.kind!=='root'&&atDay(n));
+ const whole=L.filter(n=>t.includes(n.label.toLowerCase())).sort((a,b)=>b.label.length-a.label.length);if(whole.length)return whole;
+ const w=t.split(/[^a-z0-9]+/).filter(x=>x.length>2&&!['why','what','where','the','this','that','own','its','topic','file','files','folder','help','organise','organize','private','here','is','are','with','about','and','for','my'].includes(x));
+ return L.filter(n=>w.some(x=>n.label.toLowerCase().split(/[^a-z0-9]+/).includes(x))).sort((a,b)=>({area:0,topic:1,file:2}[a.kind]-{area:0,topic:1,file:2}[b.kind]))}
+const unsureQ=()=>live().filter(x=>x.q&&x.conf==='unsure'&&atDay(x));
+/* answering a Needs You card from the map: the plan does what the card says, and tuck.html's queue drops it, so every count agrees */
+const QK='tuckQueue';const rdj=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}};
+function queueAnswer(id,a){const q=window.TuckQueue?TuckQueue.get():rdj(QK,{});const card=(q.cards||[]).find(c=>c.id===id)||null;
+ if(window.TuckQueue&&card)TuckQueue.answer(id,a);else{const as=rdj('tuckAnswers',[]);as.push({id,a,t:Date.now()});localStorage.setItem('tuckAnswers',JSON.stringify(as))}
+ return ()=>{const q2=rdj(QK,null);if(q2&&card&&!(q2.cards||[]).some(c=>c.id===id)){q2.cards=[card,...(q2.cards||[])];q2.left=(q2.left||0)+1;localStorage.setItem(QK,JSON.stringify(q2))}
+  const as=rdj('tuckAnswers',[]);as.push({id,a:'undo',t:Date.now()});localStorage.setItem('tuckAnswers',JSON.stringify(as));document.dispatchEvent(new CustomEvent('tuckqueue'))}}
+function answerNeed(id,yes){const row=Plan.answerNeed(id,yes);if(!row)return null;const back=queueAnswer(id,yes?'yes':'no');return {row,undo:()=>{Plan.undoApply(row.id);back()}}}
+/* questions about the brain itself: what Tuck knows, what goes to AI, what an MCP server would share once it is built,
+   how the map got here, sure and unsure, and how Tuck decides. Numbers come from the one plan. */
+function aboutBrain(t){const v=Plan.view(),E=esc,fs=Object.values(v.D.files),A=live().filter(x=>x.kind==='area'),T=live().filter(x=>x.kind==='topic'),P=live().filter(x=>x.kind==='person');
+ const lv={read:0,names:0,private:0};fs.forEach(f=>{const l=v.level(f.id).level;lv[l in lv?l:'read']++});
+ const uns=T.filter(x=>x.conf==='unsure').length;
+ if(/(know|remember)\s+about\s+me|what('?s| is) (in )?(the|my|this) (brain|map)|what is (the )?brain|what do you know/.test(t))
+  return `Your brain holds <b>${pf(fs.length,'file')}</b> in ${pf(A.length,'part')} of life and ${pf(T.length,'folder')}, and ${P.length} ${P.length===1?'person':'people'} from your files (${P.slice(0,3).map(x=>E(x.label)).join(', ')}). ${uns?`I’m unsure about ${pf(uns,'folder')}; those have dashed lines.`:''} ${E(Plan.readLine())} What I remember about you is in <a href="tuck.html#prefs">Settings › Memory</a>, where you can change or forget any of it.`;
+ if(/\bmcp\b|other ai (apps?|tools?|assistants?)|connect (an? )?ai|share (my |the )?(brain|map)|outside apps?/.test(t))
+  return `The MCP server is not built yet, and when it is, it stays off until you turn it on. It would let an AI app you choose ask about your brain, read only: your parts of life and folder names, each file name with its date and kind, and Tuck’s one-line reason for where it goes. <b>Private files are never shared</b>, not even their names (${pf(lv.private,'file')} today). Files set to Names only share just the name. Nothing inside a file is shared unless that file is set to Read everything. You approve each app, and every question an app asks is logged where you can see it.`;
+ if(/(sent|send|goes?|going) to (the )?ai|what (does|can) (the )?ai (see|read)|what (information|info|data) (gets|is|do you) (used|use|read)|what do you read|what gets used/.test(t))
+  return `Of your ${pf(fs.length,'file')}: <b>Read everything</b> ${lv.read} (the AI may read every page to sort them), <b>Names only</b> ${lv.names} (just the name and kind), <b>Private</b> ${lv.private} (never sent to AI; you can still open them). Change any folder or file from its panel here, or all at once in <a href="tuck.html#prefs">Settings</a>. ${E(Plan.readLine())}`;
+ if(/how (has|did) (my |the )?(map|brain)|progress|timeline|time ?slider|grown|changed|history of/.test(t)){const last=HIST.slice(-3).map(h=>E(h[1]));
+  return `Slide the bar at the bottom of the map to see any of the last ${TODAY} days. On day one Tuck read Downloads, Desktop and Documents; today the map holds ${pf(fs.length,'file')}. Lately: ${last.join('. ')}. Every change is in <a href="tuck.html#history">History</a> with Undo.`}
+ if(/\b(un)?sure\b|dashed|dotted|solid line/.test(t))
+  return `A solid line means I’m sure a folder belongs there. A dashed line means I’m unsure, so I ask you first (${pf(uns,'folder')} right now). Click a dashed line, or open <a href="tuck.html#needs">Needs You</a>, to answer.`;
+ if(/how (do|does) (you|tuck|it) (decide|sort|choose|know)|why do you put|how does (this|sorting) work/.test(t))
+  return `For each file I look at its name, kind and dates, and its first page unless it’s set to Names only or Private. Then I check your rules, what you’ve told me, and the folders you already use. When one folder clearly fits I put it there; when two could fit I ask you in Needs You. Nothing moves on disk.`;
+ return null}
+function brainReply(q){const t=q.toLowerCase().trim(),hit=findNodes(q),n=hit[0];const E=esc;
+ {const tk=Plan.smallTalk(q);if(tk)return {html:tk.html,starters:tk.starters}}
+ {const a=aboutBrain(t);if(a)return a}
+ if(/sort (my )?new|new files/.test(t)){const v=Plan.view(),nf=Plan.newFiles(v);if(!nf.length)return 'Everything new is already sorted. New files from Downloads and Desktop show up here.';let row=null;
+  return {html:`${nf.length} new in Downloads and Desktop. Here’s where each goes:<br>${nf.slice(0,5).map(f=>`<b>${E(f.name)}</b> → ${E(v.path(Plan.homeOf(v,f).id).join(' › '))}`).join('<br>')}${nf.length>5?`<br>and ${nf.length-5} more`:''}`,
+   plan:{text:`Sort ${pf(nf.length,'file')} in Tuck. Nothing moves on disk.`,apply:()=>{row=sortNew()},undo:()=>{row&&Plan.undoApply(row.id)}}}}
+ if(/clean|free (up )?space|tidy/.test(t)&&!/organi[sz]e/.test(t))return cleanLine()?`You can free <b>${cleanLine()}</b>: installers for apps you already have, opened zips and exact copies. Open Clean Up from my menu, or <a href="tuck.html#tidy">Tidy Up</a>, to look before anything goes to the Trash (with Undo).`:'Nothing to clean right now.';
+ if(/need(s)? me|waiting|questions?/.test(t)){const Q=Plan.needs().filter(x=>!x.done);return Q.length?`${Q.length} thing${Q.length===1?'':'s'} need${Q.length===1?'s':''} you:<br>${Q.slice(0,4).map(x=>`• ${E(x.q)}`).join('<br>')}<br><a href="tuck.html#needs">Answer them in Needs You</a>, or click a dashed line on the map.`:'Nothing needs you right now.'}
+ if(/edit (my )?folders|my folders/.test(t)){const wb=byId.get('wb'),ph=byId.get('phys');if(!wb||!ph)return 'Your folders look right to me. <a href="tuck.html#edit">Open Edit Folders</a> to change anything by hand.';
+  let o=null;return {html:`One change I’d suggest: <b>Whiteboards</b> (${nowFiles(wb).length} photos) are boards from your PHYS 1401 lectures. Put them in <b>PHYS 1401</b>?`,plan:{text:'Merge Whiteboards into PHYS 1401. Nothing moves on disk.',apply:()=>{o=Plan.change({ty:'merge',nodes:['wb'],into:'phys'})},undo:()=>{o&&Plan.revert(o.id)}}}}
+ /* "where is my 1098-T?": the same answer on every page */
+ if(/\b(where|find|locate|which folder)\b/.test(t)){const a=Plan.answer(q);if(a&&a.type!=='talk')return {html:a.html,files:(a.files||[]).slice(0,3)}}
+ if(/organi[sz]e|sort out/.test(t)){const a=n&&(n.kind==='file'?byId.get(n.parent):n);if(!a)return 'Which part should I organise? Try “Help me organise Photos”.';
+  const ts=a.kind==='area'?kids(a.id).filter(x=>x.kind==='topic'&&atDay(x)):[a],uns=ts.filter(x=>x.conf==='unsure'),big=ts.slice().sort((x,y)=>nowFiles(y).length-nowFiles(x).length)[0];
+  return `Here’s a plan for <b>${E(a.label)}</b> (${pf(nowFiles(a).length,'file')}):<br>• Keep ${ts.filter(x=>x.conf!=='unsure').slice(0,4).map(x=>E(x.label)).join(', ')} as they are.`+(uns.length?`<br>• Check ${uns.map(x=>E(x.label)).join(', ')}: I’m unsure about ${uns.length>1?'them':'it'}.`:'')+(big&&nowFiles(big).length>15?`<br>• Split ${E(big.label)} (${pf(nowFiles(big).length,'file')}) by kind or month.`:'')+`<br>Nothing moves until you say yes.`}
+ if(/private|locked|never sent|secret/.test(t)){const P=live().filter(x=>x.priv&&atDay(x)&&x.kind!=='root'&&!(x.parent&&byId.get(x.parent)&&byId.get(x.parent).priv));
+  return P.length?`These are private, so they’re never sent to AI: ${P.slice(0,6).map(x=>`<b>${E(x.label)}</b>${x.kind!=='file'?` (${pf(nowFiles(x).length,'file')})`:x.pkind?` (${E(x.pkind.toLowerCase())})`:''}`).join(', ')}${P.length>6?` and ${P.length-6} more`:''}. You can still open and preview all of them.`:'Nothing is private right now.'}
+ if(!n){const a=Plan.answer(q);return a?a.html:`I couldn’t find that on the map. Try a folder or file name, like PHYS 1401 or Invoice 0043.`}
+ if(n.kind==='file'){const a=Plan.answer(n.label);return a?a.html+(n.priv?'':` Why: ${E(why(n))}.`):`<b>${E(n.label)}</b>`}
+ if(n.kind==='topic')return `<b>${E(n.label)}</b> is its own folder in ${E(areaOf(n).label)} (${pf(nowFiles(n).length,'file')}). Why: ${E(ruleOf(n))}.`+(n.conf==='unsure'?` I’m not sure yet: ${E(n.q)}`:'')+(n.priv?' It’s private, so it’s never sent to AI. You can still open and preview its files.':'');
+ if(n.kind==='person'){const l=profOf(n)[0];return `<b>${E(n.label)}</b>${l?' is '+E(l.v):''}. They appear in ${n.tops.map(t=>E(byId.get(t).label)).join(' and ')}.`}
+ return `<b>${E(n.label)}</b> holds ${pf(nowFiles(n).length,'file')} in ${kids(n.id).filter(x=>x.kind==='topic').length} folders. ${E(n.meta.sum)}`}
+/* the shared queue (tuck-art.js): Needs You's count and Clean Up's total, the same on every page */
+const tuckQ=()=>window.TuckQueue?TuckQueue.get():Object.assign({left:6,tidyMB:3900},rdj(QK,{}));
+const needsLeft=()=>Plan.needsLeft();
+const cleanLine=()=>{const mb=tuckQ().tidyMB;return mb?(mb>=1000?(mb/1000).toFixed(1)+' GB':Math.round(mb)+' MB'):''};
+/* Sort New Files: the one shared state (plan.js Plan.sortNew, rule 27), so Today, History, Finder and the launcher all see it */
+function sortNew(){if(Plan.sortNew)return Plan.sortNew();const v=Plan.view(),nf=Plan.newFiles(v);if(!nf.length)return null;const by={};nf.forEach(f=>{const t=Plan.homeOf(v,f).id;(by[t]=by[t]||[]).push(f.id)});
+ return Plan.applyNow(Object.entries(by).map(([to,files])=>({ty:'moveFiles',files,to})),`Sorted ${nf.length} new file${nf.length===1?'':'s'}`,'sortNew')}
+function planSortStep(el,back,ui){const v=Plan.view(),nf=Plan.newFiles(v);
+ if(!nf.length){ui.empty(el,{text:'All sorted. New files show up here.'});return}
+ el.innerHTML=`<p>${nf.length} new file${nf.length===1?'':'s'} in Downloads and Desktop. Here’s where each goes:</p>`+ui.files(nf.map(f=>({name:f.name,to:Plan.homeOf(v,f).name,icon:Plan.kind(f.name).ic})));
+ ui.actions(el,{secondary:{label:'Not Now',fn:back},primary:{label:'Sort Them',fn:()=>{const n=nf.length,row=sortNew();
+  ui.done(el,{text:`${n} sorted. Nothing moved on disk.`,onUndo:()=>{Plan.undoApply(row.id);ui.done(el,{text:'Undone. They wait in No folder yet again.'})}})}}})}
+const planNew=()=>Plan.counts().new;
+const chatCtx=()=>FOCUS&&FOCUS.kind!=='root'?FOCUS.label:'Tuck Brain';
+const ST=TuckLauncher.steps||{};
+/* the launcher's Needs You step answers through the plan too, so the map's dashed line turns solid */
+const needsStep=ST.needs?(el,back,ui)=>ST.needs(el,back,ui,{answer:(id,a)=>{if(a==='yes'||a==='no')answerNeed(id,a==='yes');else if(window.TuckQueue)TuckQueue.answer(id,a)}}):'tuck.html#needs';
+TuckLauncher.setup({anchor:'#tuck',context:chatCtx(),status:()=>{const q=needsLeft(),n=planNew();return [n&&`${n} new file${n===1?'':'s'}`,q&&`${q} need${q===1?'s':''} you`,cleanLine()&&`${cleanLine()} to clean`].filter(Boolean).join(' · ')},
+ state:()=>needsLeft()?'needs':'idle',
+ tiles:[{id:'sort',icon:'tray-arrow-down',label:'Sort New Files',hue:'proj',count:()=>planNew()?`${planNew()} new`:'',quiet:'All sorted',ask:'Sort my new files',step:(window.TuckLauncher&&TuckLauncher.steps&&TuckLauncher.steps.sort)||planSortStep},
+  {id:'clean',icon:'broom',label:'Clean Up',hue:'photo',count:cleanLine,quiet:'Nothing to clean',ask:'What can I clean up?',step:ST.clean||'tuck.html#tidy'},
+  {id:'needs',icon:'hand-tap',label:'Needs You',hue:'job',count:()=>{const n=needsLeft();return n?`${n} waiting`:''},quiet:'Nothing waiting',ask:'What needs me?',step:needsStep},
+  {id:'edit',icon:'folders',label:'Edit Folders',hue:'work',count:()=>{const c=Plan.summary().changes;return c?`${c} change${c===1?'':'s'}`:'Workbench'},ask:'Help me edit my folders',step:'tuck.html#edit'}]});
+const SUGG=['What do you know about me?','What gets sent to AI?','What would the MCP server share?'];
+function chatSetup(){const c=chatCtx();TuckChat.setup({full:'tuck.html#chats',context:c,sugg:c==='Tuck Brain'?SUGG:[`Why is ${c} here?`,`What is private in ${c}?`,`Help me organise ${c}`],reply:brainReply,openFile:id=>{const n=byId.get(id);if(n){TuckChat.close();focus(n)}}});TuckLauncher.setup({context:c})}
+chatSetup();
+/* the sidebar counts are the same live numbers Tuck shows */
+function navCounts(){const q=needsLeft(),c=Plan.summary().changes,set=(id,t,label)=>{const e=$(id);e.textContent=t;e.hidden=!t;if(label)e.setAttribute('aria-label',label)};
+ set('#navNeeds',q?String(q):'',`${q} waiting`);set('#navChg',c?`${c} change${c===1?'':'s'}`:'');set('#navTidy',cleanLine());TuckLauncher.refresh&&TuckLauncher.refresh()}
+navCounts();Plan.subscribe(()=>{onPlan();navCounts()});Memory.onChange(()=>{onPlan();if(INSP&&INSP.kind==='root'&&!typing())openInsp(INSP)});
+document.addEventListener('tuckqueue',()=>{onPlan();navCounts()});addEventListener('storage',e=>{if(e.key==='tuckQueue'||e.key==='tuckAnswers'){onPlan();navCounts()}});
+/* the side chat docks as a column: the map re-measures */
+addEventListener('resize',()=>size());
+document.addEventListener('tuckchat',()=>{requestAnimationFrame(()=>{size();if(!LAID)return;if(FOCUS)focus(FOCUS);else fitTo(live(),5,RM?0:450)})});
+Resort.config({toast:(m,u)=>toast(m,u||false)});
+const tuckClick=()=>TuckLauncher.toggle();
+$('#tuck').onclick=tuckClick;$('#tuck').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tuckClick()}};
+$('#tuckimg').draggable=false;
+tuckDrag($('#tuck'),{img:timg,setPose:p=>{happyNow=p!=='idle';timg.src=POSES[p]},wander:true});/* he won't wander over the canvas; that's intended */
+function happy(line){/* the toast says what happened; Tuck only reacts */happyNow=true;timg.src=POSES.happy;if(!RM){timg.classList.remove('tkhop');void timg.offsetWidth;timg.classList.add('tkhop')}clearTimeout(ht);ht=setTimeout(()=>{timg.src=POSES.idle;happyNow=false},1600)}
+
+/* ================= filters, search, zoom buttons ================= */
+function setFilter(f){FILTER=f;{const u=document.getElementById('funs');if(u)u.checked=f==='unsure'}document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on',b.dataset.f===f));FILT=filterSet();
+ if(f==='all'){if(INSP&&INSP.kind==='root')closeInsp()}else{FOCUS=null;FSET=null;crumbs();openInsp(byId.get('you'));fitTo(f==='unsure'?live().filter(n=>FILT.has(n.id)&&n.kind!=='file'||n.kind==='area'):live(),1.2)}
+ req()}
+document.querySelectorAll('#filt button').forEach(b=>b.onclick=()=>setFilter(b.dataset.f));
+function updateCounts(){const u=needsLeft();$('#ucount').textContent=u;$('#ucount').style.display=u?'':'none';
+ const L=live().filter(atDay);$('#subt').textContent=`${pf(L.filter(n=>n.kind==='file').length,'file')} · ${pf(DAY<TODAY?L.filter(n=>(n.kind==='topic'||n.kind==='area')&&Plan.isFolder(n.id)).length:Plan.counts().folders,'folder')}${DAY<TODAY?' on '+DAYNAME(DAY):''}`;FILT=filterSet()}
+
+/* ================= time scrubber: the map as it was on a day ================= */
+const HIST=[[0,'Tuck read Downloads, Desktop and Documents'],[1,'Made PHYS 1401, ECON 2257 and Meeting notes'],[2,'Made COMS 1004 and Invoices'],[4,'You said GRC Associates is your employer'],[9,'Made ENGI 1006 from a design brief'],[12,'Made Resumes from your resume versions'],[14,'Made Robotics club'],[20,'Made Whiteboards, but Tuck was unsure'],[26,'Made Music from a folder name'],[30,'Made Cover letters'],[33,'Made Applications'],[38,'You answered: GRC office is where you work'],[41,'Made Interview prep, but Tuck was unsure'],[43,'You answered: Maya Chen is your lab partner'],[50,'Resume (6).pdf arrived'],[61,'Today']];
+const SR=$('#scrubr');
+function scrubLabel(){const d=DAY,ev=HIST.filter(h=>h[0]===d).map(h=>h[1]),add=live().filter(n=>n.kind==='file'&&n.day===d).length,tot=live().filter(n=>n.kind==='file'&&atDay(n)).length;
+ $('#scrubday').textContent=d===TODAY?'Today':DAYNAME(d);
+ $('#scrubwhat').textContent=d===TODAY?`Your map as it is now · ${pf(tot,'file')}`:(ev.length?ev.join('. '):add?`${add} file${add>1?'s':''} came in`:'No changes that day')+` · ${pf(tot,'file')}`;
+ $('#scrubwhat').title=$('#scrubwhat').textContent;const bk=$('#scrubback');bk.classList.toggle('off',d===TODAY);bk.tabIndex=d===TODAY?-1:0}
+function setDay(d){DAY=Math.max(0,Math.min(TODAY,d));SR.value=DAY;const L=live();L.forEach(n=>{n.tv0=n.tv??1;n.tv1=atDay(n)?1:.06});
+ anim(dur(320),t=>{const e=ease(t);L.forEach(n=>{n.tv=n.tv0+(n.tv1-n.tv0)*e})});scrubLabel();updateCounts();NBF=null;
+ if(INSP&&!insp.contains(document.activeElement))openInsp(INSP);req()}
+SR.addEventListener('input',()=>setDay(+SR.value));SR.addEventListener('keydown',e=>e.stopPropagation());
+$('#scrubback').onclick=()=>{setDay(TODAY);happy('Back to today.')};
+
+/* no file arrives on its own: a file only joins the map when the plan gets it (a new file in a watched folder, sorted by you) */
+$('#zin').onclick=()=>sel.transition().duration(dur(250)).call(zoom.scaleBy,1.4);
+$('#zout').onclick=()=>sel.transition().duration(dur(250)).call(zoom.scaleBy,1/1.4);
+$('#fit').onclick=()=>{fitTo(live(),5)};
+const Q=$('#q'),RS=$('#results');let ri=0,rlist=[];
+Q.addEventListener('input',search);Q.addEventListener('focus',()=>{if(Q.value)search()});
+function search(){const v=Q.value.trim().toLowerCase();if(!v){RS.classList.remove('on');MATCH=null;req();return}
+ rlist=live().filter(n=>n.kind!=='root'&&atDay(n)&&n.label.toLowerCase().includes(v)).sort((a,b)=>({area:0,person:1,topic:1,file:2}[a.kind]-{area:0,person:1,topic:1,file:2}[b.kind])).slice(0,12);
+ MATCH=new Set(rlist.map(n=>n.id));ri=0;
+ if(!rlist.length){RS.innerHTML=`<div class="none"><b>Nothing called "${esc(Q.value.trim())}"</b>Tuck has read ${pf(nowFiles(byId.get('you')).length,'file')} and found no topic or file with that name. Try a course code like PHYS, or a word from a file name.</div>`}
+ else{let last='';RS.innerHTML=rlist.map((n,i)=>{const h=n.kind!==last?`<div class="hd">${{area:'Parts of life',topic:'Topics',file:'Files',person:'People'}[n.kind]}</div>`:'';last=n.kind;
+  const dot=n.kind==='person'?'<i class="ph-fill ph-user" style="color:var(--ac-ink)"></i>':n.kind==='file'?`<i class="ph ph-${KICON[n.fk]}" style="color:var(--k-${n.fk});font-size:16px"></i>`:`<span class="kdot" style="background:var(${areaOf(n).hue})"></span>`;
+  return h+`<button data-i="${i}" class="${i===ri?'hi':''}">${dot}<span>${esc(n.label)}</span><small>${n.kind==='file'?esc(byId.get(n.parent).label):n.kind==='person'?'Person':pf(nowFiles(n).length,'file')}</small></button>`}).join('')}
+ RS.classList.add('on');RS.querySelectorAll('button').forEach(b=>b.onmousedown=e=>{e.preventDefault();pick(rlist[+b.dataset.i])});req()}
+function pick(n){RS.classList.remove('on');Q.blur();MATCH=null;if(FILTER!=='all')setFilter('all');focus(n)}
+Q.addEventListener('keydown',e=>{if(!RS.classList.contains('on')||!rlist.length)return;if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();ri=(ri+(e.key==='ArrowDown'?1:-1)+rlist.length)%rlist.length;RS.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('hi',i===ri))}if(e.key==='Enter')pick(rlist[ri])});
+Q.addEventListener('blur',()=>setTimeout(()=>RS.classList.remove('on'),120));
+
+/* ================= theme + prototype states ================= */
+function setTheme(t){document.documentElement.dataset.theme=t;document.querySelectorAll('#theme button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));readColors();req()}
+document.querySelectorAll('#theme button').forEach(b=>b.onclick=()=>setTheme(b.dataset.t));
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readColors();req()});
+const curTheme=()=>document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+document.querySelectorAll('#theme button').forEach(b=>b.classList.toggle('on',b.dataset.t===curTheme()));
+function buildSkeleton(){const w=$('#loadwrap');let h='';const c=260;h+=`<div class="skel" style="left:${c-26}px;top:${c-26}px;width:52px;height:52px"></div>`;
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2-Math.PI/2;h+=`<div class="skel" style="left:${c+120*Math.cos(a)-18}px;top:${c+120*Math.sin(a)-18}px;width:36px;height:36px"></div>`}
+ for(let i=0;i<24;i++){const a=i/24*Math.PI*2-Math.PI/2;h+=`<div class="skel" style="left:${c+215*Math.cos(a)-8}px;top:${c+215*Math.sin(a)-8}px;width:16px;height:16px;animation-delay:${i*40}ms"></div>`}w.innerHTML=h}
+function setState(s){document.querySelectorAll('#pstate button').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+ $('#loading').classList.toggle('on',s==='loading');$('#empty').classList.toggle('on',s==='empty');
+ const dis=s!=='ready';$('#ucount').style.display=dis?'none':'';['#q','#fit','#zin','#zout'].forEach(x=>$(x).disabled=dis);document.querySelectorAll('#filt button').forEach(b=>b.disabled=dis);
+ if(s==='ready'){focus(null);start()}}
+document.querySelectorAll('#pstate button').forEach(b=>b.onclick=()=>setState(b.dataset.s));
+$('#startread').onclick=()=>{setState('loading');setTimeout(()=>setState('ready'),1400)};
+
+function capZoom(){zoom.scaleExtent([.25,8])}
+function start(){setTimeout(()=>KEYUI(),0);document.fonts&&document.fonts.ready.then(()=>req());$('#loadtxt').textContent=`Tuck is reading ${pf(Plan.counts().all,'file')} in Downloads, Desktop and Documents`;layout();fitK=1;sel.call(zoom.transform,d3.zoomIdentity);
+ /* the map starts with the whole canvas; the You panel opens from the You node (it never covers the map at rest) */
+ fitTo(live(),5,0);capZoom();updateCounts();scrubLabel();entrance();LAID=true}
+
+/* boot */
+readColors();readGlyphs();buildSkeleton();
+const P=new URLSearchParams(location.search);if(P.get('theme'))setTheme(P.get('theme'));
+const st0=P.get('state')||'boot';
+document.fonts.ready.then(()=>{readGlyphs();size();
+ if(st0==='empty'||st0==='loading')setState(st0);
+ else setState('ready');});
+document.fonts.addEventListener('loadingdone',()=>{readGlyphs();req()});
+
+/* hooks for the screenshot script */
+/* look F: settings (top right) and the Key chip (bottom left). The map already names each part of life in its colour, so the key is
+   one small chip: hover or tap a colour to light that group; "Key" opens plain-language notes for the marks. */
+{const SB=$('#fdbtn'),M=$('#fdpop'),chip=$('#fkchip'),pop=$('#fkey');
+ const setOpen=o=>{M.classList.toggle('on',o);SB.setAttribute('aria-expanded',String(o));req()};
+ SB.onclick=e=>{e.stopPropagation();setOpen(!M.classList.contains('on'))};
+ document.addEventListener('pointerdown',e=>{if(!$('#fset').contains(e.target))setOpen(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape'){setOpen(false);if(pop.classList.contains('on')){pop.classList.remove('on');legend()}}});
+ M.querySelectorAll('#fcol button').forEach(b=>b.onclick=()=>{COLBY=b.dataset.c;M.querySelectorAll('#fcol button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));KEYPART=null;legend();req()});
+ M.querySelectorAll('#fline button').forEach(b=>b.onclick=()=>{CURVED=b.dataset.v==='curved';M.querySelectorAll('#fline button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));req()});
+ $('#fshowf').onchange=e=>{SHOWF=e.target.checked;req()};
+ $('#fshowp').onchange=e=>{SHOWP=e.target.checked;req()};
+ $('#funs').onchange=e=>setFilter(e.target.checked?'unsure':'all');
+ $('#fspread').oninput=e=>{SPREAD=+e.target.value;if(!SIM)return;SIM.force('link').distance(l=>LD[l.kind]*SPREAD);SIM.force('charge').strength(n=>n.kind==='file'?-6*SPREAD:n.kind==='topic'?-90*SPREAD:n.kind==='person'?-60:-260*SPREAD);SIM.alpha(.5).restart()};
+ function legend(){const T=COLBY==='type';
+  const G=T?TYPES.map(([id,name])=>({id,name,c:C.fk[id],n:live().filter(n=>n.kind==='file'&&atDay(n)&&fkOf(n)===id).length})):areasL().map(a=>({id:a.id,name:a.label,c:partOf(a),n:nowFiles(a).length}));
+  const open=pop.classList.contains('on');
+  chip.innerHTML=`<span>${T?'File type':'Parts of life'}</span><span class="dots">${G.map(g=>`<button type="button" data-g="${g.id}" title="${esc(g.name)}" aria-label="${esc(g.name)}" style="background:${g.c}"></button>`).join('')}</span><button type="button" class="more" id="fkmore" aria-expanded="${open}">Key<span class="fms" style="font-size:16px">${open?'expand_more':'expand_less'}</span></button>`;
+  pop.innerHTML=`<h3>${T?'Colour = file type':'Colour = part of life'}</h3>${G.map(g=>`<button type="button" data-g="${g.id}"><span class="ic"><span class="fsw" style="background:${g.c}"></span></span>${esc(g.name)}<small>${g.n} files</small></button>`).join('')}
+   <h3>Marks</h3>
+   <div class="row"><span class="ic"><span class="fsw ring"></span></span>Tuck isn't sure this folder fits</div>
+   <div class="row"><span class="ic"><span class="fms" style="font-size:14px">lock</span></span>Private: never sent to AI</div>
+   <div class="row"><span class="ic"><span style="width:8px;height:8px;background:var(--g-ink2);transform:rotate(45deg)"></span></span>A person named in your files</div>
+   <div class="row"><span class="ic"><span style="width:16px;height:3px;background:var(--g-ink2);border-radius:2px"></span></span>Thicker line: holds more files</div>
+   <div class="row"><span class="ic"><span style="width:16px;border-top:1.5px dashed var(--g-ink2)"></span></span>Dotted line: shared with a person</div>`;
+  $('#fkmore').onclick=()=>{pop.classList.toggle('on');legend();req()};
+  document.querySelectorAll('#fkeyw [data-g]').forEach(b=>{
+   b.onmouseenter=b.onfocus=()=>{if(!KEYSTICK){KEYPART=b.dataset.g;req()}};
+   b.onmouseleave=b.onblur=()=>{if(!KEYSTICK){KEYPART=null;req()}};
+   b.onclick=()=>{if(KEYSTICK&&KEYPART===b.dataset.g){KEYSTICK=false;KEYPART=null}else{KEYSTICK=true;KEYPART=b.dataset.g}req()}})}
+ KEYUI=legend;}
+window.brain={labs:()=>({labs:PLACED.filter(p=>!p.ui&&p.own).map(p=>({t:p.own.label,x:p.x,y:p.y,w:p.w,h:p.h})),hubs:live().filter(n=>(n.kind==='area'||n.kind==='root')&&alphaOf(n)>.25).map(n=>({t:n.label,x:sx(n),y:sy(n),r:rs(n)}))}),lhid:()=>live().filter(n=>(n.kind==='topic'||n.kind==='area'||n.kind==='person')&&alphaOf(n)>.25&&!n._lab&&sx(n)>0&&sx(n)<Wd-PANW()&&sy(n)>0&&sy(n)<Ht).map(n=>n.label),look:()=>({colby:COLBY,files:SHOWF,people:SHOWP,curved:CURVED}),colby:c=>{const b=document.querySelector(`#fcol [data-c=${c}]`);b&&b.click()},reply:q=>brainReply(q),sugg:SUGG,at:id=>{const n=byId.get(id),b=cv.getBoundingClientRect();return n?[Math.round(b.left+sx(n)),Math.round(b.top+sy(n)),!!n.priv]:null},kid:id=>{const n=byId.get(id)||N.find(x=>x.label===id);const k=n&&kids(n.id)[0];return k?k.id:null},area:id=>AREAS.find(a=>a.id===id),focus:id=>focus([...byId.values()].find(n=>n.id===id||n.label===id)),filter:setFilter,zoomAt:(id,k)=>{const n=[...byId.values()].find(x=>x.label===id||x.id===id);k=Math.min(k,zoom.scaleExtent()[1]);camTo(d3.zoomIdentity.translate(Wd/2-n.x*k,Ht/2-n.y*k).scale(k),0)},theme:setTheme,state:setState,pos:l=>{const n=[...byId.values()].find(x=>x.label===l&&!x.gone);const b=cv.getBoundingClientRect();return[b.left+sx(n),b.top+sy(n)]},parentOf:l=>{const n=[...byId.values()].find(x=>x.label===l&&!x.gone);return byId.get(n.parent).label},
+ fitK:()=>fitK,counts:()=>({files:live().filter(n=>n.kind==='file').length,needs:needsLeft(),unsure:unsureQ().length,sub:$('#subt').textContent}),nan:()=>{const y=byId.get('you');return [y.x,y.y,y.px,y.py,y.fx,y.vx,live().filter(n=>isNaN(n.x)).length]},setDay,sortNew,labels:()=>[...LABS],stray:()=>live().filter(n=>n.rip||n.lp!==undefined||n.flying).map(n=>n.label),overlaps:()=>{const P=PLACED.filter(p=>p.own&&p.h<40&&p.w>0&&p.own.kind!=='file'&&LABS.length);let c=0;const R=PLACED.filter(p=>!p.ui&&(p.ly!==undefined||p.h===32));for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++){const a=R[i],b=R[j];if(a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y)c++}return c},balance:()=>{const L=live().filter(n=>n.kind!=='root'&&n.kind!=='file');const cx=L.reduce((s,n)=>s+n.x,0)/L.length,cy=L.reduce((s,n)=>s+n.y,0)/L.length;return[Math.round(cx),Math.round(cy)]},menu:id=>{const n=byId.get(id);nodeMenu(n,300,300)},lab:id=>{const n=byId.get(id);return n&&n._lab&&{x:n._lab.x,y:n._lab.y,w:n._lab.w,h:n._lab.h,W:Wd,insp:!!INSP}},node:l=>{const n=[...byId.values()].find(x=>(x.label===l||x.id===l)&&!x.gone);return n&&{id:n.id,kind:n.kind,priv:!!n.priv,ai:effAI(n),nl:effNL(n),files:nowFiles(n).length,parent:n.parent,tv:n.tv}},tip:()=>{const r=tip.getBoundingClientRect();return[r.left,r.top,r.width,r.height]},
+ /* label audit (N1): labels over another node or its ring of files, labels nearer another node than their own, and nodes with no label */
+ audit:()=>{const k=Tr.k,L=live().filter(o=>o.kind!=='file'&&alphaOf(o)>.25),RAD=o=>o.kind==='topic'&&KR()>.62?Math.max(rs(o),ringR(o)*k):rs(o);
+  const gapTo=(rc,o)=>{const cx=sx(o),cy=sy(o),dx=Math.max(rc.x-cx,0,cx-rc.x-rc.w),dy=Math.max(rc.y-cy,0,cy-rc.y-rc.h);return Math.hypot(dx,dy)-RAD(o)};
+  const over=[],far=[],none=[],RW=Wd-PANW();
+  L.forEach(n=>{const rc=n._lab;const inV=sx(n)>0&&sx(n)<RW&&sy(n)>0&&sy(n)<Ht;if(!rc){if(inV&&n.kind!=='person')none.push(n.label);return}if(n.kind==='root')return;const g=gapTo(rc,n);
+   L.forEach(o=>{if(o===n)return;const go=gapTo(rc,o);if(go<0)over.push(n.label+' over '+o.label);if(go<=g)far.push(n.label+' nearer '+o.label)})});
+  return {over,far,none,labels:LABS.length}}};
+})();
+</script>
+</body>
+</html>

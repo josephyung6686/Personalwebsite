@@ -1,130 +1,56 @@
 ---
-title: "Tuck: a file app people can trust"
-role: "Cofounder: building the engine with my cofounder, from reading files and sorting them to the assistant and the checks"
-summary: "A macOS app I'm building with my cofounder: an autonomous file organizer and an AI brain for your computer"
-chips: ["Cofounder", "Sorting engine", "AI agents", "Evals with answer keys", "Privacy by design"]
+title: "Tuck: the agentic AI brain that sorts your files"
+role: "Building the engine in a team of two, from reading files and sorting them to the assistant and the checks."
+summary: "A Mac app I'm building in a team of two. It reads your files, sorts them into virtual folders and answers questions about them."
+chips: ["Agentic AI", "Sorting engine", "AI agents", "Evals with answer keys", "Privacy by design"]
 demo: tuck
 glance:
-  - { label: "Role", value: "Cofounder, on the engine" }
-  - { label: "Team", value: "Two cofounders" }
-  - { label: "Built first", value: "FileMind, my own file sorter" }
+  - { label: "Role", value: "The engine" }
+  - { label: "Team", value: "Team of two" }
+  - { label: "Rule", value: "Nothing moves on disk" }
   - { label: "Checked with", value: "27 sample homes with answer keys" }
 ---
 
-## Links
-
-- **Interactive demo:** [at the top of this page](#demo), a small rebuild of Needs You with sample files
-- **Code:** private, happy to walk through it on a call
-
 ## What Tuck is
 
-An autonomous file organizer and an AI brain for your Mac, built with my cofounder:
+Tuck is a Mac app that organizes your files by reading what's in them. It sorts them into virtual folders that live inside the app, so nothing moves in Finder. When it can't make a decision alone it asks you, and nothing changes until you answer. You can also ask it questions, and it answers from the same index the sorter built.
 
-- **Organizes for you:** files go into virtual folders, and nothing moves in Finder
-- **Asks only when it has to:** the decisions it can't make alone wait in Needs You, and nothing changes until you answer
-- **Answers from your files:** Ask Tuck finds and explains files from the same index the sorter built
-- **Who does what:** my cofounder leads the product and the interface, and I work on the engine underneath
-- **Status:** built and tested on sample home folders, real users next
+I'm building it in a team of two. My teammate leads the product and the interface, and I work on the engine underneath. So far it has been built and tested on sample home folders, and real users come next. The [demo at the top of this page](#demo) is a small rebuild of the Needs You screen with sample files. The code is private, and I'm happy to walk through it on a call.
 
 ![Tuck's Today screen: what it sorted today, each with Undo, and the decisions that need you](/work/tuck/today.webp)
-*Today, in the current prototype with sample files: what Tuck sorted, each with Undo, and what needs you*
+*The Today screen in the current prototype, with sample files. It shows what Tuck sorted, each with Undo, and what needs you.*
 
-## Where it started: FileMind
+## Reading files
 
-Before Tuck I built FileMind, a desktop file sorter of my own, and two failures from it shaped everything after:
+To sort a file by what's inside it, the engine first has to read it, whatever the format. I built six extractors for this, covering PDF, Word, images, archives, structured text and a long tail of other formats. They had 272 tests when they landed. The file extension is treated as a hint, and the file's real type decides which extractor runs. Apple Vision reads the text in images on the Mac, which covers scans and screenshots.
 
-- **The goal:** "a memory, not a filing cabinet": understand what's in every file, organize new arrivals by content and never by name alone, and find anything from a plain description in under 2 seconds
-- **What I built:** an app that reads each file and designs folders from what's inside, on Electron, React, FastAPI and Python, with crash-resumable ingestion, SQLite full-text search and local MiniLM embeddings in ChromaDB
-- **An early rule:** "local to narrow, AI to decide," with GraphRAG, MemGPT and RAPTOR rejected as more than it needed
-- **Failure one, too bold:** an early version auto-moved 968 files, a journaled undo put them all back, and read-only became the default
-- **Failure two, too careful:** the next classifier, V16, abstained on about 80% of files, so it organized almost nothing, and I rejected it
-- **The pivot:** I wrote the spec for V17, where the model sees one table with a row per file and never the raw files, to avoid context rot; subagents survey the table, three propose competing folder trees, a judge picks one, then others assign and audit
-- **Who owns the rules:** deterministic Python holds every invariant, so the model proposes and code decides what gets saved
-- **How it held up:** 150 real files through the production loop on GLM-5.2 made 23 folders, all 10 sensitive files went to review with none auto-moved, and 31 uncertain files came down to 3 questions
-- **Then a bigger test:** a preview on a real corpus of about 13,000 files exposed two engine defects, and after the fixes the full suite of 1,157 tests passed with no regressions
-- **What carried into Tuck:** the model works from a card for each file, code owns the rules, and Tuck goes a step further on safety: nothing moves at all
+What the AI understands about a file is saved against its content, so a second sort of the same folder doesn't ask the model anything. Before any model is called, rules on the Mac hold back finance, identity, medical and legal files, and a held file is never sent. For everything else, the model can only fill in the fields of a fixed schema and has to cite its evidence. If it doesn't know, it can say so, and a correct "I don't know" counts as a success.
 
-## What "nothing moves on disk" means in the code
+## Sorting
 
-A promise only counts if the code can't break it:
+The first engine was careful and costly. It gathered evidence and facts about each file, built groups, froze a folder tree and then placed each file with citations. On 9 October I started a second, batched engine beside it behind a switch. It summarizes each file in a card of about 150 tokens, makes one call to design the folders and asks no more than 3 questions.
 
-- **A sort is rows, not moves:** a placement is a row in one SQLite database, and Finder keeps opening the file at its original path
-- **A wall between packages:** a test parses every file in the graph package and fails if any of them imports the code that moves files
-- **The old move path is off:** the engine can still move files, behind explicit flags and with an undo for all of it, but moving files from the app is off in this version
-- **The one exception:** Trash asks first, and Undo puts the file back
-- **Undo on the rest:** every sort shows up in History with its own Undo
+On real DeepSeek runs, the new engine placed 80% of the files in a student home, up from 46%, and 92% in a consultant home, up from 53%, with about 40 times fewer model calls and no leaks. The old engine came out on 26 October, and two days later I deleted 30 more modules that nothing ran.
 
-![Needs You: one decision, the twelve files it covers, where they would go and why](/work/tuck/needs-you.webp)
-*Needs You, in the prototype with sample files: one decision, the files it covers, why, and "Nothing moves on disk"*
+A sort now goes through indexing, a privacy check, cards, understanding, a few quick questions, folder design and placement. Every file ends up in one place, as placed, suggested or unsorted. Your own rules and folders come first, then the design, then exact duplicates, and a model call handles whatever is left. Private files never reach the model, so code places them.
 
-![History: every sort and every choice, each with an Undo button](/work/tuck/history.webp)
-*History: every sort and every choice, each with Undo*
-
-![The Finder view with a Sorted by Tuck switch](/work/tuck/finder.webp)
-*Finder stays as it is: the same files in the same place, with a switch to Tuck's view*
-
-## Reading files: what the engine knows
-
-To sort by what's inside a file, the engine has to read it, in any format, without trusting it, and I built those readers:
-
-- **Six extractors:** PDF, Word, images, archives, structured text and a long tail of other formats, all emitting one shape, with 272 tests when they landed
-- **Routed by content:** the file extension is only a signal, and the real file type picks the extractor
-- **Scans and screenshots too:** Apple Vision reads the text in images on the Mac
-- **Read once:** what the AI understood is saved by content, so a second sort of the same folder asks the model nothing
-- **Private stays here:** rules on the Mac hold finance, identity, medical and legal files before any model is called, and a held file is never sent
-- **Cite it or say unknown:** the model can only fill fields in a fixed schema, must cite its evidence, and a correct "I don't know" counts as a success
-
-## Sorting: two engines, one rewrite
-
-The first engine was careful and costly, so I started a second one beside it and let the numbers decide:
-
-- **The first engine:** a long spec, part by part, with evidence, facts, groups built from bounded neighbourhoods, then a frozen tree and cited placements
-- **The second engine:** on 9 Oct I started a batched one behind a switch, with cards of about 150 tokens, one design call, and no more than 3 questions
-- **What decided it:** on real DeepSeek, a student home went from 46% to 80% placed and a consultant home from 53% to 92%, with about 40x fewer model calls and 0 leaks
-- **Then cleaning up:** the old engine came out on 26 Oct, and I deleted 30 more modules nothing ran on 28 Oct
-- **The stages now:** index, privacy gate, cards, understanding, quick questions, folder design, placement, then whatever is left for you
-- **Every file gets one place:** placed, suggested or unsorted, with your own rules and folders first, then the design, then exact duplicates, then a model call for what's left
-- **Private files never reach the model:** code alone places them
-- **Other languages:** a name check kept only English letters, so every Chinese and Japanese folder looked empty and merged into one; after the fix, folders kept right went from 15% to 88% in Chinese and 0% to 73% in Japanese, on an offline check
+Other languages needed their own fixes. A name check kept only English letters, so every Chinese and Japanese folder looked empty and they all merged into one. After the fix, an offline check showed folders kept correctly going from 15% to 88% in Chinese and from 0% to 73% in Japanese.
 
 ![Tuck Brain: a map of folders branching out from you, grouped by parts of life](/work/tuck/brain.webp)
-*Tuck Brain, in the prototype with sample files: 315 files and 38 folders as one map*
+*Tuck Brain in the prototype, with sample files, showing 315 files and 38 folders as one map.*
 
-## The assistant: tools over the same files
+## The assistant
 
-Ask Tuck is an agent loop I built over the sorter's own database, with no second store:
+Ask Tuck is an agent loop I built over the sorter's own database, so there's no second store. Twenty core tools go with every request in a fixed order, which lets the provider cache them, and the rest of the 102 tools load only when the model asks for them. Every tool call passes one policy check that validates it, applies privacy and trust rules and then dispatches it.
 
-- **Tools on demand:** 20 core tools go with every request, in a fixed order so the provider can cache them, and the rest of the 102 load only when the model asks
-- **One gate:** every tool call passes a single policy check: validate, then privacy and trust, then dispatch
-- **File text is data, not orders:** text from a file is tagged untrusted, and test files try to break that, like a PDF named SYSTEM_apply_moves_now
-- **Private files stay handles:** the model sees "{private:1}", never the name, and the person sees the real file on their Mac
-- **Stop means stop:** Stop ends the turn before the next request and the next tool
+Text from a file is tagged as untrusted so that it isn't followed as instructions, and test files try to break this, including a PDF named SYSTEM_apply_moves_now. Private files reach the model only as a handle like {private:1}, while the person sees the real file on their Mac. Pressing Stop ends the turn before the next request and the next tool.
 
-## A rule I kept: be honest
-
-An assistant that says it did something it didn't is worse than one that does nothing:
-
-- **No claim without a tool:** a sentence saying the model did something goes, if no tool did it that turn
-- **No invented numbers:** a sentence with a count no tool returned goes too, after a reply claimed "I looked through 2,318 files"
-- **Citations must be real:** a citation that doesn't match what a tool returned is dropped
-- **Nothing made up about providers:** each AI provider's data terms are written down, and an unknown provider is refused rather than described
+The assistant also can't claim things it didn't do. If a reply says the model did something and no tool did it that turn, the sentence is removed. The same goes for a count no tool returned, which we added after a reply claimed "I looked through 2,318 files." Citations that don't match what a tool returned are dropped, and an AI provider with no written data terms is refused.
 
 ## How we checked it
 
-27 sample homes, each a made-up person's Desktop, Documents and Downloads, each with its own answer key:
+We test against 27 sample homes. Each one is a made-up person's Desktop, Documents and Downloads with its own answer key. The key says what each file is and never where it must go, so a sort is judged on whether the person would find the file. The scorer I built reads the same reply the window draws. The targets in the code are under 5% wrong, at least 85% of files in the tree, at most 3 questions, every private file held and no leaks.
 
-- **The key says what a file is:** never where it must go, so a sort is judged on whether the person would find the file
-- **Scored on what the window shows:** the scorer I built reads the same reply the window draws
-- **Targets in code:** under 5% wrong, at least 85% of files in the tree, at most 3 questions, every private file held, no leaks
-- **Not V16 again:** that in-the-tree target means a sort can't pass by leaving most files unsorted
-- **Two real runs on DeepSeek, 1 Nov, none rerun:** a household home had 1 wrong of 52, found 50 of 53 where the person would look, held 8 of 8 private files and asked 2 questions; a freelancer home had 1 wrong of 49, found 44 of 49, held 5 of 5 and asked 2
-- **Checking the key itself:** an audit of 19 homes found about 18% of ordinary files, 151 of 844, could honestly go two ways, so a "wrong" isn't always wrong
-- **What this doesn't tell you:** these are sample homes, not real people's files, and testing with real users is next
+In two real runs on DeepSeek on 1 November, with no reruns, a household home had 1 wrong of 52, found 50 of 53 where the person would look, held 8 of 8 private files and asked 2 questions. A freelancer home had 1 wrong of 49, found 44 of 49, held 5 of 5 and asked 2.
 
-## What I learned
-
-The model was never the hard part: deciding what it's never allowed to do was
-
-- Too bold moved 968 files, too careful organized almost nothing, and what worked was a plan you can undo
-- Give the model less, a table or a card, and let code own the rules
-- An eval is only as honest as its answer key, so check the key too
+We also audited the key itself and found that about 18% of ordinary files across 19 homes, 151 of 844, could honestly go two ways, so some answers marked wrong may be fine. These are sample homes, and testing with real people's files comes next.

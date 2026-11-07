@@ -228,9 +228,9 @@ export function summarize(c: Campaign, target: number): string {
   return `Round ${c.round} of ${MAX_ROUNDS}. ${c.obs.length} experiments so far. Highest predicted yield is ${Math.round(c.post.mean[top])}% at ${peak}. ${share}% of settings are certified above ${target}%.`;
 }
 
-/** Sequential teal, dark to bright as predicted yield rises, then faded toward the background where the model is still unsure. */
-const RAMP: [number, number, number][] = [[20, 58, 58], [44, 143, 126], [165, 247, 226]];
-const FOG: [number, number, number] = [11, 26, 28];
+/** Sequential crayon green, darker as predicted yield rises, then faded toward the paper where the model is still unsure. */
+const RAMP: [number, number, number][] = [[214, 236, 220], [92, 176, 118], [20, 96, 52]];
+const FOG: [number, number, number] = [246, 251, 255];
 export const YIELD_SCALE = { min: 30, max: 90 };
 
 export function heatColor(mean: number, sd: number): [number, number, number] {

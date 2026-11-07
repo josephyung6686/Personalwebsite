@@ -1,25 +1,40 @@
 :root {
-  color-scheme: dark;
-  /* Night campus: navy surfaces, Columbia blue for structure, lion gold for what matters. */
-  --page: #0b1226;
-  --panel: #131d38;
-  --panel-2: #1a2747;
-  --panel-edge: #2a3b66;
-  --panel-edge-hi: #3f5688;
-  --panel-drop: 4px 4px 0 #060b18;
-  --panel-drop-hi: 6px 6px 0 #060b18;
-  --ink: #f2f5fb;
-  --body: #c9d4e8;
-  --muted: #a3b2cf;
-  --columbia: #b9d9eb;
-  --blue: #6fb1e6;
-  --blue-deep: #1d4f91;
-  --gold: #f5c04a;
-  --gold-deep: #a9761b;
-  --gold-soft: #2c2612;
-  --cream: #ffe9b0;
-  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
-  --font-pixel: "Press Start 2P", ui-monospace, monospace;
-  --font-ui: var(--font-mono);
+  color-scheme: light;
+  /* Columbia-blue paper, navy wax for words, real crayon colours for everything that wants attention. */
+  --page: #a9d3ef;
+  --panel: #f6fbff;
+  --panel-2: #e2f0fa;
+  --panel-edge: #16224f;
+  --panel-edge-hi: #16224f;
+  --panel-drop: 0 2px 0 rgb(16 26 66 / .14), 0 10px 20px -12px rgb(16 26 66 / .4);
+  --panel-drop-hi: 0 3px 0 rgb(16 26 66 / .16), 0 16px 26px -12px rgb(16 26 66 / .45);
+  --ink: #101a42;
+  --body: #1b2757;
+  --muted: #2c3a6b;
+  --columbia: #1d3a7c;
+  --blue: #123f96;
+  --blue-deep: #16224f;
+  --gold: #fad13b;
+  --gold-deep: #9a1a12;
+  --gold-soft: #fff1b5;
+  --cream: #fffdf6;
+  /* the box of crayons */
+  --c-blue: #1f5fd0;
+  --c-red: #d8332a;
+  --c-green: #23894a;
+  --c-yellow: #f2b518;
+  --c-purple: #6f3fb0;
+  --c-brown: #8a4b22;
+  --c-orange: #ef7b12;
+  --c-white: #fffdf6;
+  /* room the page leaves free on the right for the crayon box */
+  --box-room: 0px;
+  --wobble: 16px 13px 18px 12px / 13px 17px 12px 16px;
+  --wobble-s: 9px 7px 10px 6px / 7px 10px 6px 9px;
+  --font-body: "Lexend", "Helvetica Neue", Arial, sans-serif;
+  --font-hand: "Playpen Sans", "Lexend", "Comic Sans MS", cursive;
+  --font-mono: var(--font-hand);
+  --font-pixel: var(--font-hand);
+  --font-ui: var(--font-hand);
 }
+@media (min-width: 1280px) { :root { --box-room: 186px; } }

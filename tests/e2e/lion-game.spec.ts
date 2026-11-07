@@ -21,11 +21,11 @@ test('the lion roams on every page and has an accessible name', async ({ page })
   }
 });
 
-test('the lion and every pose are hard-pixel art', async ({ page }) => {
+test('the lion and every pose are crayon drawings', async ({ page }) => {
   await page.goto('/');
   const svgs = page.locator('#lion svg.lion-svg, .lion-pose svg.lion-svg');
   expect(await svgs.count()).toBeGreaterThanOrEqual(4);
-  for (const svg of await svgs.all()) await expect(svg).toHaveAttribute('shape-rendering', 'crispEdges');
+  for (const svg of await svgs.all()) await expect(svg.locator('image').first()).toHaveAttribute('href', /^\/lion\/.+\.webp$/);
   for (const pose of ['laptop', 'phone', 'scarf', 'bed']) await expect(page.locator(`.lion-pose[data-pose="${pose}"]`)).toHaveAttribute('aria-hidden', 'true');
 });
 
@@ -126,8 +126,8 @@ const TAP_TARGETS = [
   ['the Repo button in Wins', '/', '#wins a.btn:has-text("Repo")'],
   ['the SPADE Run button', '/work/nutrigene', '[data-demo="spade"] button:has-text("Run next round")'],
   ['an Aikonic query', '/work/aikonic', '[data-demo="aikonic"] button >> nth=0'],
-  ['an Aikonic search mode', '/work/aikonic', '[data-demo="aikonic"] button:has-text("Semantic")'],
-  ['a Tuck row', '/work/tuck', '.tuck-demo button:has-text("New folder")'],
+  ['an Aikonic recording action', '/work/aikonic', '[data-demo="aikonic"] button:has-text("Make a podcast")'],
+  ['a Tuck demo button', '/work/tuck', '.tuck-demo :is(button:has-text("The app"), button:has-text("Needs You")):visible'],
 ] as const;
 
 /** Picks the lion up on clear ground and drops it straight above a control, then scrolls that control into its lane. */
@@ -178,6 +178,15 @@ for (const width of [360, 768, 1100]) {
       });
     }
 
+    test('the Dress up button sits in the page, not over it, and clear of the lion', async ({ page }) => {
+      await page.goto('/');
+      await expect(dressUp(page)).toHaveCSS('position', 'static');
+      await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+      await expect(lion(page)).not.toHaveClass(/duck/);
+      const b = (await dressUp(page).boundingBox())!, l = (await lion(page).boundingBox())!;
+      expect(b.y + b.height).toBeLessThanOrEqual(l.y);
+    });
+
     test('neither the lion nor the Dress up button ever sits on a demo', async ({ page }) => {
       for (const path of ['/', '/work/nutrigene', '/work/aikonic', '/work/tuck']) {
         await page.goto(path);
@@ -185,13 +194,15 @@ for (const width of [360, 768, 1100]) {
           const hits: string[] = [];
           const demo = first.getBoundingClientRect();
           const start = scrollY + demo.top - innerHeight, end = scrollY + demo.bottom;
-          const clash = (a: DOMRect, b: DOMRect) => Math.min(a.right, b.right, innerWidth) - Math.max(a.left, b.left, 0) > 0 && Math.min(a.bottom, b.bottom, innerHeight) - Math.max(a.top, b.top, 0) > 0;
+          // A whole pixel of real overlap counts; a sub-pixel graze along an edge does not.
+          const clash = (a: DOMRect, b: DOMRect) => Math.min(a.right, b.right, innerWidth) - Math.max(a.left, b.left, 0) >= 1 && Math.min(a.bottom, b.bottom, innerHeight) - Math.max(a.top, b.top, 0) >= 1;
+          const lionOnDemo = () => clash(document.querySelector('#lion .lion-inner')!.getBoundingClientRect(), first.getBoundingClientRect());
           for (let y = Math.max(0, start); y <= end; y += 160) {
             scrollTo({ top: y, behavior: 'instant' });
-            await new Promise((r) => setTimeout(r, 340)); // the duck takes .2s
-            const d = first.getBoundingClientRect();
-            if (clash(document.querySelector('#lion .lion-inner')!.getBoundingClientRect(), d)) hits.push(`lion @${y}`);
-            if (clash(document.getElementById('dress-btn')!.getBoundingClientRect(), d)) hits.push(`button @${y}`);
+            // It gets a moment to duck, then has to be off the demo. Waiting on the result keeps this independent of machine speed.
+            for (let i = 0; i < 25 && lionOnDemo(); i++) await new Promise((r) => setTimeout(r, 60));
+            if (lionOnDemo()) hits.push(`lion @${y}`);
+            if (clash(document.getElementById('dress-btn')!.getBoundingClientRect(), first.getBoundingClientRect())) hits.push(`button @${y}`);
           }
           return hits;
         });
@@ -254,7 +265,7 @@ test('Save downloads a picture of your lion', async ({ page }) => {
   await page.goto('/');
   await dressUp(page).click();
   const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Save picture' }).click()]);
-  expect(dl.suggestedFilename()).toBe('pixel-lion.png');
+  expect(dl.suggestedFilename()).toBe('crayon-lion.png');
 });
 
 test('with reduced motion the lion stays put', async ({ page }) => {
@@ -267,11 +278,10 @@ test('with reduced motion the lion stays put', async ({ page }) => {
   await expect(lion(page)).toHaveAttribute('data-mode', 'sit');
 });
 
-test('on a phone: no sideways scroll, and the button sits in the page instead of over it', async ({ page }) => {
+test('on a phone: no sideways scroll, and the wardrobe fits', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 760 });
   await page.goto('/');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
-  await expect(dressUp(page)).toHaveCSS('position', 'static');
   await dressUp(page).click();
   const box = (await wardrobe(page).boundingBox())!;
   expect(box.x).toBeGreaterThanOrEqual(0);

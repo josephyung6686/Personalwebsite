@@ -12,20 +12,18 @@ describe('wardrobe catalogue', () => {
   });
 });
 
-describe('pixel art', () => {
-  it('every item draws only on the sprite grid: whole-number paths, nothing smoothed', () => {
+describe('crayon art', () => {
+  it('every item is a wax drawing placed on the rig, with a box to crop its icon to', () => {
     for (const cat of ['hat', 'top', 'face', 'held'] as const) {
       for (const it of ITEMS[cat]) {
         if (it.id === 'none') continue;
-        expect(it.svg, it.id).toContain('<path');
-        expect(it.svg, it.id).not.toMatch(/\d\.\d|<(circle|ellipse|text|filter)/);
+        expect(it.svg, it.id).toMatch(/<image href="\/lion\/[a-z-]+\.webp"/);
         expect(it.box!.w, it.id).toBeGreaterThan(0);
       }
     }
   });
-  it('slots every worn item into the lion, in crisp pixels', () => {
+  it('slots every worn item into the lion', () => {
     const svg = lionSvg({ hat: 'columbia', top: 'hoodie', face: 'glasses', held: 'cup' });
-    expect(svg).toContain('shape-rendering="crispEdges"');
     for (const id of ['columbia', 'hoodie', 'glasses', 'cup']) expect(svg).toContain(`data-item="${id}"`);
   });
 });

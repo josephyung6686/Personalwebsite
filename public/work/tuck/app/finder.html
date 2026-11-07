@@ -1,0 +1,1160 @@
+<!doctype html>
+<html lang="en">
+<head><script>try{if(!localStorage.getItem('tuckTheme'))localStorage.setItem('tuckTheme','dark')}catch(e){}</script><script>/* one Light/Dark choice for every page: remembered and applied when you move between Finder, Tuck and Brain */(function(){var k="tuckTheme",d=document.documentElement,t=null,ready=false;try{t=localStorage.getItem(k)}catch(e){}if(t)d.dataset.theme=t;new MutationObserver(function(){if(!ready)return;var v=d.dataset.theme;try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}).observe(d,{attributes:true,attributeFilter:["data-theme"]});function apply(){if(t&&d.dataset.theme!==t){if(typeof window.setTheme==="function"){try{window.setTheme(t)}catch(e){d.dataset.theme=t}}else d.dataset.theme=t}ready=true}if(document.readyState==="complete")apply();else addEventListener("load",apply)})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tuck Finder</title>
+<link rel="stylesheet" href="system.css"><link rel="stylesheet" href="phosphor.css">
+<script src="tuck-art.js"></script>
+<script src="sample.js"></script>
+<script src="composer.js"></script>
+<script src="plan.js"></script>
+<script src="folderpanel.js"></script>
+<script src="resort.js"></script>
+<script src="chatbot.js"></script>
+
+<style>
+/* ---------- page-only tokens (new names, no system token is redefined) */
+:root{--tag-red:#ff4f45;--tag-orange:#ff9f0a;--tag-yellow:#f5c400;--tag-green:#30c552;--tag-blue:#2f7bff;--tag-purple:#b25ce0;--tag-gray:#9a9aa1;
+  --sb-sel:color-mix(in oklab,var(--ink) 9%,transparent);--row:24px}
+
+.theme{position:fixed;top:9px;right:32px;z-index:5}
+.theme button{height:24px;font-size:12px}
+.win{inset:46px 32px 24px;--side-w:224px;grid-template-rows:minmax(0,1fr)}
+.win:has(.side.hide){--side-w:0px}
+
+/* ---------- sidebar (Tahoe: inset floating panel) */
+.side{padding:8px 0 8px 8px;min-width:0;min-height:0}
+.sb{height:100%;border-radius:11px;background:color-mix(in oklab,var(--side) 93%,transparent);backdrop-filter:blur(18px);box-shadow:0 0 0 .5px var(--line2);overflow:auto;display:flex;flex-direction:column}
+.sb .lights{padding:13px 13px 8px}
+.sb nav{padding:0 0 12px}
+.sh{display:flex;align-items:center;gap:5px;padding:12px 16px 3px;font:600 11px/1.2 var(--f);color:var(--ink3)}
+.sh img{width:13px;height:13px}
+.sbi{display:flex;align-items:center;gap:8px;width:calc(100% - 12px);margin:0 6px;height:28px;padding:0 10px;border-radius:7px;font:400 13px/1 var(--f);color:var(--ink);text-align:left}
+.sbi .ph,.sbi .ph-fill{font-size:16px;color:var(--ac);width:17px;text-align:center}
+.sbi:hover{background:var(--hov)}
+.sbi.on{background:var(--sb-sel)}
+.sbi .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sbi .count{font-size:10.5px}
+.sbi.drop{background:var(--ac);color:#fff}.sbi.drop .ph,.sbi.drop .ph-fill,.sbi.drop .count{color:#fff}
+.tdot{width:10px;height:10px;border-radius:50%;flex:none;margin:0 3px;background:var(--c)}
+.sec-in{animation:secIn .2s var(--ease)}
+@keyframes secIn{from{opacity:0;transform:translateY(-4px)}}
+
+/* ---------- main column */
+.main{position:relative;display:grid;grid-template-rows:52px minmax(0,1fr) auto;min-width:0;background:var(--win)}
+.tb{display:flex;align-items:center;gap:8px;padding:0 12px 0 10px;border-bottom:1px solid var(--line);min-width:0}
+.tg{display:flex;align-items:center;gap:1px;padding:2px;border-radius:999px;background:var(--win);box-shadow:0 0 0 .5px var(--line2),0 1px 3px rgba(20,30,60,.07)}
+.tg .ib{width:32px;height:28px;border-radius:999px;font-size:17px}
+.tg .ib.w{width:auto;padding:0 8px;gap:2px;display:inline-flex}
+.tg .ib.w .ph-caret-down{font-size:10px}
+.ib[disabled]{opacity:.35;pointer-events:none}
+.tb h1{font:700 15px/1 var(--f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:60px;margin-left:4px}
+.tb .sp{flex:1}
+.tb .seg button{min-width:34px;padding:0 8px}
+.tsw{gap:7px;padding:0 8px 0 7px;font-weight:600}
+.tsw img{width:16px;height:16px}
+.tsw.on{color:var(--ac-ink)}
+.tb .search{min-width:170px;width:190px;height:30px;border-radius:999px}
+
+/* ---------- content body */
+.body{position:relative;overflow:auto;outline:0;min-height:0}
+.body:focus-visible{outline:0}html.kb .body:focus-visible{box-shadow:inset 0 0 0 2px var(--ac)}
+.swap{animation:swap .2s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateX(10px)}}
+
+/* file icons drawn with CSS (one recipe for every view and size) */
+.fi{position:relative;display:inline-block;width:var(--s);height:var(--s);flex:none;vertical-align:middle}
+.fo::before{content:"";position:absolute;left:5%;top:13%;width:40%;height:22%;border-radius:calc(var(--s)*.08) calc(var(--s)*.08) 0 0;background:color-mix(in oklab,var(--k-folder) 76%,#183c9e)}
+.fo::after{content:"";position:absolute;left:3%;right:3%;top:21%;bottom:12%;border-radius:calc(var(--s)*.07);background:color-mix(in oklab,var(--k-folder) 80%,#183c9e)}
+.fo>i{position:absolute;z-index:1;left:3%;right:3%;top:31%;bottom:12%;border-radius:calc(var(--s)*.07);background:color-mix(in oklab,var(--k-folder) 78%,#fff);display:grid;place-items:center;font-size:calc(var(--s)*.3);color:color-mix(in oklab,var(--k-folder) 55%,#0b2777);font-style:normal}
+.dc .pg{position:absolute;left:16%;right:16%;top:4%;bottom:4%;background:#fff;border:max(1px,calc(var(--s)*.008)) solid rgba(20,30,60,.16);border-radius:calc(var(--s)*.035);clip-path:polygon(0 0,calc(100% - var(--s)*.17) 0,100% calc(var(--s)*.17),100% 100%,0 100%);overflow:hidden}
+.dc .pg::after{content:"";position:absolute;right:-1px;top:-1px;width:calc(var(--s)*.17);height:calc(var(--s)*.17);background:linear-gradient(to top right,#d8dde8 50%,transparent 50%)}
+.dc .pg b{position:absolute;left:0;right:0;bottom:9%;height:15%;background:var(--kc);color:#fff;font:700 calc(var(--s)*.1)/1 var(--f);letter-spacing:.03em;display:grid;place-items:center}
+.dc.big .pg b{height:11%;font-size:calc(var(--s)*.07)}
+.dc.big .pg::before{content:"";position:absolute;left:12%;right:14%;top:13%;height:56%;background:linear-gradient(#8f96a8,#8f96a8) 0 0/58% 6% no-repeat,repeating-linear-gradient(to bottom,#d3d8e2 0 max(1px,calc(var(--s)*.016)),transparent 0 calc(var(--s)*.055)) 0 18%/100% 82% no-repeat}
+.dc.big.h .pg::before{top:24%;height:48%;background:repeating-linear-gradient(to bottom,#d3d8e2 0 max(1px,calc(var(--s)*.016)),transparent 0 calc(var(--s)*.055)) 0 18%/100% 82% no-repeat}
+.dc .pg em{position:absolute;left:12%;right:14%;top:10%;font:700 calc(var(--s)*.036)/1.25 var(--f);font-style:normal;color:#2a2f3d}
+.dc.xls.big .pg::before{background:linear-gradient(90deg,transparent 0 32%,#d3d8e2 32% 33%,transparent 33% 65%,#d3d8e2 65% 66%,transparent 66%),repeating-linear-gradient(to bottom,#d3d8e2 0 max(1px,calc(var(--s)*.008)),transparent 0 calc(var(--s)*.05));top:9%}
+.im .p,.ss .p{position:absolute;left:4%;right:4%;top:17%;bottom:17%;border-radius:calc(var(--s)*.03);border:max(1px,calc(var(--s)*.025)) solid #fff;box-shadow:0 0 0 .5px rgba(0,0,0,.22),0 1px 3px rgba(0,0,0,.14)}
+.im .p{background:radial-gradient(circle at 74% 30%,hsl(var(--h) 90% 92%) 0 7%,transparent 8%),linear-gradient(168deg,transparent 54%,hsl(calc(var(--h) + 110) 30% 36%) 55%),linear-gradient(200deg,transparent 62%,hsl(calc(var(--h) + 90) 28% 46%) 63%),linear-gradient(hsl(var(--h) 62% 66%),hsl(calc(var(--h) + 25) 66% 84%))}
+.ss .p{background:linear-gradient(#cfd6e5,#cfd6e5) 0 0/100% 13% no-repeat,linear-gradient(#e7ebf3,#e7ebf3) 0 13%/26% 87% no-repeat,linear-gradient(#b9c6e6,#b9c6e6) 34% 30%/56% 10% no-repeat,linear-gradient(#dde2ec,#dde2ec) 34% 52%/56% 6% no-repeat,linear-gradient(#dde2ec,#dde2ec) 34% 66%/40% 6% no-repeat,#fff}
+.dm .p{position:absolute;left:9%;right:9%;top:19%;bottom:19%;border-radius:calc(var(--s)*.1);background:#eceef3;box-shadow:inset 0 0 0 max(1px,calc(var(--s)*.012)) rgba(20,30,60,.14),0 1px 2px rgba(0,0,0,.12);display:grid;place-items:center;color:#5d6375;font-size:calc(var(--s)*.34)}
+.ap .p{position:absolute;inset:8%;border-radius:23%;background:var(--c);display:grid;place-items:center;color:#fff;font-size:calc(var(--s)*.5);box-shadow:inset 0 0 0 .5px rgba(0,0,0,.15)}
+.ap .p img{width:72%;height:72%}
+.ap.tk .p{background:#fff}
+.fi>.lk{position:absolute;left:2%;bottom:6%;width:clamp(14px,calc(var(--s)*.32),44px);height:clamp(14px,calc(var(--s)*.32),44px);border-radius:50%;background:var(--lock);color:#fff;display:grid;place-items:center;font-size:clamp(9px,calc(var(--s)*.18),24px);box-shadow:0 0 0 2px var(--win);z-index:2}
+
+/* list view */
+.lst{--cols:minmax(240px,1fr) 190px 84px 190px;padding-bottom:84px;min-width:720px}
+.lst.srt{--cols:minmax(220px,1fr) 170px 180px 76px 150px}
+.lh{position:sticky;top:0;z-index:var(--z-sticky);display:grid;grid-template-columns:var(--cols);height:28px;align-items:center;padding:0 20px;background:var(--win);border-bottom:1px solid var(--line);font:500 12px/1 var(--f);color:var(--ink3)}
+.lh button{display:flex;align-items:center;gap:4px;height:100%;padding:0 8px;text-align:left;color:inherit;border-left:1px solid var(--line)}
+.lh button:first-child{border-left:0;padding-left:22px}
+.lh button.on{color:var(--ink);font-weight:600}
+.lh button.r{justify-content:flex-end}
+.lh .ph{font-size:10px}
+.rows{padding:4px 0}
+.row{display:grid;grid-template-columns:var(--cols);align-items:center;height:var(--row);margin:0 8px;padding:0 12px;border-radius:6px;font:400 13px/1 var(--f);color:var(--ink)}
+.rows .row:nth-child(even){background:var(--stripe)}
+.row .c{padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink3);font-size:12.5px}
+.row .c.r{text-align:right}
+.row .c.n{display:flex;align-items:center;gap:6px;padding-left:calc(var(--d,0)*18px);color:var(--ink);font-size:13px;overflow:hidden}
+.row .ri{display:flex;align-items:center;gap:5px;min-width:0}.row .ri>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .ri .ph{font-size:13px}
+.tw{width:14px;height:14px;display:grid;place-items:center;flex:none;color:var(--ink3);font-size:10px;border-radius:3px}
+.tw .ph-fill{transition:transform .15s var(--ease)}
+.tw.open .ph-fill{transform:rotate(90deg)}
+.nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dots{display:inline-flex;gap:2px;flex:none}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 0 1px var(--win)}
+.nd{width:7px;height:7px;border-radius:50%;background:var(--ac);flex:none}
+.lkI{color:var(--lock);font-size:12px;flex:none}
+.row.gh{background:none!important;font:600 12px var(--f);color:var(--ink2);border-bottom:1px solid var(--line);border-radius:0;margin-top:6px}
+.rows.grp .row:nth-child(even){background:none}
+/* selection: accent when the list has focus, grey when it does not */
+.body .sel{background:var(--soft2)!important}
+.body:focus-within .row.sel,.body:focus-within .ci.sel{background:var(--ac)!important;color:#fff}
+.body:focus-within .row.sel .c,.body:focus-within .row.sel .tw,.body:focus-within .ci.sel .ph-caret-right,.body:focus-within .ci.sel .lkI{color:rgba(255,255,255,.9)}
+.body:focus-within .sel .nd{background:#fff}.body:focus-within .sel .dots i{box-shadow:0 0 0 1.5px #fff}
+.dropT{box-shadow:inset 0 0 0 2px var(--ac)!important;background:var(--ac-fill)!important}
+
+/* icon view */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:14px 6px;padding:18px 18px 90px;align-content:start}
+.gi{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;border-radius:8px}
+.gi .ibx{width:78px;height:78px;border-radius:9px;display:grid;place-items:center}
+.gi .nm2{display:flex;align-items:center;gap:4px;max-width:100%;padding:2px 6px;border-radius:5px;font:400 12px/1.25 var(--f);text-align:center;color:var(--ink)}
+.gi .nm2 span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.gi .sub{font:400 11px/1 var(--f);color:var(--ink3);margin-top:-2px}
+.gi.sel{background:none!important}
+.gi.sel .ibx{background:var(--soft2)}
+.gi.sel .nm2{background:var(--soft2)}
+.body:focus-within .gi.sel .nm2{background:var(--ac);color:#fff}
+.body:focus-within .gi.sel .nd{background:#fff}
+.gi.dropT{box-shadow:none!important;background:none!important}.gi.dropT .ibx{box-shadow:inset 0 0 0 2px var(--ac);background:var(--ac-fill)}
+.ghd{grid-column:1/-1;font:600 12px var(--f);color:var(--ink2);padding:4px 2px;border-bottom:1px solid var(--line)}
+
+/* column view */
+.cols{display:flex;height:100%;overflow-x:auto;overflow-y:hidden}
+.col{flex:none;width:214px;height:100%;overflow-y:auto;border-right:1px solid var(--line);padding:4px 0 84px}
+.ci{display:flex;align-items:center;gap:6px;height:24px;margin:0 6px;padding:0 6px 0 8px;border-radius:6px;font:400 13px/1 var(--f)}
+.ci .nm{flex:1}
+.ci .ph-caret-right{font-size:11px;color:var(--ink3)}
+.col:not(.act) .ci.sel{background:var(--soft2)!important;color:var(--ink)!important}
+.col:not(.act) .ci.sel .ph-caret-right{color:var(--ink3)!important}
+.pv{flex:1;min-width:290px;height:100%;overflow:auto;padding:28px 26px 90px;display:flex;flex-direction:column;align-items:center}
+
+/* preview / info pane (columns + gallery) */
+.inf{width:100%;max-width:330px;display:flex;flex-direction:column;gap:12px}
+.inf .big{display:grid;place-items:center;padding:6px 0 4px}
+.inf h2{font:600 15px/1.3 var(--f);text-align:center;word-break:break-word}
+.inf .meta{font:400 12px/1.3 var(--f);color:var(--ink3);text-align:center;margin-top:-8px}
+.inf h4{font:600 12px var(--f);color:var(--ink2);padding-top:8px;border-top:1px solid var(--line)}
+.inf dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font:400 12px/1.35 var(--f)}
+.inf dt{color:var(--ink3);text-align:right}
+.inf dd{color:var(--ink);margin:0;word-break:break-word}
+.tline{display:flex;gap:9px;align-items:flex-start;padding:10px 11px;border-radius:10px;background:var(--soft);font:400 12.5px/1.4 var(--f);color:var(--ink2)}
+.tline img{width:18px;height:18px;flex:none;margin-top:1px}
+.tline b{color:var(--ink);font-weight:600}
+.tline .acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.privbox{display:grid;place-items:center;gap:8px;text-align:center;color:var(--ink2);font:500 13px var(--f)}
+.privbox .pl{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:var(--soft);color:var(--lock);font:600 11.5px var(--f)}
+.privbox .lkc{width:var(--s,96px);height:calc(var(--s,96px)*1.25);border-radius:10px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;color:var(--lock);font-size:calc(var(--s,96px)*.32)}
+
+/* gallery */
+.gal{display:grid;grid-template-columns:minmax(0,1fr) 290px;height:100%}
+.gal .stage{display:grid;grid-template-rows:minmax(0,1fr) 92px;min-width:0;border-right:1px solid var(--line)}
+.gal .big{display:grid;place-items:center;padding:20px;min-height:0;overflow:hidden}
+.film{display:flex;gap:6px;align-items:center;overflow-x:auto;padding:0 16px;border-top:1px solid var(--line);justify-content:safe center}
+.fs{flex:none;width:62px;height:62px;border-radius:8px;display:grid;place-items:center}
+.fs.sel{background:var(--soft2)!important;box-shadow:inset 0 0 0 2px var(--ac)}
+.gal .side2{overflow:auto;padding:22px 20px 90px}
+
+/* empty + loading */
+.empty{height:100%;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;padding:40px;padding-bottom:110px}
+.empty .fi{opacity:.4;margin-bottom:6px}
+.empty b{font:600 14px var(--f);color:var(--ink2)}
+.empty p{font:400 12.5px/1.45 var(--f);color:var(--ink3);max-width:300px}
+.skr{display:grid;grid-template-columns:var(--cols);align-items:center;height:var(--row);margin:0 8px;padding:0 12px}
+.skr .skel{height:9px;margin:0 8px}
+.skc{display:flex;flex-direction:column;align-items:center;gap:8px}
+
+/* footer: path bar + status bar */
+.foot{border-top:1px solid var(--line);background:var(--win);font:400 12px/1 var(--f);color:var(--ink2)}
+.path{display:flex;align-items:center;gap:2px;height:26px;padding:0 12px;overflow:hidden;white-space:nowrap}
+.path button{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 5px;border-radius:5px;color:var(--ink2)}
+.path button:hover{background:var(--hov);color:var(--ink)}
+.path .sepc{font-size:9px;color:var(--ink3)}
+.path img{width:13px;height:13px}
+.path span.last{display:inline-flex;align-items:center;gap:5px;padding:0 5px;color:var(--ink)}
+.stat{height:24px;display:flex;align-items:center;justify-content:center;gap:6px;border-top:1px solid var(--line);color:var(--ink3);font-size:11.5px}
+.stat .ph{font-size:12px;color:var(--ac-ink)}
+
+/* Tuck in the corner */
+.tuck{position:absolute;right:24px;bottom:66px;z-index:var(--z-tuck);width:46px;height:52px;padding:0;border-radius:14px}
+.tuck img{position:absolute;left:-10px;top:-12px;width:66px;height:72px;display:block;pointer-events:none;transition:transform .3s var(--spring)}
+.tuck:hover img{transform:translateY(-2px)}
+.tuck.hop img{animation:hop .5s var(--spring)}
+@keyframes hop{30%{transform:translateY(-8px) scale(1.06)}}
+.tuck .count{position:absolute;top:-12px;left:-12px;box-shadow:0 0 0 2px var(--win)}
+.bub{position:absolute;right:14px;bottom:140px;z-index:var(--z-tuck);width:280px;padding:12px 13px;border-radius:13px;background:var(--win);box-shadow:var(--sh-pop);font:400 13px/1.45 var(--f);color:var(--ink);opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .2s var(--ease),transform .2s var(--ease)}
+.bub.on{opacity:1;transform:none;pointer-events:auto}
+.bub::after{content:"";position:absolute;right:26px;bottom:-6px;width:12px;height:12px;background:var(--win);transform:rotate(45deg);box-shadow:2px 2px 0 0 var(--line)}
+.bub .k{font:600 11px var(--f);color:var(--ink3);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.bub .k img{width:13px;height:13px}
+.bub .acts{display:flex;gap:6px;justify-content:flex-end;margin-top:10px}
+.bub .field{margin-top:8px}
+.bub .log{display:grid;gap:6px;max-height:220px;overflow:auto;margin-top:8px}
+.bub .log:empty{display:none}
+.bub .m{padding:7px 10px;border-radius:11px;font-size:12.5px;line-height:1.4;max-width:92%}
+.bub .m.me{justify-self:end;background:var(--ac);color:#fff;border-bottom-right-radius:4px}
+.bub .m.tk{justify-self:start;background:var(--soft);color:var(--ink);border-bottom-left-radius:4px}
+.bub .m.tk b{font-weight:600}
+.bub .acts a{text-decoration:none}
+.bub .ans{margin-top:8px;padding:8px 10px;border-radius:9px;background:var(--soft);font-size:12.5px;color:var(--ink2)}
+.bub ul{margin:6px 0 0;padding:0 0 0 2px;list-style:none;display:grid;gap:3px;font-size:12.5px;color:var(--ink2)}
+.bub li{display:flex;align-items:center;gap:6px;min-width:0}.bub li .nm{flex:1;min-width:0}.bub li>:last-child{flex:none;white-space:nowrap}
+.bub li .ph{color:var(--ink3);font-size:11px}
+
+/* menus, hint, popover, quick look */
+.menu{max-width:300px}
+.menu .mh{display:flex;align-items:center;gap:6px;padding:6px 9px 3px;font:600 11px var(--f);color:var(--ink3)}
+.menu .mh img{width:12px;height:12px}
+.menu button .ph,.menu button .ph-fill{font-size:15px;width:16px;color:var(--ink2)}
+.menu button:hover .ph,.menu button:hover .ph-fill,.menu button:focus-visible .ph{color:#fff}
+.menu button:focus-visible{outline:0;background:var(--ac);color:#fff}
+.menu button .k{margin-left:auto;color:var(--ink3);font-size:12px}
+.menu button:hover .k{color:rgba(255,255,255,.85)}
+.menu button[disabled]{opacity:.4;pointer-events:none}
+.menu .tagrow{display:flex;gap:7px;padding:5px 9px}
+.menu .tagrow button{width:16px;height:16px;padding:0;border-radius:50%;background:var(--c)!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.menu .tagrow button.on{box-shadow:0 0 0 2px var(--win),0 0 0 3.5px var(--c)}
+.menu .tagrow button:hover{transform:scale(1.15)}
+.hint{position:fixed;z-index:var(--z-tip);max-width:280px;display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:9px;background:var(--win);box-shadow:var(--sh-pop);font:400 12px/1.4 var(--f);color:var(--ink2);opacity:0;transform:translateY(-3px);pointer-events:none;transition:opacity .15s var(--ease),transform .15s var(--ease)}
+.hint.on{opacity:1;transform:none}
+.hint img{width:16px;height:16px;flex:none}
+.hint b{color:var(--ink);font-weight:600}
+.pop{position:fixed;z-index:var(--z-pop);width:300px;padding:13px;border-radius:12px;background:var(--win);box-shadow:var(--sh-pop);font:400 13px/1.45 var(--f)}
+.pop .k{display:flex;align-items:center;gap:6px;font:600 11px var(--f);color:var(--ink3);margin-bottom:4px}
+.pop .k img{width:13px;height:13px}
+.pop p{color:var(--ink2);margin-top:4px;font-size:12.5px}
+.pop .acts{display:flex;justify-content:flex-end;gap:6px;margin-top:11px}
+.ql{position:fixed;left:50%;top:50%;z-index:var(--z-sheet);width:min(660px,86vw);transform:translate(-50%,-48%) scale(.97);opacity:0;pointer-events:none;border-radius:14px;background:var(--win);box-shadow:var(--sh-win),0 0 0 .5px var(--line2);overflow:hidden;transition:opacity .2s var(--ease),transform .2s var(--ease)}
+.ql.on{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+.ql .qh{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;height:44px;padding:0 8px;border-bottom:1px solid var(--line)}
+.ql .qh b{font:600 13px var(--f);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ql .qs{height:430px;display:grid;place-items:center;background:var(--soft)}
+.ql .qf{display:grid;gap:10px;padding:12px 14px 14px}
+.ql .qm{font:400 12px var(--f);color:var(--ink3)}
+.flier{position:fixed;z-index:75;pointer-events:none;border-radius:7px;background:var(--win);box-shadow:var(--sh-pop);overflow:hidden}
+.flychip{display:flex;align-items:center;gap:6px;height:22px;padding:0 10px;white-space:nowrap;font:500 13px/22px var(--f);color:var(--ink)}.flychip>*{flex:none}.flychip .nm{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.pulse{animation:pulse .6s var(--ease)}
+@keyframes pulse{40%{background:var(--ac-fill2)}}
+.toast{z-index:var(--z-toast);bottom:96px}body:has(#chg:not([hidden])) .toast{bottom:136px}
+.toast img{width:18px;height:18px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* Finder / Tuck app switch: the same pill, same place, on every page */
+.appsw{display:flex;margin:10px 12px 8px;position:static}.appsw button{flex:1;justify-content:center}/* Finder | Tuck: inside the window, top of the sidebar, full width */
+
+/* chips: the same look as Edit Folders (tuck.html) */
+.tag{display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 6px;border-radius:6px;font:650 10.5px/1 var(--f);flex:none}
+.tag .ph-fill,.tag .ph{font-size:10.5px}
+.tag.new{background:var(--ok-fill);color:var(--ok)}
+.tag.ren{background:var(--ac-fill);color:var(--ac-ink)}
+.tag.rem{background:var(--danger-fill);color:var(--danger)}
+.tag.mov{background:var(--warn-fill);color:var(--warn)}
+.tag.lock{background:var(--lock-fill);color:var(--lock)}
+.body:focus-within .sel .tag{background:rgba(255,255,255,.22);color:#fff}
+
+/* right-hand folder column (Sorted view): the same folder card as Edit Folders */
+.main{grid-template-columns:minmax(0,1fr) auto}
+.main>.tb,.main>.foot{grid-column:1/-1}
+.fside{grid-row:2;grid-column:2;width:0;overflow:hidden;border-left:0 solid var(--line);background:var(--side);transition:width .22s var(--ease)}
+.main.wc .fside{width:332px;border-left-width:1px;overflow:auto}
+.fside{background:var(--win)}.fside>.fp{width:331px}
+.fpv{padding:24px 22px 90px;display:flex;justify-content:center}.inf .big.stack{display:flex;justify-content:center}.inf .big.stack>*+*{margin-left:-52px}
+/* the change bar: changes that wait for Apply (the same list as Edit Folders) */
+.chg{display:flex;align-items:center;gap:8px;height:40px;padding:0 8px 0 12px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--ac) 6%,var(--win));font:500 12px var(--f);color:var(--ink2)}
+.chg[hidden]{display:none}.chg .cnum{min-width:20px;height:20px;padding:0 6px;border-radius:10px;display:grid;place-items:center;background:var(--ac);color:#fff;font:700 11px var(--f)}
+.chg a{color:var(--ink);font-weight:600;text-decoration:none;white-space:nowrap}.chg a:hover{text-decoration:underline}.chg .sp{flex:1}.chg .note{color:var(--ink3);white-space:nowrap}.chg .btn{flex:none}
+.chg .ib{width:28px;height:28px}
+/* Quick Look and the info pane: the file's own actions */
+.qacts{display:flex;gap:8px;margin-top:8px;flex-wrap:nowrap}.qacts .btn{white-space:nowrap}
+.qwhy{margin-top:8px;font:500 12px/1.45 var(--f);color:var(--ink2)}
+.main.wc .lst.srt{--cols:minmax(180px,1fr) 128px 172px 64px;min-width:0}
+/* 1100 with the folder column open: "Really in" steps aside (the panel and the hover line still say it), so names stay readable */
+@media (max-width:1340px){.main.wc .lst.srt,.main.chat .lst.srt{--cols:minmax(160px,1fr) 172px 64px}.main.wc .lst.srt .lh button:nth-child(2),.main.wc .lst.srt .row:not(.gh)>.c:nth-child(2),.main.chat .lst.srt .lh button:nth-child(2),.main.chat .lst.srt .row:not(.gh)>.c:nth-child(2){display:none}}
+.main.wc .lst.srt .lh button:last-child,.main.wc .lst.srt .row:not(.gh)>.c:last-child{display:none}
+.main.wc .tuck{right:356px}.main.wc .bub{right:346px}
+/* the side chat docks beside the page (rule 6): the folder column steps aside while it is open */
+.main.chat .fside{width:0!important;border-left-width:0!important}.main.chat .lst{min-width:0}.main.chat .lst.srt{--cols:minmax(180px,1fr) 128px 172px 64px}.main.chat .lst.srt .lh button:last-child,.main.chat .lst.srt .row:not(.gh)>.c:last-child{display:none}.main.chat .lst:not(.srt){--cols:minmax(200px,1fr) 160px 76px}.main.chat .lst:not(.srt) .lh button:last-child,.main.chat .lst:not(.srt) .row:not(.gh)>.c:last-child{display:none}
+.main.chat.wc .tuck{right:24px}
+/* a narrower toolbar beside the chat: search and the switch keep their icon, nothing is cut */
+.main.chat .tb .search{width:32px;min-width:32px;padding:0;justify-content:center;cursor:text}.main.chat .tb .search input{width:0;min-width:0;flex:0 0 0;padding:0}.main.chat .tb .search:focus-within{width:150px;padding:0 10px}.main.chat .tb .search:focus-within input{width:auto;flex:1}
+.main.chat .tsw .tswl{display:none}.main.chat #shareBtn{display:none}
+@media (max-width:1340px){.main.chat #views button[data-v="gallery"],.main.chat .tb>.tg:not(:first-child){display:none}}
+/* a narrow window (1100): the title keeps its whole name. Search keeps its icon and opens when you click it or holds what you typed */
+@media (max-width:1340px){.main:not(.chat) .tb .search{width:32px;min-width:32px;padding:0;justify-content:center;cursor:text}.main:not(.chat) .tb .search input{width:0;min-width:0;flex:0 0 0;padding:0}
+  .main:not(.chat) .tb .search:focus-within,.main:not(.chat) .tb .search:has(input:not(:placeholder-shown)){width:150px;min-width:150px;padding:0 10px}.main:not(.chat) .tb .search:focus-within input,.main:not(.chat) .tb .search:has(input:not(:placeholder-shown)) input{width:auto;flex:1}}
+/* a title is never cut off: the toolbar's other parts give way first */
+.tb h1{flex:none;overflow:visible;text-overflow:clip}
+.lifeic{font-size:16px;width:16px;flex:none;text-align:center}
+.stat .why{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:calc(100% - 24px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--ink2)}.stat .why img{width:13px;height:13px;flex:none}.stat .why b{font-weight:600;color:var(--ink)}
+@keyframes dcin{from{opacity:0;transform:translateY(6px)}}
+.bub{cursor:default}
+/* Tuck's corner (n4): rows and the header end before his corner, so he never sits on a name, a date or a size; the date column
+   keeps a whole date beside the chat */
+.lst{--tg:0px}.lst.tklane{--tg:60px}.lst .row,.lst .skr{margin-right:calc(8px + var(--tg))}.lst .lh{padding-right:calc(20px + var(--tg))}.grid{padding-right:calc(18px + 60px)}
+.tuck{right:12px}.main.wc .tuck{right:344px}.main.wc .bub{right:334px}.main.chat.wc .tuck{right:12px}
+.lst:not(.srt){--cols:minmax(220px,1fr) 176px 80px 196px}
+.main.chat .lst:not(.srt){--cols:minmax(150px,1fr) 176px 72px}
+.main.chat .lst.srt{--cols:minmax(150px,1fr) 128px 176px 64px}
+/* Finder's Preview pane beside a plain list: the list narrows, and below 1500 px Kind gives way, as Finder drops columns */
+.main.wc .lst:not(.srt){--cols:minmax(180px,1fr) 176px 72px 150px;min-width:0}
+@media (max-width:1500px){.main.wc .lst:not(.srt){--cols:minmax(150px,1fr) 176px 72px}.main.wc .lst:not(.srt) .lh button:last-child,.main.wc .lst:not(.srt) .row:not(.gh)>.c:last-child{display:none}}
+@media (max-width:1340px){.main.wc .lst.srt,.main.chat .lst.srt{--cols:minmax(120px,1fr) 176px 60px}.main:not(.wc):not(.chat) .lst.srt{--cols:minmax(180px,1fr) 140px 172px 64px 120px}}
+.qlink{display:flex;align-items:center;gap:6px;margin:2px 0 4px;font:600 12.5px var(--f);color:var(--ac-ink);text-decoration:none}.qlink:hover{text-decoration:underline}
+.lstep{margin:0 0 8px;font:500 13px/1.45 var(--f);color:var(--ink2)}
+.subnav .sbi{padding-left:30px;height:26px;font-size:12.5px}.subnav .sbi .ph-fill,.subnav .sbi .ph{font-size:14px}
+/* a narrow window keeps one toolbar row, the way Finder folds its toolbar: the switch keeps its icon (its name is in the tooltip),
+   Share and Tags fold away (both stay in More and the right-click menu), and Gallery goes */
+@media (max-width:1080px){.tsw .tswl{display:none}#shareBtn,#tagBtn,#views button[data-v="gallery"]{display:none}}
+/* …and the names keep their room: a slimmer side pane, Name and Date only in a plain list */
+@media (max-width:1080px){.main.wc .fside{width:272px}.fside>.fp{width:271px}
+  .main.wc .lst:not(.srt){--cols:minmax(160px,1fr) 150px}.main.wc .lst:not(.srt) .lh button:nth-child(n+3),.main.wc .lst:not(.srt) .row:not(.gh)>.c:nth-child(n+3){display:none}}
+@media (max-width:1340px){.main.wc .lst:not(.srt){--cols:minmax(150px,1fr) 150px}.main.wc .lst:not(.srt) .lh button:nth-child(n+3),.main.wc .lst:not(.srt) .row:not(.gh)>.c:nth-child(n+3){display:none}}
+@media (max-width:960px){.main.wc .lst:not(.srt){--cols:minmax(110px,1fr) 132px}}
+@media (max-width:1080px){.main:not(.wc) .lst{min-width:0}
+  .main:not(.wc) .lst:not(.srt){--cols:minmax(200px,1fr) 172px 72px}.main:not(.wc) .lst:not(.srt) .lh button:nth-child(n+4),.main:not(.wc) .lst:not(.srt) .row:not(.gh)>.c:nth-child(n+4){display:none}
+  .lst.srt{min-width:0}.main:not(.wc) .lst.srt{--cols:minmax(180px,1fr) 130px 150px}.main:not(.wc) .lst.srt .lh button:nth-child(n+4),.main:not(.wc) .lst.srt .row:not(.gh)>.c:nth-child(n+4){display:none}
+  .main.wc .lst.srt{--cols:minmax(150px,1fr) 140px}.main.wc .lst.srt .lh button:nth-child(n+3),.main.wc .lst.srt .row:not(.gh)>.c:nth-child(n+3){display:none}}
+</style>
+<style>.win{inset:10px 12px!important}#theme{display:none!important}</style>
+</head>
+<body>
+<div class="theme seg" id="theme" role="group" aria-label="Appearance">
+  <button data-t="light"><i class="ph ph-sun"></i>Light</button><button data-t="dark"><i class="ph ph-moon"></i>Dark</button>
+</div>
+
+
+
+<div class="win" id="win">
+  <aside class="side"><div class="sb"><div class="lights" aria-hidden="true"><i></i><i></i><i></i></div><div class="seg appsw" role="group" aria-label="App"><button class="on" aria-pressed="true"><i class="ph ph-folder-simple"></i>Finder</button><button onclick="location.href='tuck.html'"><i class="ph ph-sparkle"></i>Tuck</button></div><nav id="nav" aria-label="Sidebar"></nav></div></aside>
+  <section class="main" id="main">
+    <div class="tb" role="toolbar" aria-label="Toolbar">
+      <div class="tg"><button class="ib" id="back" title="Back" aria-label="Back"><i class="ph ph-caret-left"></i></button><button class="ib" id="fwd" title="Forward" aria-label="Forward"><i class="ph ph-caret-right"></i></button></div>
+      <h1 id="title">Downloads</h1>
+      <div class="sp"></div>
+      <div class="seg" id="views" role="group" aria-label="View">
+        <button data-v="icons" title="Icons" aria-label="as Icons"><i class="ph ph-squares-four"></i></button><button data-v="list" title="List" aria-label="as List"><i class="ph ph-list"></i></button><button data-v="columns" title="Columns" aria-label="as Columns"><i class="ph ph-columns"></i></button><button data-v="gallery" title="Gallery" aria-label="as Gallery"><i class="ph ph-slideshow"></i></button>
+      </div>
+      <div class="tg"><button class="ib" id="sideBtn" aria-pressed="true" aria-label="Hide the side panel" title="Hide the side panel (⇧⌘P)"><i class="ph ph-sidebar-simple" style="transform:scaleX(-1)"></i></button></div>
+      <div class="tg">
+        <button class="ib w" id="grpBtn" title="Group and sort" aria-label="Group and sort" aria-haspopup="menu"><i class="ph ph-rows"></i><i class="ph ph-caret-down pcaret" aria-hidden="true"></i></button>
+        <button class="ib w" id="shareBtn" title="Share" aria-label="Share" aria-haspopup="menu"><i class="ph ph-export"></i><i class="ph ph-caret-down pcaret" aria-hidden="true"></i></button>
+        <button class="ib w" id="tagBtn" title="Tags" aria-label="Tags" aria-haspopup="menu"><i class="ph ph-tag"></i><i class="ph ph-caret-down pcaret" aria-hidden="true"></i></button>
+        <button class="ib w" id="moreBtn" title="Action" aria-label="More actions" aria-haspopup="menu"><i class="ph ph-dots-three-circle"></i><i class="ph ph-caret-down pcaret" aria-hidden="true"></i></button>
+      </div>
+      <button class="btn ghost sm tsw" id="tsw" role="switch" aria-checked="false" title="Show your files in Tuck's folders. Nothing moves on disk."><img alt="" id="tswMark"><span class="tswl">Sorted by Tuck</span><span class="sw"></span></button>
+      <label class="search"><i class="ph ph-magnifying-glass"></i><input id="q" placeholder="Search" aria-label="Search"></label>
+    </div>
+    <div class="body" id="body" tabindex="0" role="listbox" aria-multiselectable="true" aria-label="Files"></div>
+    <aside class="fside" id="fside" aria-label="Selected Tuck folder"></aside>
+    <footer class="foot"><div class="chg" id="chg" hidden></div><div class="path" id="path"></div><div class="stat" id="stat"></div></footer>
+    <button class="tuck" id="tuck" aria-label="Tuck"><img id="tuckImg" alt=""><span class="count" id="badge">3</span></button>
+    <div class="bub" id="bub" role="dialog" aria-label="Tuck"></div>
+  </section>
+</div>
+
+<div class="ql" id="ql" role="dialog" aria-label="Quick Look"></div>
+<div class="menu" id="menu" role="menu" hidden></div>
+<div class="pop" id="pop" hidden></div>
+<div class="hint" id="hint" role="tooltip"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const last=p=>p.split('/').pop();
+const RM=matchMedia('(prefers-reduced-motion: reduce)');
+const MARK=window.TUCK_MARK;
+/* one clock (rule 18): the page-load time from plan.js. D(m,d,h,mi) is a date in 2026 counted back from today (1 Nov in the sample),
+   at its clock time, and never later than now. Files the plan knows take the plan's own arrival time instead (see bindFiles). */
+const NOW=new Date(Plan.NOW);
+const D=(m,d,h=12,mi=0)=>{const days=Math.round((new Date(2026,10,1)-new Date(2026,m-1,d))/864e5);const x=new Date(NOW);x.setDate(x.getDate()-days);x.setHours(h,mi,0,0);
+  return x>NOW?new Date(NOW-(days+1)*36e5):x};
+
+/* ---------- kinds */
+const K={pdf:{k:'PDF document',b:'PDF',c:'var(--k-pdf)'},doc:{k:'Microsoft Word document',b:'DOCX',c:'var(--k-doc)'},xls:{k:'Microsoft Excel spreadsheet',b:'XLSX',c:'var(--k-xls)'},
+  txt:{k:'Plain Text',b:'TXT',c:'var(--k-txt)'},ppt:{k:'PowerPoint presentation',b:'PPTX',c:'var(--k-pdf)'},code:{k:'Source code',b:'CODE',c:'var(--k-code)'},cad:{k:'CAD model',b:'STEP',c:'var(--k-code)'},audio:{k:'Audio',b:'M4A',c:'var(--k-img)'},zip:{k:'ZIP archive',b:'ZIP',c:'var(--k-txt)'},png:{k:'PNG image'},heic:{k:'HEIF image'},dmg:{k:'Disk Image'},folder:{k:'Folder'},app:{k:'Application'},disk:{k:'Volume'}};
+const TAGS=[['red','Red'],['orange','Orange'],['yellow','Yellow'],['green','Green'],['blue','Blue'],['purple','Purple'],['gray','Gray']];
+
+const FTYPE={pdf:'pdf',docx:'doc',xlsx:'xls',txt:'txt',png:'png',heic:'heic',dmg:'dmg',pptx:'ppt',py:'code',html:'code',css:'code',js:'code',step:'cad',m4a:'audio',zip:'zip'};
+/* ---------- files (one object per file; the same file shows in both views) */
+let fid=0;const FILES=[];
+function F(name,size,date,t,o={}){const ext=name.split('.').pop().toLowerCase();
+  const f=Object.assign({id:'f'+(++fid),name,size,date,t,tags:[],type:FTYPE[ext]||'txt'},o);FILES.push(f);return f}
+const dir=(name,kids)=>({dir:true,name,kids});
+const REAL={
+ 'Users/joseph/Desktop':[
+   dir('School',[
+     dir('PHYS 1401',[
+       F('Lab 3 Pendulum.pdf',1240000,D(10,14,22,18),'Studying/PHYS 1401',{tags:['blue'],h1:'PHYS 1401 Lab 3: The Simple Pendulum',why:'its first page says PHYS 1401, Lab 3: The Simple Pendulum.'}),
+       F('Lab 2 Projectile Motion.pdf',982000,D(9,30,23,4),'Studying/PHYS 1401',{h1:'PHYS 1401 Lab 2: Projectile Motion',why:'its first page says PHYS 1401, Lab 2.'}),
+       F('Lab 3 data.xlsx',64000,D(10,13,19,40),'Studying/PHYS 1401',{why:'it holds the pendulum timings used in Lab 3.'}),
+       F('Midterm review.pdf',2310000,D(10,20,16,2),'Studying/PHYS 1401',{h1:'PHYS 1401 Midterm Review',why:'it is a PHYS 1401 review sheet, not a lab.'})]),
+     dir('ECON 2257',[
+       F('Problem Set 4.pdf',410000,D(10,9,11,30),'Studying/ECON 2257',{h1:'ECON BC2257 Problem Set 4',why:'the header reads ECON BC2257, Problem Set 4.'}),
+       F('Problem Set 5.pdf',455000,D(10,23,9,15),'Studying/ECON 2257',{tags:['yellow'],h1:'ECON BC2257 Problem Set 5',why:'the header reads ECON BC2257, Problem Set 5.'}),
+       F('Problem Set 5 notes.docx',38000,D(10,25,21,47),'Studying/ECON 2257',{why:'it answers the questions in Problem Set 5.'})])]),
+   dir('Misc',[]),
+   F('Screenshot 2026-10-22 at 14.03.11.png',812000,D(10,22,14,3),'Photos/Screenshots',{why:'macOS named it as a screenshot.'}),
+   F('Screenshot 2026-10-28 at 09.41.52.png',1104000,D(10,28,9,41),'Photos/Screenshots',{why:'macOS named it as a screenshot.'}),
+   F('Lab 3 draft.docx',52000,D(10,12,23,55),'Studying/PHYS 1401',{why:'it is an early version of Lab 3 Pendulum.pdf.'}),
+   F('Screenshot 2026-10-30 at 18.22.40.png',760000,D(10,30,18,22),null,{dest:'Photos/Screenshots',why:'macOS named it as a screenshot.'}),
+   F('Screenshot 2026-10-31 at 11.05.17.png',690000,D(10,31,11,5),null,{dest:'Photos/Screenshots',why:'macOS named it as a screenshot.'})],
+ 'Users/joseph/Documents':[
+   dir('Resume',[
+     F('Joseph Yung Resume 2026.pdf',188000,D(10,19,17,22),'Job Search/Resumes',{tags:['green'],h1:'Joseph Yung',why:'it is a resume with your name at the top.'}),
+     F('Resume (old).docx',61000,D(3,2,13,10),'Job Search/Resumes',{why:'it is an older copy of your resume.'}),
+     F('Cover Letter GRC Associates.docx',44000,D(9,12,10,5),'Job Search/Cover letters',{why:'it starts with Dear GRC Associates hiring team.'})]),
+   dir('Tax 2025',[
+     F('Form 1040 draft 2025.pdf',730000,D(4,8,20,11),'Home and Money/Taxes 2025',{tags:['red'],why:'it is your 2025 tax return draft. Tax forms are a private kind.'}),
+     F('W-2 GRC Associates 2025.pdf',220000,D(2,1,9,0),'Home and Money/Taxes 2025',{why:'it is your 2025 W-2 from GRC Associates. Tax forms are a private kind.'}),
+     F('1098-T Columbia 2025.pdf',160000,D(1,30,8,20),'Home and Money/Taxes 2025',{h1:'Form 1098-T Tuition Statement',why:'it is a 2025 tuition statement for your taxes. Tax forms are a private kind.'})]),
+   F('Notes.txt',3000,D(10,30,23,12),'No folder yet',{tags:['gray'],why:'it is a short list with no clear topic. Tuck would rather ask than guess.'}),
+   F('Passport scan.pdf',1900000,D(6,3,15,30),'Home and Money/IDs',{why:'it is a passport scan. IDs are a private kind.'}),
+   F('Budget October.xlsx',41000,D(10,31,18,2),'Home and Money/Bills',{why:'it is a monthly budget.'})],
+ 'Users/joseph/Downloads':[
+   F('PHYS1401_Lab4_handout.pdf',640000,D(11,1,9,12),null,{isNew:true,dest:'Studying/PHYS 1401',h1:'PHYS 1401 Lab 4: Conservation of Energy',why:'its first page says PHYS 1401, Lab 4.'}),
+   F('ECON 2257 PS6.pdf',398000,D(11,1,8,40),null,{isNew:true,dest:'Studying/ECON 2257',h1:'ECON BC2257 Problem Set 6',why:'the header reads ECON BC2257, Problem Set 6.'}),
+   F('Screenshot 2026-11-01 at 00.41.12.png',930000,D(11,1,0,41),null,{isNew:true,dest:'Photos/Screenshots',why:'macOS named it as a screenshot.'}),
+   F('GRC onboarding packet.pdf',3400000,D(10,6,10,20),'Work/GRC Associates',{tags:['orange'],h1:'Welcome to GRC Associates',why:'it is the welcome packet from GRC Associates.'}),
+   F('Invoice 0043.pdf',96000,D(10,27,12,0),'Work/Invoices',{h1:'Invoice 0043',why:'it is an invoice billed to GRC Associates.'}),
+   F('Offer letter GRC Associates.pdf',210000,D(8,28,15,45),'Job Search/Applications',{h1:'Offer of Internship',why:'it offers you the GRC Associates internship.'}),
+   F('Unofficial transcript.pdf',350000,D(9,3,11,11),'Studying/Registration',{h1:'Columbia University Unofficial Transcript',why:'it is your Columbia transcript. School records are a private kind.'}),
+   F('Tuition bill Fall 2026.pdf',284000,D(8,14,10,2),'Studying/Registration',{h1:'Tuition Statement, Fall 2026',why:'it is a Columbia tuition bill. Money and school records are a private kind.'}),
+   F('Financial aid award 2026.pdf',312000,D(7,22,16,40),'Studying/Registration',{h1:'Financial Aid Award 2026-27',why:'it is your financial aid award. Money and school records are a private kind.'}),
+   F('IMG_4412.HEIC',2800000,D(10,18,17,40),'Photos/Trips',{h:205,why:'it is a photo from your phone.'}),
+   F('IMG_4415.HEIC',3100000,D(10,18,17,52),'Photos/Trips',{h:28,why:'it is a photo from your phone.'}),
+   F('IMG_4420.HEIC',2600000,D(10,24,13,5),'Photos/Trips',{h:150,why:'it is a photo from your phone.'}),
+   F('Zoom.dmg',94100000,D(9,1,9,0),'Installers',{why:'it installs Zoom, which you already have in Applications.'}),
+   F('Notion-3.2.dmg',121400000,D(10,2,20,30),'Installers',{why:'it installs Notion, which you already have in Applications.'})],
+ 'iCloud Drive':[
+   F('Barnard club budget.xlsx',58000,D(10,29,21,0),'Home and Money/Bills',{why:'it is a budget sheet for a club.'}),
+   F('Spring trip plan.docx',27000,D(10,11,14,0),'Photos/Trips',{why:'it is a personal trip plan.'}),
+   F('IMG_4377.HEIC',2400000,D(10,5,12,30),'Photos/Trips',{h:340,why:'it is a photo from your phone.'})]
+};
+
+/* private by kind (school records, money and tax, IDs): one list for every page, see sample.js */
+FILES.forEach(f=>{if(PRIVATE_FILES.has(f.name))f.priv=true});
+
+/* ---------- registry */
+const N={};
+const GLY={'Users/joseph/Desktop':'desktop','Users/joseph/Documents':'file-text','Users/joseph/Downloads':'arrow-circle-down',
+  'No folder yet':'tray',...Object.fromEntries(EXTRA_TOP.map(a=>[a.name,a.ic])),...Object.fromEntries(LIFE_AREAS.map(a=>[a.name,a.ic]))};
+function regDir(path,parent){const id='r:'+path;N[id]={id,name:last(path),type:'folder',kids:[],parent,path,glyph:GLY[path]};if(parent&&N[parent])N[parent].kids.push(id);return id}
+regDir('Users',null);N['r:Users'].parent='v:hd';regDir('Users/joseph','r:Users');
+function walk(path,list,parent){const id=regDir(path,parent);for(const x of list){if(x.dir)walk(path+'/'+x.name,x.kids,id);else{x.real=path;x.parent=id;N[x.id]=x;N[id].kids.push(x.id)}}}
+for(const p in REAL)walk(p,REAL[p],p.startsWith('Users/joseph')?'r:Users/joseph':null);
+if(!N['r:Users/joseph/Pictures'])regDir('Users/joseph/Pictures','r:Users/joseph');if(!N['r:Users/joseph/Music'])regDir('Users/joseph/Music','r:Users/joseph');GLY['Users/joseph/Pictures']='image';GLY['Users/joseph/Music']='music-notes';N['r:Users/joseph/Pictures'].glyph='image';N['r:Users/joseph/Music'].glyph='music-notes';
+N['v:hd']={id:'v:hd',name:'Macintosh HD',type:'disk',kids:['v:apps','r:Users'],parent:'v:mac'};
+N['v:mac']={id:'v:mac',name:'MacBook Air',type:'disk',kids:['v:hd']};
+N['v:apps']={id:'v:apps',name:'Applications',type:'folder',glyph:'app-window',parent:'v:hd'};
+for(const [id,name] of [['v:recents','Recents'],['v:airdrop','AirDrop'],['v:shared','Shared'],['v:network','Network']])N[id]={id,name,type:'folder'};
+TAGS.forEach(([c,l])=>N['tag:'+c]={id:'tag:'+c,name:l,type:'folder'});
+let aid=0;const APPS=[['Safari','compass','#1d8bf2'],['Mail','envelope-simple','#2f80ff'],['Messages','chat-circle','#30c552'],['Notes','note','#f2b400'],['Calendar','calendar-blank','#ff4f45'],['Preview','image','#5a8ed9'],['Zoom','video-camera','#2d8cff'],['Notion','note-pencil','#2a2a2e'],['Tuck','',null]]
+  .map(([name,icon,c])=>N['a'+(++aid)]={id:'a'+aid,name:name+'.app',type:'app',icon,c,mark:!c,size:icon?48000000+aid*7300000:31000000,date:D(10,aid*3,10,0),real:'Applications'});
+
+/* Tuck's folders come from the one plan (plan.js), the same tree as Edit Folders and Tuck Brain: the parts of life
+   (sample.js), then Installers, then No folder yet (every file Tuck hasn't placed). They show as Desktop subfolders:
+   Desktop › Studying › PHYS 1401. A change made on any page (pending or applied) shows here at once. Nothing moves on disk. */
+const SD=[],PRIVD=new Set(),RENAMED=new Set(),PID={},PATH={},PFILE={};
+let TOP=[];
+const pPath=p=>p.includes('/')?p.slice(0,p.lastIndexOf('/')):'';
+const DESK='r:Users/joseph/Desktop';
+N['s:']={id:'s:',name:'Desktop, sorted by Tuck',crumb:'Desktop',type:'folder',sorted:true,path:''};
+/* the places in the sidebar. With Sorted by Tuck on, each one shows only its own files, inside the Tuck folders they were
+   placed in: Downloads › Studying › PHYS 1401 holds the PHYS 1401 files that are really in Downloads. Nothing moves on disk. */
+const PLACES=['Users/joseph/Desktop','Users/joseph/Documents','Users/joseph/Downloads','iCloud Drive'];
+const placeOf=f=>f&&f.real?PLACES.find(p=>f.real===p||f.real.startsWith(p+'/'))||null:null;
+const placeName=p=>p.split('/').pop();
+const placeWhere=p=>p.startsWith('Users/')?'Macintosh HD › '+p.split('/').join(' › '):p;
+const isPlace=loc=>!!loc&&loc.startsWith('r:')&&PLACES.includes(loc.slice(2));
+function setPlace(p){S.place=p;const nm=placeName(p);N['s:'].name=nm+', sorted by Tuck';N['s:'].crumb=nm;try{localStorage.setItem('tuckSortedPlace',p)}catch(e){}}
+/* which Tuck folders show in each place: the ones holding a file from that place, and empty ones (a new folder shows everywhere) */
+const PD={};let ANYD=new Set();
+/* every file Finder shows is a file in the plan; plan files Finder has no real listing for still show in Tuck's folders */
+(function bindFiles(){const v=Plan.view(),all=Object.values(v.D.files),by={};all.forEach(f=>(by[f.name]=by[f.name]||[]).push(f));
+  FILES.forEach(f=>{const c=by[f.name];if(!c)return;const want=f.t||f.dest;const pf=c.find(x=>v.path(x.node).join('/')===want)||c[0];if(PFILE[pf.id])return;f.pf=pf.id;PFILE[pf.id]=f});
+  /* the plan is a view: every file stays where it really is on disk, so Downloads lists every file the plan says is there,
+     the new ones too (rule 26). Plan.realWhere gives that place ('Downloads', 'Desktop › School › PHYS 1401'). */
+  const realOfPf=pf=>{const w=(Plan.realWhere&&Plan.realWhere(pf))||pf.where||pf.from||'Downloads';return w==='iCloud Drive'?w:'Users/joseph/'+w.split(' › ').join('/')};
+  all.forEach(pf=>{if(PFILE[pf.id])return;const real=realOfPf(pf);
+    const f={id:'p:'+pf.id,pf:pf.id,name:pf.name,size:pf.size*1000,date:new Date(NOW-pf.age*864e5),t:null,tags:[],type:FTYPE[Plan.ext(pf.name)]||'txt',real,parent:N['r:'+real]?'r:'+real:null,h:pf.name.length*37%360};
+    FILES.push(f);N[f.id]=f;PFILE[pf.id]=f;f.virtual=true;if(f.parent)N[f.parent].kids.push(f.id)});
+  /* every file the plan knows is stamped with the plan's arrival time, so Lab 8 prelab.pdf is "Today at" five minutes ago here
+     and "5 min ago" on Needs You, and no two files share a made-up clock time */
+  FILES.forEach(f=>{const a=f.pf&&Plan.arrived(f.pf);if(a&&isFinite(a.at))f.date=new Date(Math.min(a.at,+NOW))})})();
+const partStyleOf=(id,a,x,n)=>{const p=window.PART_STYLE&&(PART_STYLE[n.special?'loose':id]);if(p)return {ic:p.ic,hue:p.hue};
+  return a?{ic:a.ic,hue:a.hue}:x?{ic:x.ic,hue:'--a-none'}:n.special?{ic:'tray',hue:'--a-none'}:{ic:'folder-simple',hue:'--k-folder'}};
+const homeOf=(v,id)=>{let n=v.node(id);while(n&&n.sug)n=v.node(n.parent);return n?n.id:null};
+function buildSorted(){const v=Plan.view(),b=Plan.before();
+  for(const k in N)if(k.startsWith('s:')&&k!=='s:')delete N[k];
+  SD.length=0;PRIVD.clear();RENAMED.clear();[PID,PATH].forEach(o=>Object.keys(o).forEach(k=>delete o[k]));
+  const nm=id=>v.node(id).special?'No folder yet':v.node(id).name;
+  const walk=(id,pre,hid,area)=>{const n=v.node(id);if(!n)return;const p=(pre?pre+'/':'')+nm(id);PATH[id]=p;const h=hid||n.hidden;
+    if(!h){const top=!pre,a=LIFE_AREAS.find(x=>x.id===(area||id)),x=EXTRA_TOP.find(x=>x.id===id),bn=b.node(id),lv=v.level(id).level==='private';
+      PID[p]=id;SD.push(p);if(lv)PRIVD.add(p);if(bn&&bn.name!==n.name)RENAMED.add(p);
+      /* one colour and one icon per part of life and special folder (PART_STYLE, sample.js; rule 28): Installers is the same grey as
+         in Brain, and No folder yet is always the tray */
+      const ps=top?partStyleOf(id,a,x,n):null;
+      N['s:'+p]={id:'s:'+p,pid:id,name:nm(id),type:'folder',sorted:true,path:p,glyph:top?ps.ic:undefined,hue:top?ps.hue:a?a.hue:null,priv:lv,
+        sug:n.sug,isNewF:!bn&&!n.sug,moved:!!bn&&bn.parent!==n.parent}}
+    v.kids(id).forEach(k=>walk(k,p,h,area||id))};
+  v.roots().slice().sort((x,y)=>(v.node(x).special?1:0)-(v.node(y).special?1:0)).forEach(r=>walk(r,'',false,null));
+  TOP=SD.filter(p=>!p.includes('/'));
+  /* where each file shows: its plan folder; files with no folder that Tuck knows a home for wait at the top as new */
+  const NEW=new Set((Plan.newFiles?Plan.newFiles(v):[]).map(x=>x.id));
+  FILES.forEach(f=>{if(!f.pf)return;const pf=v.file(f.pf);if(pf.node==='loose'){const home=pf.hint&&homeOf(v,pf.hint);f.t='No folder yet';f.dest=home?PATH[home]:null;f.isNew=NEW.has(f.pf);f.from=pf.from}
+    else{f.t=PATH[pf.node]||null;f.dest=null;f.isNew=false}
+    if(f.virtual){const nd=v.node(pf.node);f.why=nd&&nd.why&&!nd.special?nd.why.replace(/^./,c=>c.toLowerCase())+'.':''}
+    const lv=v.level(f.pf);/* a file in a private folder is private too (the folder says all its files are) */f.priv=lv.own?lv.own==='private':lv.level==='private'||PRIVATE_FILES.has(f.name)});
+  PLACES.forEach(p=>PD[p]=new Set());ANYD=new Set();
+  FILES.forEach(f=>{if(f.t==null)return;const pl=placeOf(f),a=f.t.split('/');for(let i=1;i<=a.length;i++){const q=a.slice(0,i).join('/');ANYD.add(q);pl&&PD[pl].add(q)}});
+}
+const dirShows=d=>!S.place||PD[S.place].has(d)||!ANYD.has(d);
+/* keep where you are when a folder is renamed, moved or merged in the plan */
+function syncFromPlan(){const pidOf=id=>id&&id.startsWith('s:')&&id!=='s:'&&N[id]?N[id].pid:null;
+  const keep=id=>{const p=pidOf(id);return p?{p}:{id}};const st={loc:keep(S.loc),cols:S.cols.map(keep),sel:[...S.sel].map(keep),exp:[...S.exp].map(keep),hist:S.hist.map(keep),fut:S.fut.map(keep)};
+  buildSorted();const v=Plan.view();
+  const back=k=>{if(!k.p)return k.id;let id=k.p;while(id&&!PID[PATH[id]])id=(v.raw(id)||{}).mergedInto||(v.node(id)||{}).parent;return id&&PATH[id]?'s:'+PATH[id]:null};
+  S.loc=back(st.loc)||'s:';S.cols=st.cols.map(back).filter(Boolean);if(!S.cols.length)S.cols=[S.loc];S.sel=new Set(st.sel.map(back).filter(Boolean));S.exp=new Set(st.exp.map(back).filter(Boolean));
+  S.hist=st.hist.map(back).filter(Boolean);S.fut=st.fut.map(back).filter(Boolean)}
+buildSorted();
+const isDir=n=>n&&(n.type==='folder'||n.type==='disk');
+
+function children(id){
+  if(id.startsWith('s:')){const p=id.slice(2);return [...SD.filter(d=>pPath(d)===p&&d!==p&&dirShows(d)).map(d=>N['s:'+d]),...FILES.filter(f=>(p===''?f.t==null:f.t===p)&&(!S.place||placeOf(f)===S.place))]}
+  if(id==='v:recents')return [...FILES].sort((a,b)=>b.date-a.date).slice(0,18);
+  if(id==='v:apps')return Object.values(N).filter(n=>n.type==='app');
+  if(id.startsWith('tag:'))return FILES.filter(f=>f.tags.includes(id.slice(4)));
+  const n=N[id];return n&&n.kids?n.kids.map(k=>N[k]):[];
+}
+/* the sorted root stands in for the place you opened, so its parent is the place's: Macintosh HD › Users › joseph › Downloads › Studying */
+function parentOf(id){if(id.startsWith('s:'))return id==='s:'?(S.place&&S.place.includes('/')?'r:'+pPath(S.place):null):'s:'+pPath(id.slice(2));const n=N[id];return n?n.parent||null:null}
+function descend(id,out=[]){for(const c of children(id)){out.push(c);if(isDir(c)&&c.type!=='app')descend(c.id,out)}return out}
+const dateOf=n=>n.date||(isDir(n)?descend(n.id).filter(x=>x.date).reduce((m,x)=>x.date>m?x.date:m,D(9,2,10,0)):D(9,2));
+const kindOf=n=>n.sorted?'Tuck folder':K[n.type].k;
+const realOf=f=>f.real?f.real.replace('Users/joseph/','').split('/').join(' › '):'';
+const realShort=f=>{const a=f.real.replace('Users/joseph/','').split('/');return a.length>2?a[0]+' › … › '+a[a.length-1]:a.join(' › ')};
+const loose=f=>f.t==='No folder yet';
+const tuckOf=f=>f.t==null?null:f.t===''?'Desktop':f.t.split('/').join(' › ');
+const goesTo=f=>loose(f)?(f.dest||'').split('/').join(' › '):tuckOf(f)||'';
+const destOf=f=>f.t??f.dest;
+function fmtSize(b){if(b==null)return '--';if(b<1e6)return Math.max(1,Math.round(b/1e3))+' KB';return (b/1e6).toFixed(1).replace('.0','')+' MB'}
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+/* the same words as Plan.fileDate(x, true): 'Today at 9:30 AM', 'Yesterday at 2:03 PM', '22 Oct 2026 at 2:03 PM' */
+function fmtDate(d){const hm=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  const day=x=>new Date(x.getFullYear(),x.getMonth(),x.getDate()).getTime();const dd=(day(NOW)-day(d))/864e5;
+  return dd===0?'Today at '+hm:dd===1?'Yesterday at '+hm:`${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()} at ${hm}`}
+const cap=t=>t?t[0].toUpperCase()+t.slice(1):t;
+function whyOf(f){if(f.t==='No folder yet')return f.dest?{head:(f.isNew?'New in ':'In ')+realOf(f),txt:'It would go in '+f.dest.split('/').join(' › ')+'.'}:{head:'No folder yet',txt:'Tuck isn’t sure where this goes, so it asks first.'};
+  if(f.t==null)return {head:'In '+realOf(f),txt:'Tuck has not sorted it yet.'};
+  return {head:'Tuck put this in '+(last(f.t)||'Sorted by Tuck'),txt:f.virtual?fileWhy(f):cap(f.why||'it fits there best.')}}
+/* a file with no first-page reason of its own: one honest sentence from its name and kind (folderpanel.js), never the folder's rule */
+function fileWhy(f){try{if(f.pf&&window.FolderPanel&&FolderPanel.why){const w=FolderPanel.why(f.pf);if(w)return String(w)}
+  const v=Plan.view(),pf=v.file(f.pf),nd=pf&&v.node(pf.node);if(nd){const n=v.total(pf.node)-1;return n>0?`It sits with ${n} file${n===1?'':'s'} like it in ${nd.name}.`:`It is the first file in ${nd.name}.`}}catch(e){}
+  return 'It fits there best.'}
+
+/* ---------- icons, drawn with CSS */
+function icon(n,px,opt={}){
+  const s=`--s:${px}px`;let h;
+  if(n.type==='folder'&&n.sorted&&px<40&&n.glyph&&!n.path.includes('/'))return `<i class="ph-fill ph-${n.glyph} lifeic" style="color:var(${n.hue||'--k-folder'});font-size:${px}px;width:${px}px" aria-hidden="true"></i>`;
+  if(n.type==='folder'){const g=px>=40&&(n.glyph||n.priv)?`<i class="ph ph-${n.priv?'lock-simple':n.glyph}"></i>`:'<i></i>';const lf=n.sorted&&(n.hue?{hue:n.hue}:lifeOfPath(n.path));/* private keeps its part's colour; the lock says private (rule 28) */h=`<span class="fi fo" style="${s}${lf?`;--k-folder:var(${lf.hue})`:''}">${g}</span>`}
+  else if(n.type==='disk')h=`<span class="fi dm" style="${s}"><span class="p"><i class="ph ph-${n.id==='v:mac'?'laptop':'hard-drives'}"></i></span></span>`;
+  else if(n.type==='app')h=`<span class="fi ap${n.mark?' tk':''}" style="${s};--c:${n.c||'#fff'}"><span class="p">${n.mark?`<img src="${MARK}" alt="">`:`<i class="ph-fill ph-${n.icon}"></i>`}</span></span>`;
+  else if(n.type==='heic')h=`<span class="fi im" style="${s};--h:${n.h||200}"><span class="p"></span></span>`;
+  else if(n.type==='png')h=`<span class="fi ss" style="${s}"><span class="p"></span></span>`;
+  else if(n.type==='dmg')h=`<span class="fi dm" style="${s}"><span class="p"><i class="ph ph-package"></i></span></span>`;
+  else{const k=K[n.type],big=px>=48,h1=big&&px>=150&&(n.h1||n.name.replace(/\.[^.]+$/,''));
+    h=`<span class="fi dc ${n.type}${big?' big':''}${h1?' h':''}" style="${s};--kc:${k.c}"><span class="pg">${h1?`<em>${esc(h1)}</em>`:''}<b>${k.b}</b></span></span>`}
+  if(n.priv&&px>=32)h=h.slice(0,-7)+`<span class="lk"><i class="ph-fill ph-lock-simple"></i></span></span>`;
+  return h;
+}
+const dots=n=>n.tags&&n.tags.length?`<span class="dots">${n.tags.map(t=>`<i style="--c:var(--tag-${t})"></i>`).join('')}</span>`:'';
+/* states: Finder's own marks in the real view, Edit Folders' chips in the Sorted view */
+/* a file shows the small lock; the Private chip is for folders, so a private folder's list doesn't say Private eight times (rule 30) */
+const lockI=n=>!n.priv?'':S.mode==='sorted'&&isDir(n)?`<span class="tag lock" title="${esc(PRIVATE_LABEL)}"><i class="ph-fill ph-lock-simple"></i>Private</span>`:`<i class="ph-fill ph-lock-simple lkI" aria-label="${esc(PRIVATE_LABEL)}" title="${esc(PRIVATE_LABEL)}"></i>`;
+const newD=n=>!n.isNew?'':S.mode==='sorted'?'<span class="tag new">New</span>':'<span class="nd" title="New"></span>';
+const stateC=n=>!n.sorted?'':(n.sug?'<span class="tag sug"><i class="ph ph-sparkle"></i>Suggested</span>':'')+(n.isNewF?'<span class="tag new">New</span>':'')+(RENAMED.has(n.path)?'<span class="tag ren">Renamed</span>':'')+(n.moved?'<span class="tag mov">Moved</span>':'');
+
+/* ---------- state */
+const S={mode:'real',pv:(()=>{/* open unless you closed it; a narrow window starts with it closed, as Finder's own Preview pane does, until you open it */let v=null;try{v=localStorage.getItem('finderSide')}catch(e){}return v==null?innerWidth>=1080:v!=='0'})(),loc:'r:Users/joseph/Downloads',view:'list',sel:new Set(),anchor:null,hist:[],fut:[],q:'',
+  sort:{key:'date',dir:-1},sortBy:{real:{key:'date',dir:-1},sorted:{key:'name',dir:1}},group:false,exp:new Set(),cols:['r:Users/joseph/Downloads'],loading:false,ql:false,lastReal:'r:Users/joseph/Downloads',order:[],toldDisk:false};
+const body=$('#body');
+
+function items(loc=S.loc){
+  let xs=S.q?descend(loc).filter(n=>n.name.toLowerCase().includes(S.q.toLowerCase())):children(loc);
+  const {key,dir}=S.sort;
+  const v=n=>key==='date'?+dateOf(n):key==='size'?(n.size||0):key==='kind'?kindOf(n):n.name;
+  return xs.sort((a,b)=>{if(key==='name'&&isDir(a)!==isDir(b))return isDir(a)?-1:1;const A=v(a),B=v(b);
+    return (typeof A==='string'?A.localeCompare(B,undefined,{numeric:true,sensitivity:'base'}):A-B)*dir||a.name.localeCompare(b.name)});
+}
+const groupKey=n=>n.isNew?'New':isDir(n)?'Folders':n.type==='heic'||n.type==='png'?'Images':n.type==='pdf'?'PDF documents':n.type==='dmg'?'Disk images':n.type==='app'?'Applications':'Documents';
+function grouped(xs){if(!S.group)return [[null,xs]];const m=new Map();xs.forEach(n=>{const k=groupKey(n);if(!m.has(k))m.set(k,[]);m.get(k).push(n)});
+  const ord=['New','Folders','PDF documents','Documents','Images','Disk images','Applications'];return [...m].sort((a,b)=>ord.indexOf(a[0])-ord.indexOf(b[0]))}
+
+/* ---------- sidebar */
+function navRow(loc,label,ic,extra=''){const on=S.loc===loc||(S.loc.startsWith('s:')&&loc==='r:'+S.place);
+  return `<button class="sbi${on?' on':''}" data-loc="${loc}">${ic.startsWith('<')?ic:`<i class="${on?'ph-fill':'ph'} ph-${ic}"></i>`}<span class="nm">${label}</span>${extra}</button>`}
+/* a place in the sidebar; with Sorted by Tuck on, the place you are in opens to its parts of life (only those holding its files) */
+function placeRow(loc,label,ic){if(!(S.mode==='sorted'&&S.loc.startsWith('s:')&&loc==='r:'+S.place))return navRow(loc,label,ic);
+  const nf=FILES.filter(f=>f.t==='No folder yet'&&placeOf(f)===S.place).length;
+  return navRow(loc,label,ic)+`<div class="subnav" role="group" aria-label="${esc(label)}, sorted by Tuck">${TOP.filter(dirShows).map(t=>{const sn=N['s:'+t],lf=sn&&sn.hue?{ic:sn.glyph,hue:sn.hue}:null,nh=t==='No folder yet'?nf:0;return navRow('s:'+t,t,lf?`<i class="ph-fill ph-${lf.ic}" style="color:var(${lf.hue})"></i>`:`<i class="ph ph-${(sn&&sn.glyph)||GLY[t]||'folder-simple'}"></i>`,nh?`<span class="count quiet">${nh}</span>`:'')}).join('')}</div>`}
+function renderNav(anim){
+  /* pure Finder: Favourites, iCloud, Locations, Tags. With Sorted by Tuck on, Desktop opens to every part of life (a view; nothing moves on disk). */
+  let h=`<div class="sh">Favorites</div>${navRow('v:airdrop','AirDrop','broadcast')}${navRow('v:recents','Recents','clock')}${navRow('v:apps','Applications','app-window')}${placeRow('r:Users/joseph/Desktop','Desktop','desktop')}${placeRow('r:Users/joseph/Documents','Documents','file-text')}${placeRow('r:Users/joseph/Downloads','Downloads','arrow-circle-down')}`;
+  h+=`<div class="sh">iCloud</div>${placeRow('r:iCloud Drive','iCloud Drive','cloud')}${navRow('v:shared','Shared','users')}`;
+  h+=`<div class="sh">Locations</div>${navRow('v:mac','MacBook Air','laptop')}${navRow('v:network','Network','globe')}`;
+  h+=`<div class="sh">Tags</div>`+TAGS.map(([c,l])=>navRow('tag:'+c,l,`<span class="tdot" style="--c:var(--tag-${c})"></span>`)).join('');
+  $('#nav').innerHTML=h;
+}
+
+/* ---------- toolbar */
+function renderBar(){
+  $('#back').disabled=!S.hist.length;$('#fwd').disabled=!S.fut.length;
+  const t=S.view==='columns'?N[S.cols[S.cols.length-1]]:N[S.loc];
+  /* the place name only: the Sorted by Tuck switch beside it already says the rest, and a title is never cut off */
+  if(S.q)$('#title').textContent=`Searching “${N[S.loc].crumb||N[S.loc].name}”`;
+  else if(t.id==='s:')$('#title').textContent=placeName(S.place);else $('#title').textContent=t.name;
+  document.title=(t.name||'Finder');
+  $$('#views button').forEach(b=>{const on=b.dataset.v===S.view;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+  const sw=$('#tsw');sw.classList.toggle('on',S.mode==='sorted');sw.setAttribute('aria-checked',S.mode==='sorted');sw.querySelector('.sw').classList.toggle('on',S.mode==='sorted');
+}
+
+/* ---------- content */
+const attrs=(n,extra='')=>`data-id="${n.id}" role="option" aria-selected="${S.sel.has(n.id)}" ${!isDir(n)&&n.type!=='app'?'draggable="true"':''} ${extra}`;
+function renderBody(){syncSort();
+  const v=S.view;let h;
+  if(S.loading)h=skeleton();
+  else if(v==='columns')h=renderCols();
+  else{const xs=items();
+    if(!xs.length)h=emptyState();
+    else h=v==='list'?renderList(xs):v==='icons'?renderIcons(xs):renderGallery(xs);}
+  body.innerHTML=h;
+  S.order=$$('[data-nav]',body).map(e=>e.dataset.id);
+  if(v==='columns'){const c=$$('.col',body);const a=body.querySelector('.col.act');if(a){const cs=body.querySelector('.cols');cs.scrollLeft=cs.scrollWidth;}}
+  renderCard();fitNames();setTimeout(fitNames,260);
+}
+/* long names keep their start and their end, the way Finder does: "1098-T Columbia…2025.pdf", never "1098-T Columbia 20…" */
+function fitNames(){requestAnimationFrame(()=>$$('.row .c.n .nm, .ci .nm',body).forEach(el=>{const full=el.dataset.full||el.textContent;el.dataset.full=full;el.textContent=full;
+  if(el.scrollWidth<=el.clientWidth+1)return;el.title=full;let lo=6,hi=full.length-1,best=tuckMid(full,lo);
+  while(lo<=hi){const m=(lo+hi)>>1;el.textContent=tuckMid(full,m);if(el.scrollWidth<=el.clientWidth+1){best=el.textContent;lo=m+1}else hi=m-1}el.textContent=best}))}
+addEventListener('resize',()=>fitNames());document.addEventListener('tuckchat',()=>setTimeout(fitNames,300));
+function emptyState(){
+  const n=N[S.loc];let hint='Files you save here will show up in this folder.';
+  if(S.q)return `<div class="empty"><i class="ph ph-magnifying-glass" style="font-size:30px;color:var(--ink3)"></i><b>No results for “${esc(S.q)}”</b><p>Try another word, or search a folder higher up.</p></div>`;
+  if(n.sorted)hint=`Tuck will put ${n.name.toLowerCase()} here when it finds them. Nothing moves on disk.`;
+  else if(S.loc==='v:airdrop')hint='People nearby who use AirDrop will show up here.';
+  else if(S.loc==='v:shared')hint='Files other people share with you will show up here.';
+  else if(S.loc==='v:network')hint='No other computers were found on this network.';
+  else if(S.loc.startsWith('tag:'))hint=`Files you tag ${n.name} will show up here.`;
+  return `<div class="empty">${icon({type:'folder'},64)}<b>Nothing here yet</b><p>${hint}</p></div>`;
+}
+function skeleton(){
+  if(S.view==='icons')return `<div class="grid">${Array.from({length:10},()=>`<div class="skc"><div class="skel" style="width:62px;height:62px;border-radius:10px"></div><div class="skel" style="width:70px;height:9px"></div></div>`).join('')}</div>`;
+  const w=[62,48,70,40,55,66,44,58];
+  return `<div class="lst">${listHead()}<div class="rows" aria-busy="true">${w.map(x=>`<div class="skr"><div class="skel" style="width:${x}%"></div><div class="skel" style="width:60%"></div><div class="skel" style="width:50%"></div><div class="skel" style="width:70%"></div></div>`).join('')}</div></div>`;
+}
+/* the Really in column is for Tuck's folders; in Downloads seen through the switch every file is really in Downloads */
+const srtCols=()=>S.loc.startsWith('s:');
+function listHead(){const srt=srtCols();
+  const col=(k,l,r)=>`<button class="${S.sort.key===k?'on':''}${r?' r':''}" data-sort="${k}">${l}${S.sort.key===k?`<i class="ph ph-caret-${S.sort.dir>0?'up':'down'}"></i>`:''}</button>`;
+  return `<div class="lh">${col('name','Name')}${srt?'<button disabled>Really in</button>':''}${col('date','Date Modified')}${col('size','Size',1)}${col('kind','Kind')}</div>`}
+function listRow(n,d){const dirn=isDir(n),srt=srtCols();
+  const ri=srt?(n.real?`<span class="c ri" title="${esc(realOf(n))}"><i class="ph ph-folder-simple"></i><span>${esc(realShort(n))}</span></span>`:`<span class="c">${n.sorted?'Only in Tuck':'--'}</span>`):'';
+  return `<div class="row${S.sel.has(n.id)?' sel':''}" ${attrs(n,'data-nav="1"')} style="--d:${d}"><span class="c n"><span class="tw${S.exp.has(n.id)?' open':''}">${dirn&&n.type!=='disk'?'<i class="ph-fill ph-caret-right"></i>':''}</span>${icon(n,16)}<span class="nm">${esc(n.name)}</span>${dots(n)}${lockI(n)}${newD(n)}${stateC(n)}</span>${ri}<span class="c">${fmtDate(dateOf(n))}</span><span class="c r">${dirn?'--':fmtSize(n.size)}</span><span class="c">${kindOf(n)}</span></div>`}
+function renderList(xs){
+  let rows='';
+  const flat=(arr,d)=>{for(const n of arr){rows+=listRow(n,d);if(isDir(n)&&S.exp.has(n.id))flat(items(n.id),d+1)}};
+  for(const [g,arr] of grouped(xs)){if(g)rows+=`<div class="row gh">${g}</div>`;flat(arr,0)}
+  return `<div class="lst${srtCols()?' srt':''}">${listHead()}<div class="rows${S.group?' grp':''}">${rows}</div></div>`;
+}
+function renderIcons(xs){
+  let h='';for(const [g,arr] of grouped(xs)){if(g)h+=`<div class="ghd">${g}</div>`;
+    h+=arr.map(n=>`<div class="gi${S.sel.has(n.id)?' sel':''}" ${attrs(n,'data-nav="1"')}><span class="ibx">${icon(n,64)}</span><span class="nm2">${newD(n)}<span>${esc(n.name)}</span>${dots(n)}</span>${S.mode==='sorted'&&n.real?`<span class="sub" title="${esc(realOf(n))}">${esc(realShort(n))}</span>`:''}</div>`).join('')}
+  return `<div class="grid">${h}</div>`;
+}
+function colItem(n,colId,act){const dirn=isDir(n);
+  return `<div class="ci${(S.sel.has(n.id)||S.cols.includes(n.id))?' sel':''}" ${attrs(n,act?'data-nav="1"':'')} data-col="${colId}">${icon(n,16)}<span class="nm">${esc(n.name)}</span>${dots(n)}${lockI(n)}${newD(n)}${stateC(n)}${dirn?'<i class="ph ph-caret-right"></i>':''}</div>`}
+function renderCols(){
+  let h='';const c=S.cols;
+  c.forEach((id,i)=>{const act=i===c.length-1;const xs=items(id);h+=`<div class="col${act?' act':''}" data-colid="${id}">${xs.map(n=>colItem(n,id,act)).join('')||'<div class="empty" style="padding:30px 10px"><p>Nothing here yet</p></div>'}</div>`});
+  const one=S.sel.size===1?N[[...S.sel][0]]:null;
+  if(one&&isDir(one)){const xs=items(one.id);h+=`<div class="col" data-colid="${one.id}">${xs.map(n=>colItem(n,one.id,false)).join('')||'<div class="empty" style="padding:30px 10px"><p>Nothing here yet</p></div>'}</div>`}
+  else if(one)h+=`<div class="pv">${infoPane(one,170)}</div>`;
+  else h+='<div class="pv"></div>';
+  return `<div class="cols">${h}</div>`;
+}
+function bigPreview(n,px){
+  /* private files preview like any other; only AI is locked out */
+  if(n.priv&&!isDir(n))return `<div class="privbox">${icon(n,px)}<span class="pl"><i class="ph-fill ph-lock-simple"></i>${esc(PRIVATE_LABEL)}</span></div>`;
+  return icon(n,px);
+}
+function tuckLine(n){
+  if(!n||n.type==='app'||n.type==='disk'||!n.real&&!n.sorted)return '';
+  if(n.sorted)return `<div class="tline"><img src="${MARK}" alt=""><div>${n.priv?`A private folder. ${esc(PRIVATE_LABEL)}. You can open and preview these as usual.`:`A Tuck folder with ${descend(n.id).filter(x=>!isDir(x)).length} files${S.place?' from '+esc(placeName(S.place)):''}. Nothing moves on disk.`}</div></div>`;
+  if(isDir(n))return '';
+  const tp=goesTo(n);
+  if(n.priv)return `<div class="tline"><img src="${MARK}" alt=""><div><b>${esc(PRIVATE_LABEL)}.</b> Kept in ${esc(tuckOf(n)||'its folder')} with a lock. You can open and preview it as usual. Really in ${esc(realOf(n))}.</div></div>`;
+  if(S.mode==='sorted')return `<div class="tline"><img src="${MARK}" alt=""><div><b>Really in: ${esc(realOf(n))}</b><br>${loose(n)?(n.dest?'Not sorted yet. It would go in '+esc(tp)+'.':'Tuck isn’t sure where this goes yet.'):esc(whyOf(n).head+'. '+whyOf(n).txt)}<div class="acts"><button class="btn sm" data-act="reveal" data-fid="${n.id}"><i class="ph ph-arrow-square-out"></i>Show in Enclosing Folder</button></div></div></div>`;
+  return `<div class="tline"><img src="${MARK}" alt=""><div><b>Tuck: goes in ${esc(tp)}</b><br>Nothing moves on disk.</div></div>`;
+}
+function infoPane(n,px){
+  const dirn=isDir(n),cnt=dirn?children(n.id).length:0;
+  const rows=[['Kind',kindOf(n)],dirn?['Contents',cnt+(cnt===1?' item':' items')]:['Size',fmtSize(n.size)],['Modified',fmtDate(dateOf(n))]];
+  if(n.type==='heic')rows.push(['Dimensions','4032 × 3024']);
+  if(n.real)rows.push(['Where',(n.real.startsWith('Users')?'Macintosh HD › ':'')+n.real.split('/').join(' › ')]);
+  if(n.sorted)rows.push(['Where',placeWhere(S.place)+(n.path?' › '+n.path.split('/').join(' › '):'')+' (in Tuck)']);
+  if(n.tags&&n.tags.length)rows.push(['Tags',n.tags.map(t=>t[0].toUpperCase()+t.slice(1)).join(', ')]);
+  return `<div class="inf"><div class="big">${bigPreview(n,px)}</div><h2>${esc(n.name)}</h2><div class="meta">${kindOf(n)}${dirn?'':' · '+fmtSize(n.size)}</div>${tuckLine(n)}${dirn?'':fileActs(n)}<h4>Information</h4><dl>${rows.map(([a,b])=>`<dt>${a}</dt><dd>${esc(b)}</dd>`).join('')}</dl></div>`;
+}
+function renderGallery(xs){
+  let cur=xs.find(n=>S.sel.has(n.id));if(!cur){cur=xs[0];S.sel=new Set([cur.id]);S.anchor=cur.id}
+  return `<div class="gal"><div class="stage"><div class="big">${bigPreview(cur,300)}</div><div class="film">${xs.map(n=>`<div class="fs${n.id===cur.id?' sel':''}" ${attrs(n,'data-nav="1"')} title="${esc(n.name)}">${icon(n,48)}</div>`).join('')}</div></div><div class="side2">${infoPane(cur,0).replace(/<div class="big">[\s\S]*?<\/div><h2>/,'<h2>')}</div></div>`;
+}
+
+/* ---------- footer */
+function renderFoot(){
+  const crumbs=[];let id=S.view==='columns'?S.cols[S.cols.length-1]:S.loc;while(id){crumbs.unshift(id);if(id==='v:hd')break;id=parentOf(id)}
+  const one=S.sel.size===1?N[[...S.sel][0]]:null;
+  const ci=n=>n.id==='s:'?`<img src="${MARK}" alt="">`:n.type==='disk'?'<i class="ph ph-hard-drives" style="font-size:13px;color:var(--ink3)"></i>':icon(n,14);
+  let h=crumbs.map((c,i)=>`${i?'<i class="ph ph-caret-right sepc"></i>':''}<button data-loc="${c}">${ci(N[c])}${esc(N[c].crumb||N[c].name)}</button>`).join('');
+  if(one&&!S.cols.includes(one.id))h+=`<i class="ph ph-caret-right sepc"></i><span class="last">${icon(one,14)}${esc(one.name)}</span>`;
+  $('#path').innerHTML=h;
+  const n=S.loading?0:(S.view==='columns'?items(S.cols[S.cols.length-1]):items()).length;
+  const selTxt=S.sel.size>1?`${S.sel.size} of ${n} selected`:`${n} item${n===1?'':'s'}`;
+  $('#stat').innerHTML=S.loading?'Loading…':S.mode==='sorted'?`${selTxt}<span aria-hidden="true">·</span><img src="${MARK}" alt="" style="width:13px;height:13px">Sorted by Tuck. Nothing moves on disk.`:`${selTxt}, 112 GB available`;
+}
+
+/* each view keeps its own order: real folders newest first (what just landed in Downloads is on top), Tuck's folders by name */
+function syncSort(){if(S._sm!==S.mode){if(S._sm)S.sortBy[S._sm]=S.sort;S.sort=S.sortBy[S.mode];S._sm=S.mode}}
+function render(o={}){syncSort();renderNav(o.navAnim);renderBar();renderBody();renderFoot();renderChg();updateBadge();if(S.ql)renderQL();
+  if(o.anim&&!RM.matches){body.classList.remove('swap');void body.offsetWidth;body.classList.add('swap')}}
+
+/* ---------- navigation */
+function go(loc,o={}){
+  if(o.push!==false&&loc!==S.loc){S.hist.push(S.loc);S.fut=[]}
+  /* Sorted by Tuck is one switch for the whole Finder: opening Downloads keeps it on. With it on, Desktop is Tuck's folders,
+     and any other folder shows its own files under the Tuck folder each one goes in */
+  if(loc.startsWith('s:'))S.mode='sorted';else if(S.mode==='sorted'&&isPlace(loc)){setPlace(loc.slice(2));loc='s:'}
+  if(o.place)setPlace(o.place);
+  S.loc=loc;S.cols=[loc];S.sel=new Set(o.sel?[o.sel]:[]);S.anchor=o.sel||null;S.q='';$('#q').value='';
+  if(!loc.startsWith('s:'))S.lastReal=loc;
+  /* the side chat's context chip follows the folder you are in */
+  if(window.TuckChat&&N[loc])TuckChat.setup({context:loc==='s:'?placeName(S.place):(N[loc].crumb||N[loc].name)});
+  hideHint();closePop();
+  if(loc==='r:iCloud Drive'||loc==='v:network'){S.loading=true;setTimeout(()=>{S.loading=false;if(S.loc===loc)render()},900)}else S.loading=false;
+  render();
+  if(o.sel)requestAnimationFrame(()=>{const e=body.querySelector(`[data-id="${o.sel}"]`);e&&e.scrollIntoView({block:'nearest'})});
+}
+function back(){if(!S.hist.length)return;S.fut.push(S.loc);go(S.hist.pop(),{push:false})}
+function fwd(){if(!S.fut.length)return;S.hist.push(S.loc);go(S.fut.pop(),{push:false})}
+function openItem(n){if(!n)return;if(isDir(n))go(n.id);else openQL()}
+function setMode(m){
+  if(m===S.mode)return;
+  const one=S.sel.size===1?N[[...S.sel][0]]:null;const file=one&&!isDir(one)&&one.real?one:null;
+  S.mode=m;S.hist=[];S.fut=[];S.exp.clear();
+  let loc,sel=null;
+  let place=null;
+  /* on: you stay in the place you are in, now inside its Tuck folders; a selected file opens in its own Tuck folder */
+  if(m==='sorted'){place=file&&placeOf(file)||(isPlace(S.loc)?S.loc.slice(2):S.place);loc=file&&placeOf(file)?'s:'+(file.t??''):'s:';sel=file&&placeOf(file)?file.id:null}
+  else{loc=file?file.parent:S.loc.startsWith('s:')?'r:'+S.place:S.lastReal;sel=file?file.id:null}
+  try{localStorage.setItem('tuckSorted',m==='sorted'?'1':'')}catch(e){}
+  go(loc,{push:false,sel,place});
+  render({anim:true,navAnim:m==='sorted'});
+  /* the status bar says "Sorted by Tuck. Nothing moves on disk." already: no tip over the column headers (critique r2 #33) */
+}
+
+/* ---------- selection + keyboard */
+function selectOnly(id){S.sel=new Set([id]);S.anchor=id}
+function clickSelect(e,id){
+  if(e.metaKey||e.ctrlKey){S.sel.has(id)?S.sel.delete(id):S.sel.add(id);S.anchor=id}
+  else if(e.shiftKey&&S.anchor&&S.order.includes(S.anchor)&&S.order.includes(id)){const a=S.order.indexOf(S.anchor),b=S.order.indexOf(id);S.sel=new Set(S.order.slice(Math.min(a,b),Math.max(a,b)+1))}
+  else selectOnly(id);
+}
+function moveSel(delta,shift){
+  const o=S.order;if(!o.length)return;
+  const curId=S.sel.size?([...S.sel].pop()):null;let i=curId?o.indexOf(curId):-1;
+  let j=i<0?(delta>0?0:o.length-1):Math.max(0,Math.min(o.length-1,i+delta));
+  const id=o[j];
+  if(shift&&S.anchor){const a=o.indexOf(S.anchor);S.sel=new Set(o.slice(Math.min(a,j),Math.max(a,j)+1));S.sel.delete(id);S.sel.add(id)}else selectOnly(id);
+  afterSel(id);
+}
+function afterSel(id){renderBody();renderFoot();renderBar();if(S.ql)renderQL();const e=body.querySelector(`[data-id="${CSS.escape(id)}"][data-nav]`)||body.querySelector(`[data-id="${CSS.escape(id)}"]`);e&&e.scrollIntoView({block:'nearest',inline:'nearest'})}
+function perRow(){const els=$$('.gi[data-nav]',body);if(els.length<2)return 1;const t=els[0].offsetTop;let k=0;while(k<els.length&&els[k].offsetTop===t)k++;return k}
+const curOne=()=>S.sel.size===1?N[[...S.sel][0]]:null;
+const selNodes=()=>[...S.sel].map(id=>N[id]).filter(Boolean);
+
+document.addEventListener('keydown',e=>{
+  const tg=e.target;if(tg.matches('input,textarea'))return;
+  if((e.metaKey||e.ctrlKey)&&e.shiftKey&&e.key.toLowerCase()==='p'){e.preventDefault();setSide(!S.pv);return}
+  if(e.key==='Escape'){if(S.ql){closeQL();return}closeMenu();closePop();closeBub();hideHint();return}
+  if(!$('#menu').hidden)return;
+  const meta=e.metaKey||e.ctrlKey;
+  if(meta&&e.key==='['){e.preventDefault();back();return}
+  if(meta&&e.key===']'){e.preventDefault();fwd();return}
+  if(meta&&['1','2','3','4'].includes(e.key)){e.preventDefault();setView(['icons','list','columns','gallery'][+e.key-1]);return}
+  if(meta&&e.key==='f'){e.preventDefault();$('#q').focus();return}
+  if(meta&&e.key==='a'){e.preventDefault();S.sel=new Set(S.order);afterSel(S.order[0]);return}
+  if(meta&&e.key==='ArrowUp'){e.preventDefault();const p=parentOf(S.loc);p&&go(p,{sel:S.loc});return}
+  if(meta&&(e.key==='ArrowDown'||e.key==='o')){e.preventDefault();openItem(curOne());return}
+  if(!body.contains(tg)&&tg!==document.body&&!tg.closest('.ql'))return;
+  const one=curOne();
+  if(e.key===' '){e.preventDefault();S.ql?closeQL():openQL();return}
+  if(e.key==='Enter'){e.preventDefault();one&&startRename(one.id);return}
+  const v=S.view;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const d=e.key==='ArrowDown'?1:-1;moveSel(v==='icons'?d*perRow():d,e.shiftKey);return}
+  if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();const r=e.key==='ArrowRight';
+    if(v==='icons'||v==='gallery')return moveSel(r?1:-1,e.shiftKey);
+    if(v==='list'&&one&&isDir(one)&&one.type!=='disk'){r?S.exp.add(one.id):S.exp.delete(one.id);return afterSel(one.id)}
+    if(v==='columns'){
+      if(r&&one&&isDir(one)){const k=items(one.id);if(k.length){S.cols.push(one.id);selectOnly(k[0].id);afterSel(k[0].id)}}
+      else if(!r&&S.cols.length>1){const f=S.cols.pop();selectOnly(f);afterSel(f)}
+    }
+  }
+});
+
+/* ---------- rename */
+function startRename(id){
+  const n=N[id];if(!n||n.id==='s:'||n.path==='No folder yet')return;
+  const el=body.querySelector(`[data-id="${CSS.escape(id)}"] .nm2 span, [data-id="${CSS.escape(id)}"] .nm`);if(!el)return;
+  const inp=document.createElement('input');inp.className='field';inp.value=n.name;inp.setAttribute('aria-label','Rename');
+  inp.style.cssText='height:20px;padding:0 4px;font-size:12.5px;width:'+Math.max(140,el.offsetWidth+30)+'px;border-color:var(--ac);background:var(--win);color:var(--ink)';
+  el.replaceWith(inp);inp.focus();const dot=n.name.lastIndexOf('.');inp.setSelectionRange(0,dot>0&&!isDir(n)?dot:n.name.length);
+  let done=false;const fin=ok=>{if(done)return;done=true;const v=inp.value.trim();
+    if(ok&&v&&v!==n.name){if(n.sorted){const op=Plan.change({ty:'rename',node:n.pid,name:v});if(op)toast(`Renamed to “${v}”.`,()=>Plan.revert(op.id))}else{const old=n.name;n.name=v;toast(`Renamed to “${v}”`,()=>{n.name=old;render()})}}render();body.focus()};
+  inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')fin(true);if(e.key==='Escape')fin(false)});
+  inp.addEventListener('blur',()=>fin(true));inp.addEventListener('mousedown',e=>e.stopPropagation());
+}
+
+/* ---------- body mouse */
+body.addEventListener('mousedown',e=>{
+  if(e.button!==0)return;closeMenu();closePop();hideHint();
+  const h=e.target.closest('[data-sort]');if(h){const k=h.dataset.sort;S.sort=S.sort.key===k?{key:k,dir:-S.sort.dir}:{key:k,dir:k==='date'?-1:1};renderBody();return}
+  const tw=e.target.closest('.tw');const it=e.target.closest('[data-id]');
+  if(tw&&it&&tw.children.length){e.preventDefault();const id=it.dataset.id;S.exp.has(id)?S.exp.delete(id):S.exp.add(id);renderBody();return}
+  if(!it){if(e.target.closest('.lh,.tline,.inf,.big'))return;S.sel.clear();renderBody();renderFoot();return}
+  const id=it.dataset.id;
+  if(S.view==='columns'&&it.dataset.col){const col=it.dataset.col;const ix=S.cols.indexOf(col);if(ix<0)S.cols.push(col);else S.cols=S.cols.slice(0,ix+1);
+    clickSelect(e,id);if(!S.sel.has(id))selectOnly(id);renderBody();renderFoot();renderBar();if(S.ql)renderQL();return}
+  if(S.sel.has(id)&&!(e.metaKey||e.ctrlKey||e.shiftKey))return; // keep a multi-selection for dragging
+  clickSelect(e,id);renderBody();renderFoot();if(S.ql)renderQL();
+});
+body.addEventListener('click',e=>{const it=e.target.closest('[data-id]');const a=e.target.closest('[data-act]');
+  if(a){if(a.dataset.act==='reveal')reveal(N[a.dataset.fid]);return}
+  if(it&&!(e.metaKey||e.ctrlKey||e.shiftKey)&&S.sel.size>1&&S.sel.has(it.dataset.id)&&S.view!=='columns'){selectOnly(it.dataset.id);renderBody();renderFoot()}});
+body.addEventListener('dblclick',e=>{const it=e.target.closest('[data-id]');if(it&&!e.target.closest('.tw'))openItem(N[it.dataset.id])});
+body.addEventListener('contextmenu',e=>{e.preventDefault();hideHint();const it=e.target.closest('[data-id]');
+  if(!it){openMenu(bgMenu(),e.clientX,e.clientY);return}
+  const id=it.dataset.id;if(!S.sel.has(id)){selectOnly(id);renderBody();renderFoot()}
+  if(S.mode==='sorted'){const sel=panelSel();const n=N[id];if(sel&&(n.sorted||n.pf)){FolderPanel.menu(e.clientX,e.clientY,S.sel.size>1?sel:n.sorted?{type:'node',id:n.pid}:{type:'file',id:n.pf},PH);return}}
+  openMenu(itemMenu(),e.clientX,e.clientY)});
+
+/* ---------- drag to a Tuck folder */
+let DRAG=null;
+body.addEventListener('dragstart',e=>{const it=e.target.closest('[data-id]');if(!it)return;const id=it.dataset.id;
+  if(!S.sel.has(id)){selectOnly(id);}DRAG=[...S.sel].filter(x=>N[x]&&!isDir(N[x])&&N[x].real);
+  e.dataTransfer.setData('text/plain',DRAG.map(x=>N[x].name).join('\n'));e.dataTransfer.effectAllowed='move';hideHint()});
+document.addEventListener('dragend',()=>{DRAG=null;$$('.drop,.dropT').forEach(x=>x.classList.remove('drop','dropT'));setTimeout(()=>{renderBody();renderFoot()},0)});
+const dropTarget=e=>{if(!DRAG&&window.TUCK_DRAG&&TUCK_DRAG.type==='file')DRAG=TUCK_DRAG.ids.map(x=>PFILE[x]&&PFILE[x].id).filter(Boolean);if(!DRAG||S.mode!=='sorted')return null;const s=e.target.closest('.sbi[data-loc^="s:"]');if(s)return s;const f=e.target.closest('[data-id^="s:"]');return f};
+document.addEventListener('dragover',e=>{const t=dropTarget(e);$$('.drop,.dropT').forEach(x=>x!==t&&x.classList.remove('drop','dropT'));if(t){e.preventDefault();e.dataTransfer.dropEffect='move';t.classList.add(t.classList.contains('sbi')?'drop':'dropT')}});
+document.addEventListener('drop',e=>{const t=dropTarget(e);if(!t)return;e.preventDefault();const path=(t.dataset.loc||t.dataset.id).slice(2);const ids=DRAG.filter(id=>N[id]&&N[id].t!==path);DRAG=null;sortInto(ids,path);learnDrag(ids,path)});
+function sortInto(ids,path){
+  ids=ids.filter(id=>N[id]&&!isDir(N[id])&&N[id].pf);const to=PID[path];if(!ids.length||!to)return;
+  const op=Plan.change({ty:'moveFiles',files:ids.map(id=>N[id].pf),to});if(!op)return;pulse(path);
+  toast(`${ids.length>1?ids.length+' files':'“'+N[ids[0]].name+'”'} sorted into ${last(path)}.`,()=>Plan.revert(op.id));
+}
+function pulse(path){const top='s:'+path.split('/')[0];[...$$(`[data-id="${CSS.escape('s:'+path)}"]`,body),...$$(`[data-id="${CSS.escape(top)}"]`,body),...$$(`.sbi[data-loc="${CSS.escape(top)}"]`)].forEach(x=>{x.classList.remove('pulse');void x.offsetWidth;x.classList.add('pulse')})}
+function reveal(f){if(!f||!f.real)return;closeQL();closeMenu();
+  if(S.mode==='sorted')setMode('real');go(f.parent,{sel:f.id});body.focus()}
+
+/* ---------- menus */
+const MENU=$('#menu');
+function openMenu(list,x,y){
+  MENU.innerHTML=list.map((it,i)=>{if(it==='-')return '<hr>';if(it.head)return `<div class="mh">${it.mark?`<img src="${MARK}" alt="">`:''}${it.head}</div>`;
+    if(it.tags)return `<div class="tagrow" role="group" aria-label="Tags">${TAGS.map(([c,l])=>`<button data-tag="${c}" class="${it.tags.includes(c)?'on':''}" style="--c:var(--tag-${c})" aria-label="${l}" title="${l}"></button>`).join('')}</div>`;
+    return `<button role="menuitem" data-i="${i}" ${it.dis?'disabled':''} style="${it.pad?'padding-left:'+(9+it.pad*14)+'px':''}">${it.chk!==undefined?`<i class="ph ph-check" style="visibility:${it.chk?'visible':'hidden'}"></i>`:it.ic?`<i class="ph ph-${it.ic}"></i>`:''}<span>${it.l}</span>${it.k?`<span class="k">${it.k}</span>`:''}</button>`}).join('');
+  MENU.hidden=false;MENU._list=list;
+  const r=MENU.getBoundingClientRect();MENU.style.left=Math.min(x,innerWidth-r.width-8)+'px';MENU.style.top=Math.min(y,innerHeight-r.height-8)+'px';
+  const f=MENU.querySelector('button[data-i]:not([disabled])');f&&f.focus({preventScroll:true});
+}
+function closeMenu(){if(!MENU.hidden){MENU.hidden=true;MENU.style.zIndex=''}}
+MENU.addEventListener('mousedown',e=>e.stopPropagation());
+MENU.addEventListener('click',e=>{const t=e.target.closest('[data-tag]');if(t){toggleTag(t.dataset.tag);t.classList.toggle('on');return}
+  const b=e.target.closest('button[data-i]');if(!b)return;const it=MENU._list[+b.dataset.i];closeMenu();it.fn&&it.fn();});
+MENU.addEventListener('keydown',e=>{e.stopPropagation();const bs=$$('button[data-i]:not([disabled])',MENU);const i=bs.indexOf(document.activeElement);
+  if(e.key==='ArrowDown'){e.preventDefault();bs[(i+1)%bs.length].focus()}if(e.key==='ArrowUp'){e.preventDefault();bs[(i-1+bs.length)%bs.length].focus()}
+  if(e.key==='Escape'){closeMenu();body.focus()}});
+document.addEventListener('mousedown',e=>{if(!MENU.hidden&&!MENU.contains(e.target))closeMenu();if(!$('#pop').hidden&&!$('#pop').contains(e.target))closePop();
+  if($('#bub').classList.contains('on')&&!e.target.closest('#bub,#tuck'))closeBub()});
+
+function itemMenu(){
+  const ns=selNodes(),one=ns.length===1?ns[0]:null,files=ns.filter(n=>!isDir(n)&&n.real);
+  const allTags=ns.length?TAGS.map(t=>t[0]).filter(c=>ns.every(n=>n.tags&&n.tags.includes(c))):[];
+  const priv=files.length&&files.every(f=>f.priv);
+  return [
+    {l:'Open',ic:'folder-open',fn:()=>openItem(one||ns[0]),k:'⌘O'},
+    {l:'Quick Look',ic:'eye',fn:openQL,k:'Space'},
+    {l:'Show in Enclosing Folder',ic:'arrow-square-out',dis:!(one&&one.real&&(S.mode==='sorted'||S.loc!==one.parent)),fn:()=>reveal(one)},
+    '-',
+    {l:'Rename',ic:'pencil-simple',dis:!one,fn:()=>startRename(one.id),k:'↩'},
+    {tags:allTags},{l:'Tags…',ic:'tag',dis:!files.length,fn:()=>tagMenuAt(MENU._x,MENU._y)},
+    '-',{head:'Tuck',mark:1},
+    {l:'Move To…',ic:'tray-arrow-down',dis:!files.length,fn:()=>sortWithMenu(files)},
+    {l:'Private',chk:priv,dis:!files.length,fn:()=>togglePrivate(files,!priv)},
+    {l:'Why Here',ic:'question',dis:!(one&&one.real),fn:()=>whyPop(one)}];
+}
+function bgMenu(){return [{l:'New Folder',ic:'folder-plus',dis:true},'-',{head:'View'},...['icons','list','columns','gallery'].map(v=>({l:'as '+v[0].toUpperCase()+v.slice(1),chk:S.view===v,fn:()=>setView(v)})),'-',...sortItems()]}
+function sortItems(){return [{l:S.pv?'Hide Preview':'Show Preview',k:'⇧⌘P',fn:()=>setSide(!S.pv)},'-',{l:'Use Groups',chk:S.group,fn:()=>{S.group=!S.group;renderBody()}},'-',{head:'Sort by'},...[['name','Name'],['kind','Kind'],['date','Date Modified'],['size','Size']].map(([k,l])=>({l,chk:S.sort.key===k,fn:()=>{S.sort={key:k,dir:k==='date'||k==='size'?-1:1};renderBody()}}))]}
+function toggleTag(c){const ns=selNodes().filter(n=>n.tags);if(!ns.length)return;const all=ns.every(n=>n.tags.includes(c));ns.forEach(n=>{n.tags=all?n.tags.filter(x=>x!==c):[...new Set([...n.tags,c])]});renderBody();renderNav()}
+function tagMenuAt(x,y){const r=$('#tagBtn').getBoundingClientRect();const ns=selNodes();
+  openMenu([{head:'Tags'},{tags:ns.length?TAGS.map(t=>t[0]).filter(c=>ns.every(n=>n.tags&&n.tags.includes(c))):[]},'-',...TAGS.map(([c,l])=>({l:`<span class="tdot" style="--c:var(--tag-${c});display:inline-block;margin:0 4px 0 0"></span>${l}`,dis:!ns.length,fn:()=>toggleTag(c)}))],r.left-120,r.bottom+6)}
+function sortWithMenu(files){
+  const sug=files.length===1?(files[0].dest||files[0].t):null;
+  const r=body.querySelector('.sel')?.getBoundingClientRect()||body.getBoundingClientRect();
+  const list=[{head:files.length>1?`Sort ${files.length} files with Tuck`:'Suggested',mark:1}];
+  if(sug&&sug!==files[0].t)list.push({l:sug.split('/').join(' › '),ic:'sparkle',fn:()=>sortInto(files.map(f=>f.id),sug)});
+  if(sug&&sug===files[0].t)list.push({l:'Already in '+last(sug),ic:'check',dis:true});
+  list.push('-',{head:'All Tuck folders'},...SD.map(p=>({l:last(p),pad:p.split('/').length-1,fn:()=>sortInto(files.map(f=>f.id),p)})));
+  openMenu(list,r.left+60,r.top+20);
+}
+function togglePrivate(files,on){files=files.filter(f=>f.pf);const rows=files.map(f=>Plan.setLevel(f.pf,on?'private':(PRIVATE_FILES.has(f.name)?'read':'inherit')));
+  toast(on?`Kept private. ${files.length>1?'They stay':'It stays'} in ${files.length>1?'their folders':'its folder'} with a lock; never sent to AI. You can still open and preview ${files.length>1?'them':'it'}.`:'No longer private.',()=>rows.forEach(r=>Plan.undoApply(r.id)))}
+
+/* ---------- Why here? popover */
+const POP=$('#pop');
+function whyPop(f){
+  const el=body.querySelector(`[data-id="${f.id}"]`);const r=(el||body).getBoundingClientRect();const w=whyOf(f);
+  POP.innerHTML=`<div class="k"><img src="${MARK}" alt="">Why here?</div><b>${esc(w.head)}</b><p>${esc(w.txt[0].toUpperCase()+w.txt.slice(1))}</p><p>Really in ${esc(realOf(f))}. Nothing moved on disk.</p><div class="acts"><button class="btn sm" id="popMove">Move To…</button><button class="btn sm pri" id="popOk">Looks Right</button></div>`;
+  POP.hidden=false;const pr=POP.getBoundingClientRect();
+  POP.style.left=Math.min(r.left+40,innerWidth-pr.width-12)+'px';POP.style.top=(r.bottom+pr.height+8>innerHeight?r.top-pr.height-6:r.bottom+6)+'px';
+  $('#popOk').onclick=()=>{closePop();body.focus()};$('#popMove').onclick=()=>{closePop();sortWithMenu([f])};$('#popOk').focus();
+}
+function closePop(){POP.hidden=true}
+POP.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();closePop();body.focus()}});
+
+/* ---------- Quick Look */
+const QL=$('#ql');
+function openQL(forId){S.qlFor=typeof forId==='string'?forId:null;if(!S.sel.size&&!S.qlFor)return;S.ql=true;window.TuckNotice&&TuckNotice.hide();renderQL();QL.classList.add('on');closeMenu()}
+function closeQL(){S.ql=false;S.qlFor=null;QL.classList.remove('on');body.focus()}
+/* the file actions every place shows for one file: Move To, Keep Private, Why Here */
+const fileActs=(n,o={})=>n&&n.pf?`<div class="qacts">${o.open===false?'':`<button class="btn sm pri" data-qa="open" data-fid="${n.id}">Open</button>`}<button class="btn sm" data-qa="more" data-fid="${n.id}" aria-haspopup="menu" aria-label="More actions for ${esc(n.name)}"><i class="ph ph-dots-three"></i>More<i class="ph ph-caret-down pcaret" aria-hidden="true"></i></button></div>${S.why===n.id?`<p class="qwhy">${esc(whyOf(n).head)}. ${esc(whyOf(n).txt)} Really in ${esc(realOf(n))}. Nothing moved on disk.</p>`:''}`:'';
+function moveFile(f){const v=Plan.view();FolderPanel.pick($('[data-qa="more"]')||body,{title:`Move ${tuckMid(f.name,28)} to`,exclude:[v.file(f.pf).node],newFolder:true}).then(t=>{if(!t)return;const op=Plan.change({ty:'moveFiles',files:[f.pf],to:t});toast(`“${f.name}” moves to ${v.node(t)?v.node(t).name:'the new folder'}. Nothing moved on disk.`,()=>Plan.revert(op.id))})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-qa]');if(!b)return;const f=N[b.dataset.fid];if(!f||!f.pf)return;const a=b.dataset.qa;
+  if(a==='open')toast(`Opening “${f.name}”. Opening files is not part of this prototype.`);
+  if(a==='more'){const r=b.getBoundingClientRect();openMenu([{l:'Move To…',ic:'arrow-bend-up-right',fn:()=>moveFile(f)},{l:'Private',chk:!!f.priv,fn:()=>togglePrivate([f],!f.priv)},
+    {l:'Why Here',ic:'question',fn:()=>{S.why=S.why===f.id?null:f.id;if(S.ql)renderQL();renderBody()}}],r.left,r.bottom+6);MENU.style.zIndex='var(--z-tip)'}});
+function renderQL(){
+  const n=N[S.qlFor||[...S.sel].pop()];if(!n)return;const dirn=isDir(n);
+  let line='';
+  if(n.priv&&!dirn)line=`<div class="tline"><img src="${MARK}" alt=""><div><b>${esc(PRIVATE_LABEL)}.</b> Kept in ${esc(tuckOf(n)||'its folder')} with a lock. You can open and preview it as usual.</div></div>`;
+  else if(n.real&&!dirn){const tp=goesTo(n);line=`<div class="tline"><img src="${MARK}" alt=""><div><b>${loose(n)?(n.dest?'Tuck: would go in '+esc(tp):'Tuck: no folder yet'):'Tuck: goes in '+esc(tp)}</b>${S.mode==='sorted'?'<br>Really in '+esc(realOf(n))+'. Nothing moved on disk.':''}</div></div>`}
+  else line=tuckLine(n);
+  QL.innerHTML=`<div class="qh"><button class="ib" id="qlx" aria-label="Close Quick Look"><i class="ph ph-x"></i></button><b>${esc(n.name)}</b><button class="btn sm" id="qlOpen">Open with ${n.type==='doc'?'Pages':n.type==='xls'?'Numbers':dirn?'Finder':'Preview'}</button></div>
+    <div class="qs">${bigPreview(n,n.type==='heic'||n.type==='png'?400:360)}</div>
+    <div class="qf"><div class="qm">${kindOf(n)}${dirn?' · '+children(n.id).length+' items':' · '+fmtSize(n.size)} · Modified ${fmtDate(dateOf(n))}</div>${line}${dirn?'':fileActs(n,{open:false})}</div>`;
+  $('#qlx').onclick=closeQL;$('#qlOpen').onclick=()=>toast(`Opening “${n.name}”. Opening files is not part of this prototype.`);
+}
+QL.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Escape'){e.preventDefault();e.stopPropagation();closeQL()}});
+
+/* a one-time note under the Sorted by Tuck switch */
+/* ---------- toast */
+let tT;
+function toast(msg,undo){window.TuckNotice&&TuckNotice.hide();const T=$('#toast');T.innerHTML=`<img src="${MARK}" alt=""><span>${esc(msg)}</span>${undo?'<button class="btn sm" id="undo">Undo</button>':''}`;T.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>T.classList.remove('on'),5200);
+  if(undo)$('#undo').onclick=()=>{undo();T.classList.remove('on')}}
+
+/* ---------- hover hint (Sorted view only) */
+const HINT=$('#hint');let hT=null,hId=null;
+body.addEventListener('mouseover',e=>{const it=e.target.closest('[data-id]');const id=it&&it.dataset.id;if(id===hId)return;hideHint();hId=id;
+  if(!it||S.mode!=='sorted'||DRAG||!MENU.hidden||S.ql)return;const f=N[id];if(!f||isDir(f)||!f.real)return;
+  /* why here, in the status bar under the list: it never covers a row */
+  hT=setTimeout(()=>{const w=whyOf(f);$('#stat').innerHTML=`<span class="why" role="status"><img src="${MARK}" alt="">${f.priv?`<b>${esc(PRIVATE_LABEL)}.</b> Kept here with a lock. You can still open and preview it.`:`<b>${esc(w.head)}:</b> ${esc(w.txt)}`}</span>`},350)});
+body.addEventListener('mouseleave',hideHint);body.addEventListener('scroll',hideHint);
+function hideHint(){clearTimeout(hT);const had=hId&&$('#stat .why');hId=null;HINT.classList.remove('on');if(had)renderFoot()}
+
+/* ---------- Tuck */
+const TI=$('#tuckImg'),BUB=$('#bub');let tuckBusy=false;
+TI.src=POSES.idle;$('#tswMark').src=MARK;
+function blink(){setTimeout(()=>{if(!tuckBusy){TI.src=POSES.blink;setTimeout(()=>{if(!tuckBusy)TI.src=POSES.idle},140)}blink()},3000+Math.random()*3000)}blink();
+/* new = waiting in No folder yet, from a watched folder (Downloads, Desktop), with a home Tuck knows (Plan.newFiles, rule 10) */
+const newFiles=()=>FILES.filter(f=>f.isNew&&loose(f));
+const newWhere=nf=>{const w=(Plan.WATCHED||['Downloads','Desktop']).filter(x=>nf.some(f=>f.from===x));return w.join(' and ')||'Downloads and Desktop'};
+/* the badge is the one Needs You count (tuckQueue, rule 2): the same number as the Tuck app's sidebar */
+const tuckQ=()=>TuckQueue.get();
+function updateBadge(){const n=tuckQ().left;const b=$('#badge');b.textContent=n;b.style.display=n?'':'none';$('#tuck').setAttribute('aria-label',n?`Tuck, ${n} need${n===1?'s':''} you`:'Tuck')}
+document.addEventListener('tuckqueue',()=>{updateBadge();TuckLauncher.refresh()});
+function openBub(html){window.TuckNotice&&TuckNotice.hide();TuckLauncher.close();BUB.innerHTML=html;BUB.classList.add('on')}
+function closeBub(){BUB.classList.remove('on')}
+/* "where is …?": one answer for every page (Plan.answer); private files are matched by name only */
+function chatReply(q){const a=Plan.answer&&Plan.answer(q);
+  if(a)return a.type==='talk'?{html:a.html,starters:a.starters}:{html:a.html,files:(a.files||[]).slice(0,3)};
+  return 'I didn’t find a file named like that. Try a word from its name, like “Lab 3” or “resume”, or ask me to sort new files.'}
+/* clicking Tuck opens his launcher: four big jobs, each a step inside it; questions continue in the side chat */
+const cleanLine=()=>{const mb=tuckQ().tidyMB;return mb?(mb>=1000?(mb/1000).toFixed(1)+' GB':Math.round(mb)+' MB'):''};
+/* Sort New Files: the shared launcher step (tuck-art.js), so every page shows and writes the same sort state (rule 27).
+   Finder flies the files into their folders first. */
+const sortStep=TuckLauncher.steps.sort?(el,back,ui)=>TuckLauncher.steps.sort(el,back,ui,{run:(ids,to)=>sortNew(true,ids,to)}):'tuck.html#today';
+TuckLauncher.setup({anchor:'#tuck',context:'Downloads',
+  status:()=>{const n=newFiles().length,q=tuckQ().left;return [n&&`${n} new file${n===1?'':'s'}`,q&&`${q} need${q===1?'s':''} you`,cleanLine()&&`${cleanLine()} to clean`].filter(Boolean).join(' · ')},
+  state:()=>newFiles().length?'new':tuckQ().left?'needs':'idle',
+  tiles:[{id:'sort',icon:'tray-arrow-down',label:'Sort New Files',hue:'proj',count:()=>newFiles().length?`${newFiles().length} new`:'',quiet:'All sorted',ask:'Sort my new files',step:sortStep},
+    {id:'clean',icon:'broom',label:'Clean Up',hue:'photo',count:cleanLine,quiet:'Nothing to clean',ask:'What can I clean up?',step:TuckLauncher.steps.clean},
+    {id:'needs',icon:'hand-tap',label:'Needs You',hue:'job',count:()=>tuckQ().left?`${tuckQ().left} waiting`:'',quiet:'Nothing waiting',ask:'What needs me?',step:TuckLauncher.steps.needs},
+    {id:'edit',icon:'folders',label:'Edit Folders',hue:'work',count:()=>{const c=Plan.summary().changes;return c?`${c} change${c===1?'':'s'}`:'Workbench'},ask:'Help me edit my folders',step:'tuck.html#edit'}]});
+$('#tuck').onclick=()=>TuckLauncher.toggle();
+function finderReply(q){const l=q.toLowerCase().trim(),nf=newFiles();
+  if(/sort (my )?new|new files/.test(l)){if(!nf.length)return 'Everything new is already sorted! I’ll tell you when something lands in Downloads or Desktop.';
+    let row=null;
+    return {html:`${nf.length} new file${nf.length===1?'':'s'} in ${esc(newWhere(nf))}. Here’s where each goes:<br>${nf.map(f=>`<b>${esc(tuckMid(f.name,26))}</b> → ${esc(f.dest.split('/').join(' › '))}`).join('<br>')}`,
+      plan:{text:`Sort ${nf.length} files in my folders.`,apply:async()=>{row=await sortNew(true)},undo:()=>{row&&Plan.undoApply(row.id)}}}}
+  if(/clean|space|tidy/.test(l))return cleanLine()?`You can free <b>${cleanLine()}</b>. Everything goes to the Trash, so you can put it back. <a href="#" onclick="TuckChat.close();TuckLauncher.open('clean');return false">Show me</a>`:'Nothing to clean right now.';
+  if(/need(s)? me|waiting|questions?/.test(l)){const n=tuckQ().left;return n?`${n} decision${n===1?'':'s'} need you, about ${Math.max(1,Math.round(n*.5))} minute${n>2?'s':''}. <a href="#" onclick="TuckChat.close();TuckLauncher.open('needs');return false">Answer them here</a>`:'All clear! Nothing needs you right now.'}
+  if(/edit|my folders|organi[sz]e/.test(l)){const m=l.match(/organi[sz]e\s+(?:my\s+)?(.+?)(?:\s+folder)?$/);const name=m&&!/^(this|it|my|the)$/.test(m[1])?m[1]:'Downloads';
+    return {html:`Here’s a plan for <b>${esc(name)}</b>: installers go to Installers, screenshots to Photos › Screenshots, class files to their class. Your own folders stay as they are.`,plan:{text:`Arrange ${name} in my folders.`,apply:()=>{},undo:()=>{}}}}
+  return chatReply(q)}
+/* the list keeps a lane free for Tuck only when its rows reach his corner (a short folder keeps its full width) */
+function tuckGutter(){const L=body.querySelector('.lst'),t=$('#tuck');if(!L||!t)return;const sc=L.parentElement,rs=L.querySelector('.rows'),last=rs&&rs.lastElementChild;
+  const tt=t.getBoundingClientRect().top-12;L.classList.toggle('tklane',sc.scrollHeight>sc.clientHeight+1||!!last&&last.getBoundingClientRect().bottom>tt)}
+new MutationObserver(()=>tuckGutter()).observe(body,{childList:true});addEventListener('resize',tuckGutter);document.addEventListener('tuckchat',()=>setTimeout(tuckGutter,300));tuckGutter();
+/* Tuck's notices lie over the path bar, beside him, so they never cover a file row (n4) */
+TuckNotice.setPlace(N=>{const f=$('.foot'),t=TuckUI.anchorRect('#tuck');if(!f||!t)return false;const fr=f.getBoundingClientRect(),right=t.left-14,left=fr.left+12;if(right-left<320)return false;
+  N.style.maxWidth=(right-left)+'px';N.style.maxHeight='';N.style.top='auto';const w=N.offsetWidth,h=N.offsetHeight;
+  N.style.left=Math.max(left,right-w)+'px';N.style.bottom=(innerHeight-fr.bottom+Math.max(4,(fr.height-h)/2))+'px'});
+TuckChat.setup({full:'tuck.html#chats',context:'Downloads',reply:finderReply,openFile:id=>{const f=PFILE[id];if(f&&f.real){TuckChat.close();reveal(f)}}});
+/* the chat docks as a column in the window: the folder column steps aside while it is open */
+document.addEventListener('tuckchat',e=>{$('#main').classList.toggle('chat',e.detail.open)});
+/* the "N new" notice shows once per batch of new files in a session, then clears itself after 8 s (critique r2 #12) */
+const newSeen=()=>{try{return sessionStorage.getItem('tuckNewSeen')===String(newFiles().length)}catch(e){return false}};
+if(newFiles().length&&!newSeen())setTimeout(()=>{try{sessionStorage.setItem('tuckNewSeen',String(newFiles().length))}catch(e){}TuckNotice.show({text:`${newFiles().length} new in ${newWhere(newFiles())}. Want me to sort them?`,action:{label:'Show Me',fn:()=>TuckLauncher.open('sort')},dismiss:'Later'})},1600);
+tuckDrag($('#tuck'),{img:TI,onLift:closeBub,setPose:p=>{tuckBusy=p!=='idle';TI.src=POSES[p]},wander:true});
+document.addEventListener('tuckmood',e=>{const k=e.detail&&e.detail.mood;if(!k||!POSES[k]||tuckBusy&&!MOODY.has(TI.src))return;TI.src=POSES[k];tuckBusy=k!=='idle'});
+const MOODY=new Set(['listen','think','happy','oops'].map(k=>POSES[k]));
+function happy(ms=1600){tuckBusy=true;TI.src=POSES.happy;const t=$('#tuck');t.classList.remove('hop');void t.offsetWidth;t.classList.add('hop');setTimeout(()=>{TI.src=POSES.idle;tuckBusy=false},ms)}
+/* the one sort state (Plan.sortNew): Today, History, Needs You, Brain and the launcher read the same row */
+function applySort(nf,to){const ids=nf.map(f=>f.pf);if(TuckLauncher.steps.sortNow)return TuckLauncher.steps.sortNow(ids,to);
+  const by={};nf.forEach(f=>{const to=PID[f.dest];if(to)(by[to]=by[to]||[]).push(f.pf)});
+  return Plan.applyNow(Object.entries(by).map(([to,files])=>({ty:'moveFiles',files,to})),`Sorted ${nf.length} new file${nf.length===1?'':'s'}`)}
+async function sortNew(quiet,ids,to){
+  closeBub();const nf=newFiles().filter(f=>!ids||ids.includes(f.pf));if(!nf.length)return;
+  const NL='s:No folder yet';if(S.mode!=='sorted'){S.mode='sorted';S.hist=[];S.fut=[];S.exp.clear();go(NL,{push:false});render({anim:true,navAnim:true})}
+  else if(S.loc!==NL||S.view==='columns'&&S.cols.length>1)go(NL);
+  await new Promise(r=>setTimeout(r,RM.matches?0:260));
+  tuckBusy=true;TI.src=POSES.carry;
+  const flights=nf.map((f,i)=>{const el=body.querySelector(`[data-id="${f.id}"]`);const top=f.dest.split('/')[0];
+    const tg=body.querySelector(`[data-id="${CSS.escape('s:'+top)}"]`)||document.querySelector(`.sbi[data-loc="${CSS.escape('s:'+top)}"]`);
+    if(!el||!tg||RM.matches)return Promise.resolve();
+    /* a one-line chip (icon and name) flies, not the row: a row's columns would stack on top of each other outside the list (n1) */
+    const nc=el.querySelector('.c.n')||el,r0=nc.getBoundingClientRect(),c=document.createElement('div');c.className='flier flychip';
+    const ic=el.querySelector('.c.n .tw+*')||el.querySelector('img,.ph,svg');c.innerHTML=`${ic?ic.outerHTML:''}<span class="nm">${esc(f.name)}</span>`;
+    Object.assign(c.style,{left:(r0.left+4)+'px',top:(r0.top+r0.height/2-11)+'px',maxWidth:Math.min(300,Math.max(160,r0.width))+'px'});document.body.appendChild(c);el.style.visibility='hidden';
+    const a=c.getBoundingClientRect(),b=tg.getBoundingClientRect();
+    const dx=b.left+b.width/2-(a.left+a.width/2),dy=b.top+b.height/2-(a.top+a.height/2);
+    return c.animate([{transform:'none',opacity:1},{transform:`translate(${dx*.5}px,${dy*.5-30}px) scale(.7)`,opacity:1,offset:.55},{transform:`translate(${dx}px,${dy}px) scale(.25)`,opacity:0}],{duration:620,delay:i*150,easing:'cubic-bezier(.5,0,.3,1)',fill:'forwards'}).finished.then(()=>{c.remove();pulseEl(tg)})});
+  await Promise.all(flights);
+  const row=applySort(nf,to);if(!row)return null;happy();
+  if(!quiet)toast(`Sorted ${nf.length} new files.`,()=>Plan.undoApply(row.id));return row;
+}
+function pulseEl(x){x.classList.remove('pulse');void x.offsetWidth;x.classList.add('pulse')}
+function askTuck(f){TuckChat.open({context:f.name})}
+
+/* ---------- right-hand column (Sorted view): the same right panel as Edit Folders and Tuck Brain (folderpanel.js).
+   Every edit is a pending change in the one plan; the change bar below has Undo, Preview and Apply. */
+const FSIDE=$('#fside');
+const pretty=p=>p===''?'Desktop':p.split('/').join(' › ');
+const filesIn=p=>FILES.filter(f=>f.t===p||(f.t&&f.t.startsWith(p+'/')));
+const PH={toast:(m,u)=>toast(m,u),hide:()=>setSide(false),
+  select:s=>{if(s&&s.type==='file'&&PFILE[s.id])openQL(PFILE[s.id].id)},
+  ask:(text,s)=>{const v=Plan.view();const name=s&&s.type==='file'?(v.file(s.id)||{}).name:s&&s.type==='node'?(v.node(s.id)||{}).name:'';TuckChat.open({context:name||'Downloads'});TuckChat.send(text)},
+  open:id=>{const f=PFILE[id];f&&toast(`Opening “${f.name}”. Opening files is not part of this prototype.`)},
+  reveal:id=>reveal(PFILE[id]),
+  quicklook:id=>{const f=PFILE[id];f&&openQL(f.id)},info:id=>{const f=PFILE[id];f&&openQL(f.id)},
+  why:id=>{const f=PFILE[id];if(!f)return;S.why=f.id;openQL(f.id)}};
+function panelSel(){if(S.mode!=='sorted'||S.view==='gallery'||S.loading)return null;const ns=selNodes();
+  const as=n=>n.sorted&&n.pid?{type:'node',id:n.pid}:n.pf?{type:'file',id:n.pf}:null;
+  if(ns.length>1){const items=ns.map(as).filter(Boolean);return items.length>1?{type:'multi',items}:items[0]||null}
+  const one=ns[0];if(one&&one.sorted&&one.pid)return {type:'node',id:one.pid};
+  if(one&&one.pf&&S.view!=='columns')return {type:'file',id:one.pf};
+  const c=N[S.view==='columns'?S.cols[S.cols.length-1]:S.loc];return c&&c.pid?{type:'node',id:c.pid}:null}
+/* everywhere else: Finder's own Preview pane (View › Show Preview, Shift-Command-P). It shows what you clicked, two or more
+   as "N items", or the folder you are in when nothing is selected. Column and Gallery views have their own preview. */
+function previewOf(){if(!S.pv||S.loading||S.view==='columns'||S.view==='gallery')return null;
+  const ns=[...S.sel].map(id=>N[id]).filter(Boolean);if(ns.length>1)return {multi:ns};if(ns.length)return ns[0];
+  return /^[rs]:/.test(S.loc)&&N[S.loc]?N[S.loc]:null}
+function multiPane(ns){const sz=ns.reduce((a,n)=>a+(isDir(n)?0:n.size||0),0),nf=ns.filter(n=>!isDir(n)).length;
+  return `<div class="inf"><div class="big stack">${ns.slice(0,3).map(n=>icon(n,96)).join('')}</div><h2>${ns.length} items</h2><div class="meta">${nf?fmtSize(sz):'Folders'}</div><h4>Information</h4><dl><dt>Selected</dt><dd>${ns.length} items</dd>${nf?`<dt>Size</dt><dd>${fmtSize(sz)}</dd>`:''}</dl></div>`}
+function renderCard(){const sel=S.pv?panelSel():null,main=$('#main');
+  if(!sel){const n=previewOf();if(!n){main.classList.remove('wc');FSIDE.innerHTML='';FSIDE._k='';return}
+    const k='pv:'+(n.multi?n.multi.map(x=>x.id).join():n.id);if(FSIDE._k!==k){FSIDE._k=k;FSIDE.scrollTop=0}
+    main.classList.add('wc');FSIDE.setAttribute('aria-label','Preview');FSIDE.onclick=null;FSIDE.innerHTML=`<div class="fp fpv"><div class="fp-tools"><button class="ib fp-hide" data-fphide aria-label="Hide the side panel" title="Hide the side panel (⇧⌘P)"><i class="ph ph-sidebar-simple"></i></button></div>${n.multi?multiPane(n.multi):infoPane(n,150)}</div>`;return}
+  const k=JSON.stringify(sel);if(FSIDE._k!==k){FSIDE._k=k;FSIDE.scrollTop=0}
+  main.classList.add('wc');FSIDE.setAttribute('aria-label','Selected Tuck folder');FolderPanel.render(FSIDE,sel,PH)}
+/* the side column (Tuck's panel in Sorted view, Finder's Preview pane otherwise): its corner button hides it, the toolbar's
+   sidebar button and Shift-Command-P bring it back. Remembered in localStorage 'finderSide'. */
+function syncSideBtn(){const b=$('#sideBtn');if(!b)return;b.setAttribute('aria-pressed',S.pv);b.classList.toggle('on',S.pv);const l=S.pv?'Hide the side panel':'Show the side panel';b.setAttribute('aria-label',l);b.title=l+' (⇧⌘P)'}
+function setSide(on){S.pv=!!on;try{localStorage.setItem('finderSide',on?'1':'0')}catch(e){}renderCard();syncSideBtn();if(!on){const b=$('#sideBtn');b&&b.focus()}}
+$('#sideBtn').onclick=()=>setSide(!S.pv);syncSideBtn();
+FSIDE.addEventListener('click',e=>{if(e.target.closest('[data-fphide]')&&!FSIDE.querySelector('.fp:not(.fpv)'))setSide(false)});
+/* the change bar: what waits for Apply, the same list as Edit Folders' bottom bar */
+function renderChg(){const el=$('#chg');const sm=Plan.summary();el.hidden=!sm.changes||S.mode!=='sorted';if(el.hidden)return;
+  el.innerHTML=`<span class="cnum">${sm.changes}</span><a href="tuck.html#edit" title="See every change in Edit Folders">${esc(sm.line)}</a><button class="ib" id="chgUndo" title="Undo last change" aria-label="Undo last change"><i class="ph ph-arrow-counter-clockwise"></i></button><span class="sp"></span><span class="note">Nothing moves on disk.</span><button class="btn sm" id="chgPrev"><i class="ph ph-eye"></i>Preview</button><button class="btn sm pri" id="chgApply"><i class="ph ph-check"></i>Apply</button>`}
+$('#chg').addEventListener('click',e=>{
+  if(e.target.closest('#chgUndo')){const o=Plan.undo();o&&toast(`Undone: ${o.text}.`,()=>Plan.restore(o));return}
+  if(e.target.closest('#chgPrev')){Resort.preview({});return}
+  if(e.target.closest('#chgApply')){const row=Plan.apply();if(row){happy();toast('Applied. Nothing moved on disk.',()=>Plan.undoApply(row.id))}}});
+Resort.config({toast:(m,u)=>toast(m,u)});
+/* a change made here, on another page or in another tab: redraw from the plan */
+Plan.subscribe(()=>{syncFromPlan();render()});
+
+/* ---------- "Always put these here?" after 3 alike drags into the same Tuck folder */
+const DRAGLOG={},RULES=[],ASKED=new Set();
+const KINDP={pdf:'PDFs',doc:'Word documents',xls:'spreadsheets',txt:'text files',heic:'photos',png:'images',dmg:'installers'};
+const likeKey=f=>/^Screenshot\b/i.test(f.name)?['shot','screenshots']:/^IMG_\d+/i.test(f.name)?['img','phone photos']:['k:'+f.type,KINDP[f.type]||'files like these'];
+function learnDrag(ids,path){if(!path)return;const log=DRAGLOG[path]=DRAGLOG[path]||[];ids.forEach(id=>{if(!log.includes(id))log.push(id)});
+  const c=new Map();log.forEach(id=>{const [k,l]=likeKey(N[id]);c.set(k,{l,n:((c.get(k)||{}).n||0)+1})});
+  for(const [k,{l,n}] of c){const key=k+'>'+path;if(n>=3&&!ASKED.has(key)&&!RULES.some(r=>r.key===key)){ASKED.add(key);setTimeout(()=>askRule(key,l,path),RM.matches?0:450);return}}}
+function askRule(key,label,path){happy(1200);
+  openBub(`<div class="k"><img src="${MARK}" alt="">Tuck</div>You’ve put 3 ${esc(label)} here. <b>Always put ${esc(label)} in ${esc(pretty(path))}?</b><div class="acts"><button class="btn sm" id="rNo">Not now</button><button class="btn sm pri" id="rYes">Yes</button></div>`);
+  $('#rNo').onclick=closeBub;
+  /* the rule goes into the one plan (Plan.addRule), so Settings › Rules lists it on every page; Undo takes it out again */
+  $('#rYes').onclick=()=>{const text=`${cap(label)} → ${pretty(path)}`;RULES.push({key,label,path,text});Plan.addRule&&Plan.addRule(text);closeBub();
+    toast('Rule added. See it in Settings › Rules',()=>{const i=RULES.findIndex(r=>r.key===key);if(i>=0)RULES.splice(i,1);Plan.removeRule&&Plan.removeRule(text)})};$('#rYes').focus()}
+
+/* ---------- toolbar wiring */
+function setView(v){S.view=v;S.cols=[S.loc];if(v==='columns'){const one=curOne();if(one){S.sel=new Set([one.id])}}render();body.focus()}
+$('#views').onclick=e=>{const b=e.target.closest('[data-v]');b&&setView(b.dataset.v)};
+$('#back').onclick=back;$('#fwd').onclick=fwd;
+$('#tsw').onclick=()=>setMode(S.mode==='sorted'?'real':'sorted');
+$('#grpBtn').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();openMenu(sortItems(),r.left,r.bottom+6)};
+$('#shareBtn').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();const ok=S.sel.size&&!selNodes().some(n=>n.priv);
+  openMenu([{l:'AirDrop',ic:'broadcast',dis:!ok},{l:'Mail',ic:'envelope-simple',dis:!ok},{l:'Messages',ic:'chat-circle',dis:!ok},{l:'Notes',ic:'note',dis:!ok}].map(x=>({...x,fn:()=>toast('Sharing is not part of this prototype.')})),r.left,r.bottom+6)};
+$('#tagBtn').onclick=()=>tagMenuAt();
+$('#moreBtn').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();if(!S.sel.size){openMenu(bgMenu(),r.left,r.bottom+6);return}openMenu(itemMenu(),r.left-120,r.bottom+6)};
+$('#q').addEventListener('input',e=>{S.q=e.target.value.trim();S.sel.clear();renderBody();renderBar();renderFoot()});
+$('#q').addEventListener('keydown',e=>{if(e.key==='Escape'){e.target.value='';S.q='';render();body.focus()}if(e.key==='ArrowDown'){e.preventDefault();body.focus();moveSel(1)}});
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('[data-loc]');if(b){go(b.dataset.loc);}});
+$('#path').addEventListener('click',e=>{const b=e.target.closest('[data-loc]');if(b)go(b.dataset.loc)});
+
+/* ---------- theme */
+function setTheme(t){document.documentElement.dataset.theme=t;$$('#theme button').forEach(b=>{b.classList.toggle('on',b.dataset.t===t);b.setAttribute('aria-pressed',b.dataset.t===t)})}
+setTheme(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+$('#theme').onclick=e=>{const b=e.target.closest('[data-t]');b&&setTheme(b.dataset.t)};
+
+addEventListener('keydown',e=>{if(e.key==='Tab')document.documentElement.classList.add('kb')});addEventListener('mousedown',()=>document.documentElement.classList.remove('kb'));
+/* the switch is one setting for the whole Finder: it stays as you left it when you come back from Tuck or reload */
+try{const pl=localStorage.getItem('tuckSortedPlace');if(PLACES.includes(pl))setPlace(pl);else setPlace(PLACES[0]);if(localStorage.getItem('tuckSorted')==='1'){S.loc=S.lastReal='r:'+S.place;setMode('sorted')}}catch(e){setPlace(PLACES[0])}
+render();body.focus();
+</script>
+</body>
+</html>

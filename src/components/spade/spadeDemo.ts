@@ -5,9 +5,10 @@ import {
   type Campaign, type Posterior,
 } from './spadeMath';
 
-const GOLD = '#f5c04a';
-const INK = '#eaf6f4';
-const SHADE = '#06201b';
+// Wax on paper: navy for the marks, a paper halo so they read over any colour, and red for the one answer.
+const GOLD = '#d8332a';
+const INK = '#101a42';
+const SHADE = '#fffdf6';
 const MORPH_MS = 260;
 
 function mount(root: HTMLElement): void {
@@ -50,7 +51,7 @@ function mount(root: HTMLElement): void {
     const mask = certify(campaign.post, target);
     const on = (i: number, j: number) => i >= 0 && j >= 0 && i < GRID && j < GRID && mask[j * GRID + i] === 1;
     ctx.beginPath();
-    ctx.fillStyle = 'rgba(255,255,255,.13)';
+    ctx.fillStyle = 'rgba(16,26,66,.1)';
     for (let j = 0; j < GRID; j++) {
       for (let i = 0; i < GRID; i++) {
         if (!on(i, j)) continue;
@@ -68,9 +69,22 @@ function mount(root: HTMLElement): void {
     const rect = recommend(campaign.post, target);
     if (rect) {
       const x = ex(rect.x0), y = ey(rect.y1 + 1), rw = ex(rect.x1 + 1) - x, rh = ey(rect.y0) - y;
-      ctx.lineCap = 'butt';
-      ctx.strokeStyle = SHADE; ctx.lineWidth = 6 * dpr; ctx.strokeRect(x, y, rw, rh);
-      ctx.strokeStyle = GOLD; ctx.lineWidth = 3 * dpr; ctx.strokeRect(x, y, rw, rh);
+      // Drawn by hand: the same small wobble each repaint, so the line looks like crayon and does not shimmer.
+      const pts: [number, number][] = [];
+      const side = (ax: number, ay: number, bx: number, by: number) => {
+        for (let t = 0; t < 1; t += 0.1) {
+          const n = pts.length;
+          const j = Math.sin(n * 2.3) * 1.3 * dpr;
+          pts.push([ax + (bx - ax) * t + (ay === by ? 0 : j), ay + (by - ay) * t + (ay === by ? j : 0)]);
+        }
+      };
+      side(x, y, x + rw, y); side(x + rw, y, x + rw, y + rh); side(x + rw, y + rh, x, y + rh); side(x, y + rh, x, y);
+      ctx.beginPath();
+      pts.forEach(([px, py], n) => (n ? ctx.lineTo(px, py) : ctx.moveTo(px, py)));
+      ctx.closePath();
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.strokeStyle = SHADE; ctx.lineWidth = 7 * dpr; ctx.stroke();
+      ctx.strokeStyle = GOLD; ctx.lineWidth = 3.5 * dpr; ctx.stroke();
     }
 
     const dot = (px: number, py: number, radius: number) => {
@@ -88,7 +102,7 @@ function mount(root: HTMLElement): void {
     if (hover >= 0) {
       const i = hover % GRID, j = Math.floor(hover / GRID);
       ctx.lineWidth = 1.5 * dpr;
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = INK;
       ctx.strokeRect(ex(i), ey(j + 1), ex(i + 1) - ex(i), ey(j) - ey(j + 1));
     }
   }

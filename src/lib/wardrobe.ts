@@ -52,7 +52,7 @@ export const ITEMS: Record<Category, Item[]> = {
 
 export const QUESTS: Quest[] = [
   { id: 'read', name: 'Read a case study', reward: 'Grad cap · Guitar' },
-  { id: 'sort', name: 'Finish a decision in the Tuck demo', reward: 'Lab coat · Ski goggles' },
+  { id: 'sort', name: 'Try the Tuck demo', reward: 'Lab coat · Ski goggles' },
   { id: 'devpost', name: 'Open a hackathon Devpost', reward: 'Columbia hoodie · Fencing foil' },
   { id: 'throw', name: 'Throw the lion 3 times', reward: 'Bragging rights' },
   { id: 'dress', name: 'Try on 5 things', reward: 'Bragging rights' },
@@ -114,7 +114,7 @@ export function saveState(s: GameState, storage: Storage): void {
   try { storage.setItem(KEY, JSON.stringify(s)); } catch { /* private mode or blocked storage: the game still works for this visit */ }
 }
 
-/** The full pixel lion for an outfit, with every animation frame ready for the CSS to switch between. */
+/** The full crayon lion for an outfit, with every animation frame ready for the CSS to switch between. */
 export function lionSvg(o: Outfit): string {
   const slot = (c: Category) => `<g data-item="${o[c]}">${findItem(c, o[c])?.svg ?? ''}</g>`;
   return svgOpen(SIZE, SIZE) + rig({ top: slot('top'), face: slot('face'), hat: slot('hat'), held: slot('held') }) + '</svg>';

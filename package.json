@@ -8,20 +8,20 @@
     "preview": "astro preview",
     "test": "vitest run",
     "e2e": "playwright test",
-    "scene": "node scripts/render-scene.mjs",
+    "scene": "node scripts/render-wax.mjs && node scripts/render-scene.mjs && node scripts/render-lion.mjs && node scripts/render-icons.mjs && node scripts/render-og.mjs",
     "prebuild": "node scripts/release-check.mjs"
   },
   "dependencies": {
     "@fontsource/bricolage-grotesque": "^5.3.0",
-    "@fontsource/fredoka": "^5.3.0",
     "@fontsource/ibm-plex-sans": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/lexend": "^5.3.0",
     "@fontsource/manrope": "^5.3.0",
     "@fontsource/onest": "^5.3.1",
     "@fontsource/playfair-display": "^5.3.0",
+    "@fontsource/playpen-sans": "^5.3.0",
     "@fontsource/poppins": "^5.3.0",
-    "@fontsource/press-start-2p": "^5.3.0",
     "astro": "^5.18.2"
   },
   "devDependencies": {

@@ -10,7 +10,7 @@ import Lion from '../components/Lion.astro';
   </main>
 </Base>
 <style>
-  .nf { min-height: 80vh; display: grid; place-content: center; justify-items: center; text-align: center; padding: 24px; background: linear-gradient(var(--page), #14224a); }
+  .nf { min-height: 80vh; display: grid; place-content: center; justify-items: center; text-align: center; padding: 24px; }
   :global(.nf-lion) { width: 180px; }
-  h1 { font-family: var(--font-pixel); font-size: 18px; color: var(--ink); margin: 18px 0; }
+  h1 { font: 700 clamp(26px, 5vw, 36px)/1.15 var(--font-body); color: var(--ink); margin: 18px 0; -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px; filter: url(#wax-edge); }
 </style>

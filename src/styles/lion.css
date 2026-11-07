@@ -1,9 +1,9 @@
-/* The pixel lion. Inside the SVG one CSS pixel is one sprite pixel, so every move lands on the grid.
+/* The crayon lion. Inside the SVG one unit is one 44th of his canvas, and frames flip like pages in a flip book.
    Base frames are visible and alternates carry visibility="hidden", so with animation off the lion simply holds still. */
 .lion-pose { display: inline-block; line-height: 0; vertical-align: bottom; }
 .lion-svg { display: block; width: 100%; height: auto; overflow: visible; }
 
-/* In the hero, one sprite pixel is one campus pixel: 44 of the scene's 320 columns. */
+/* In the hero he stands at the same scale against the campus as he always has: 44 of the scene's 320 columns. */
 .hero-lion .lion.lion-pose { width: max(72px, 13.75vw); }
 
 /* blink, twice in quick succession */
@@ -12,7 +12,7 @@
 @keyframes l-eye-open { 0% { visibility: visible; } 88% { visibility: hidden; } 90% { visibility: visible; } 92% { visibility: hidden; } 95% { visibility: visible; } }
 @keyframes l-eye-shut { 0% { visibility: hidden; } 88% { visibility: visible; } 90% { visibility: hidden; } 92% { visibility: visible; } 95% { visibility: hidden; } }
 
-/* breathing: the head settles one pixel */
+/* breathing: the head settles a little */
 .lion-svg .l-head { animation: l-breathe 2.4s steps(1) infinite; }
 @keyframes l-breathe { 0% { transform: translateY(0); } 50% { transform: translateY(1px); } }
 
@@ -61,6 +61,8 @@
 [data-pose="scarf"] .lion-svg :is(.e-open, .e-blink) { animation-delay: -3.1s; }
 [data-pose="phone"] .lion-svg .l-head { animation-delay: -.8s; }
 [data-pose="scarf"] .lion-svg .l-head { animation-delay: -1.6s; }
+
+.lion-pose.offscreen .lion-svg * { animation-play-state: paused; }
 
 @media (prefers-reduced-motion: reduce) {
   .lion-svg *, .lion-svg { animation: none !important; }

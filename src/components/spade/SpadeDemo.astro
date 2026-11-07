@@ -8,8 +8,8 @@ const start = newCampaign();
 const status = describeStatus(start, DEFAULT_TARGET);
 const mid = (a: { min: number; max: number }) => (a.min + a.max) / 2;
 ---
-<div class:list={['spd', size]} data-demo="spade" data-size={size} role="region" aria-label="Interactive demo: planning experiments with a Gaussian process">
-  <p class="spd-label"><i aria-hidden="true"></i>My reimagining of the idea, with sample data. Not NutriGene's product.</p>
+<div class:list={['panel', 'spd', size]} data-demo="spade" data-size={size} role="region" aria-label="Interactive demo: planning experiments with a Gaussian process">
+  <p class="spd-label"><i aria-hidden="true"></i>A visualization of how the backend works, with sample data. Not the actual system.</p>
   <div class="spd-grid">
     <div class="spd-status" role="status" data-kind={status.kind}>
       <span class="spd-ic" aria-hidden="true">
@@ -42,8 +42,8 @@ const mid = (a: { min: number; max: number }) => (a.min + a.max) / 2;
       </div>
 
       <div class="spd-keys">
-        <button type="button" class="spd-key spd-run">Run next round</button>
-        <button type="button" class="spd-key alt spd-reset">Reset</button>
+        <button type="button" class="btn spd-run">Run next round</button>
+        <button type="button" class="btn alt spd-reset">Reset</button>
       </div>
 
       <div class="spd-target">
@@ -69,7 +69,7 @@ const mid = (a: { min: number; max: number }) => (a.min + a.max) / 2;
         <summary>How this demo works</summary>
         <p>A real Gaussian process runs in your browser: an RBF kernel with fixed settings on a {GRID} by {GRID} grid, refit after every round. The yield function and its noise are invented and seeded, so Reset replays the same run.</p>
         <p>Round 1 spreads {BATCH} experiments across the space. After that, each batch goes where the model is unsure and near your target. A setting is certified when its mean minus two standard deviations clears the target, and the recommendation is the largest fully certified rectangle.</p>
-        <p>The system this reimagines works over six factors with a stricter estimate of the whole region at once. This shows the shape of the idea on two.</p>
+        <p>The actual system works over six factors with a stricter estimate of the whole region at once. This shows how the idea works on two.</p>
       </details>
     </div>
   </div>

@@ -1,0 +1,1243 @@
+<!doctype html>
+<html lang="en" class="intro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tuck Onboarding Prototype</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/work/tuck/app/phosphor.css">
+<style>
+/* Welcome / account step, iteration 6. Bricolage Grotesque 800 for the heading only, Onest for everything else.
+   Left: one 440px column (top bar, intro, tiles, buttons, privacy line share its edges).
+   Right: three thick 3D files (hover one: it floats up); Tuck peeks over the front one with his hands on the edge. */
+:root{
+  --f:"Onest",-apple-system,system-ui,sans-serif;--fd:"Bricolage Grotesque","Onest",system-ui,sans-serif;
+  --page:#eef2fb;--win:#ffffff;--soft:#f5f6fc;--soft2:#e9edf8;
+  --line:#e6e9f2;--ink:#1e2131;--ink2:#4a4f63;--ink3:#8a90a3;
+  --ac:#0a4bff;--ac-ink:#2b6cc4;--sky:#c9ecfb;--peri:#a2bbf9;
+  --brand:linear-gradient(120deg,#0a4bff,#7fa3f8);
+  --paper:#ffffff;--paper-edge:oklch(0.90 0.012 255);--paper-ink:oklch(0.25 0.02 260);--paper-ink2:oklch(0.50 0.02 260);
+  --box:oklch(0.985 0.004 250);--box-side:#e7ecf8;--box-in:#d6def2;
+  --ease:cubic-bezier(.16,1,.3,1);
+  /* Right panel and files */
+  --st-bg:linear-gradient(155deg,#e2f0ff 0%,#edf2ff 48%,#f6f3ff 100%);
+  --st-glow:conic-gradient(from 200deg at 88% 112%,transparent 0deg,rgba(90,135,255,.26) 38deg,rgba(140,215,255,.20) 78deg,transparent 135deg);
+  --st-lines:rgba(31,91,224,.075);
+  --st-dot:#5b7fd633;--cap:#24304d;
+  --edge:#e8ecf5;--face-hi:#ffffff;--lines:#e9ecf3;--q-bg:#f1f3f8;--ic-bg:#eef2fb;--ic-ink:#0a4bff;
+  --chip-bg:#0a4bff14;--chip-ink:#0a4bff;--lock-bg:rgba(40,170,170,.14);--lock-ink:#1d6f73;--shade:#2e458524;--shade2:#2e45854d;--drop:rgba(22,34,80,.22);
+  font:14px/1.5 var(--f);color:var(--ink);
+}
+:root[data-theme="dark"]{
+  --page:oklch(0.15 0.008 255);--win:oklch(0.20 0.007 255);--soft:oklch(0.245 0.009 255);--soft2:oklch(0.28 0.01 255);
+  --line:oklch(0.31 0.01 255);--ink:oklch(0.96 0.004 255);--ink2:oklch(0.78 0.01 255);--ink3:oklch(0.64 0.01 255);
+  --ac:#3b6dff;--ac-ink:#8fb0ff;
+  --st-bg:linear-gradient(155deg,#101a38 0%,#111832 50%,#0d1327 100%);
+  --st-glow:conic-gradient(from 200deg at 88% 112%,transparent 0deg,rgba(70,110,255,.24) 38deg,rgba(60,170,230,.14) 78deg,transparent 135deg);
+  --st-lines:rgba(150,180,255,.07);
+  --st-dot:rgba(150,180,255,.12);--cap:rgba(255,255,255,.82);
+  --paper:#1b2234;--paper-ink:rgba(255,255,255,.92);--paper-ink2:rgba(255,255,255,.62);
+  --face-line:rgba(160,185,255,.22);--edge:#37425f;--face-hi:rgba(255,255,255,.07);--lines:rgba(255,255,255,.08);--q-bg:rgba(255,255,255,.06);--ic-bg:rgba(80,140,255,.16);--ic-ink:#8fb0ff;
+  --chip-bg:rgba(80,140,255,.18);--chip-ink:#a6c0ff;--lock-bg:rgba(60,200,190,.16);--lock-ink:#7fe3d8;--shade:#00000033;--shade2:#00000070;--drop:rgba(0,4,18,.55);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:oklch(0.15 0.008 255);--win:oklch(0.20 0.007 255);--soft:oklch(0.245 0.009 255);--soft2:oklch(0.28 0.01 255);
+  --line:oklch(0.31 0.01 255);--ink:oklch(0.96 0.004 255);--ink2:oklch(0.78 0.01 255);--ink3:oklch(0.64 0.01 255);
+  --ac:#3b6dff;--ac-ink:#8fb0ff;
+  --st-bg:linear-gradient(155deg,#101a38 0%,#111832 50%,#0d1327 100%);
+  --st-glow:conic-gradient(from 200deg at 88% 112%,transparent 0deg,rgba(70,110,255,.24) 38deg,rgba(60,170,230,.14) 78deg,transparent 135deg);
+  --st-lines:rgba(150,180,255,.07);
+  --st-dot:rgba(150,180,255,.12);--cap:rgba(255,255,255,.82);
+  --paper:#1b2234;--paper-ink:rgba(255,255,255,.92);--paper-ink2:rgba(255,255,255,.62);
+  --face-line:rgba(160,185,255,.22);--edge:#37425f;--face-hi:rgba(255,255,255,.07);--lines:rgba(255,255,255,.08);--q-bg:rgba(255,255,255,.06);--ic-bg:rgba(80,140,255,.16);--ic-ink:#8fb0ff;
+  --chip-bg:rgba(80,140,255,.18);--chip-ink:#a6c0ff;--lock-bg:rgba(60,200,190,.16);--lock-ink:#7fe3d8;--shade:#00000033;--shade2:#00000070;--drop:rgba(0,4,18,.55);
+}}
+*{box-sizing:border-box;margin:0}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+body{min-height:100dvh;background:linear-gradient(160deg,#e8eefc 0%,#f2f1fb 55%,#eaf3f8 100%);display:grid;place-items:center;padding:32px 16px;font-family:var(--f);color:var(--ink)}
+
+:root[data-theme="dark"] body{background:linear-gradient(160deg,#121a30 0%,#0f1322 55%,#0f1a24 100%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body{background:linear-gradient(160deg,#121a30 0%,#0f1322 55%,#0f1a24 100%)}}
+
+/* Window */
+.win{width:min(1180px,100%);min-height:680px;background:var(--win);border-radius:32px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:14px;
+  box-shadow:0 1px 0 oklch(1 0 0 / .6) inset,0 0 0 1px var(--line),0 30px 80px -30px oklch(0.35 0.06 260 / .35),0 8px 24px -12px oklch(0.35 0.04 260 / .18)}
+.left{display:flex;flex-direction:column;padding:28px 34px 26px}
+
+/* Top bar */
+.top{display:flex;align-items:center;gap:14px;max-width:440px}
+.mark{display:flex;align-items:center;gap:9px;font:600 17px var(--f);letter-spacing:-.01em}
+.mark img{width:30px;height:30px;margin:-2px}
+.steps{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--ink3);font-size:12.5px;white-space:nowrap}
+.dots{display:flex;gap:4px}.dots span{width:14px;height:4px;border-radius:4px;background:var(--soft2)}.dots span.on{width:26px;background:var(--brand)}
+.ask{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex:none;height:30px;padding:0 12px;border-radius:999px;background:var(--soft);color:var(--ac-ink);font-weight:600;font-size:12.5px}
+
+/* Copy */
+.copy{margin-top:auto;padding-top:40px}
+h1{font:800 clamp(40px,4.6vw,56px)/1 var(--fd);letter-spacing:-.035em}
+h1 em{font-style:normal;background:var(--brand);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin-top:16px;font-size:17px;line-height:1.5;color:var(--ink2);max-width:440px;text-wrap:pretty}
+/* Three equal tiles in one row: same width and height, icon above the text */
+.facts{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:440px}
+.facts span{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:12px 12px 13px;border-radius:16px;background:var(--soft);font-size:12.5px;line-height:1.35;font-weight:500;color:var(--ink2)}
+.facts i{color:var(--ac);font-size:18px}
+
+/* Account */
+.acct{margin-top:30px;display:flex;flex-direction:column;gap:10px;max-width:440px}
+.acct h2{font:600 13px var(--f);color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.pill{height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:9px;font-weight:600;font-size:15px;transition:transform .15s var(--ease),box-shadow .2s var(--ease),background .2s}
+/* Buttons have a physical edge instead of a glow: a slightly darker, less saturated rim along the bottom
+   (the button's thickness), a faint highlight along the top, and a short tight shadow that touches it.
+   Pressing pushes it down onto its edge. */
+.pill.primary{background:#1f5bff;color:#fff;box-shadow:inset 0 -2px 0 rgba(10,30,110,.22),0 1px 2px rgba(16,36,94,.14),0 6px 14px -8px rgba(31,91,255,.45)}
+.pill.primary:hover{background:#2a64ff}
+.pill.primary:active{transform:translateY(1px);box-shadow:inset 0 -1px 0 rgba(10,30,110,.22),0 1px 1px rgba(16,36,94,.14)}
+.pill.soft{background:var(--soft);box-shadow:inset 0 -2px 0 var(--pill-edge,rgba(30,45,90,.07)),0 0 0 1px var(--line)}
+.pill.soft:hover{background:var(--soft2)}
+.pill.soft:active{transform:translateY(1px);box-shadow:inset 0 -1px 0 var(--pill-edge,rgba(30,45,90,.07)),0 0 0 1px var(--line)}
+:root[data-theme="dark"] .pill.primary{background:#3368ff;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.35)}
+:root[data-theme="dark"]{--pill-edge:rgba(0,0,0,.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.primary{background:#3368ff;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),0 1px 2px rgba(0,0,0,.35)}
+  :root:not([data-theme="light"]){--pill-edge:rgba(0,0,0,.35)}}
+.pill.ghost{height:44px;color:var(--ink2);font-weight:500}.pill.ghost:hover{color:var(--ink)}
+.pill i{font-size:18px}
+.gl{width:26px;height:26px;border-radius:50%;background:#fff;display:grid;place-items:center;margin-left:-6px}.g{width:16px;height:16px}
+.note{margin-top:auto;padding-top:24px;display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink3)}
+
+/* Right: gradient stage */
+.stage{position:relative;border-radius:22px;background:var(--st-bg);overflow:hidden;min-height:640px;isolation:isolate}
+.stage::before{content:"";position:absolute;inset:0;background:var(--st-glow);z-index:-1}
+/* Contour lines: rings from the top-right corner, like layers of stacked files; they fade toward the middle */
+.stage::after{content:"";position:absolute;inset:0;background:repeating-radial-gradient(circle at 108% -12%,transparent 0 26px,var(--st-lines) 26px 27px);mask-image:linear-gradient(200deg,#000 10%,transparent 70%);z-index:-1}
+.cap{position:absolute;left:28px;top:26px;right:28px;color:var(--cap);display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.cap b{font:600 13px var(--f);opacity:.9;letter-spacing:.01em}
+.cap span{font-size:12px;opacity:.75}
+
+/* Isometric scene: zoomed in and cropped by the panel, like a product shot */
+/* Perspective: nearer parts look bigger, so the stack recedes into the screen instead of looking flat */
+.scene{position:absolute;left:50%;top:50%;width:0;height:0;perspective:1300px}
+.measure .card{animation:none!important}
+.iso{position:absolute;transform-style:preserve-3d;transform:scale(var(--zoom,1.2)) rotateX(50deg) rotateZ(-22deg)}
+.iso *{transform-style:preserve-3d}
+/* Files stand on an invisible 360 x 360 floor; only their shadow shows */
+.box{position:absolute;left:-180px;top:-180px;width:360px;height:360px}
+
+/* Folder cards with real thickness: a stack of 1px layers, front face carries the content */
+.card{position:absolute;width:320px;height:var(--h);left:var(--x);top:calc(var(--y) - var(--h));transform-origin:50% 100%;
+  transform:translateZ(calc(var(--z,0px) + var(--lift,0px))) rotateX(-90deg) rotateY(var(--ry,0deg));animation:rise 1.2s var(--ease) backwards;transition:--lift .45s var(--ease),--flift .45s var(--ease);animation-delay:var(--d)}
+/* Transform only: animating opacity makes Chrome flatten the card, which hides its thickness */
+@keyframes rise{from{transform:translateZ(-140px) rotateX(-90deg) rotateY(var(--ry,0deg))}to{transform:translateZ(var(--z,0px)) rotateX(-90deg) rotateY(var(--ry,0deg))}}
+@media (prefers-reduced-motion:reduce){.card{animation:none}}
+/* Hover a file: it floats up a little */
+.slab{position:absolute;inset:0;border-radius:18px 0 18px 18px;background:var(--c,var(--edge));transform:translateZ(calc(var(--i) * -1px))}
+.slab::before{content:"";position:absolute;right:0;top:-26px;width:40%;height:27px;border-radius:14px 14px 0 0;background:inherit}
+.slab::after{content:"";position:absolute;right:calc(40% - 14px);top:-26px;width:32px;height:27px;border-radius:12px 0 0 0;background:inherit;transform:skewX(-34deg);transform-origin:100% 100%}
+/* a hairline one pixel outside the face, tab included, so each file has a crisp edge */
+.slab.rim{inset:-1px;--c:var(--face-line,rgba(30,45,90,.16))}
+.slab.face{--c:var(--paper);box-shadow:inset 0 1px 0 var(--face-hi)}
+/* Solid edges; the only gradient is the shade a file in front casts on the one behind it */
+/* Shadow between files, kept physical: light comes from high in front, so a file darkens the one behind it
+   only on that file's own surface, in a soft band just below the height of the front file's top edge.
+   --edge is that height in the back file's coordinates. Both files' lift values animate together
+   (registered properties), so when either file floats up the band moves with the front file's edge
+   and never hangs in the air or appears where there is no surface. */
+@property --lift{syntax:'<length>';inherits:true;initial-value:0px}
+@property --flift{syntax:'<length>';inherits:true;initial-value:0px}
+.shade{position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  /* the light is high in front, so the shadow lands about 60px below that height (110px of depth at ~60 degrees) */
+  --edge:calc(var(--h) - (var(--zf) + var(--flift) + var(--hf) - var(--z,0px) - var(--lift)) + 60px);
+  background:linear-gradient(to bottom,transparent calc(var(--edge) - 46px),var(--drop) calc(var(--edge) + 6px),var(--drop))}
+.face .in{position:absolute;inset:0;padding:22px 20px;color:var(--paper-ink)}
+.chip{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:999px;font:600 10.5px var(--f);letter-spacing:.01em;background:var(--chip-bg);color:var(--chip-ink)}
+.chip.lock{background:var(--lock-bg);color:var(--lock-ink)}
+.card .t{display:flex;gap:9px;align-items:center;margin-top:12px}
+.card .ic{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;font-size:17px;background:var(--ic-bg);color:var(--ic-ink)}
+.card h3{font:600 15.5px/1.25 var(--f);letter-spacing:-.01em}
+.card p{margin-top:7px;font-size:11.5px;line-height:1.45;color:var(--paper-ink2)}
+.card .lines{margin-top:14px;display:grid;gap:6px}.card .lines span{height:6px;border-radius:4px;background:var(--lines)}
+.card .lines span:nth-child(2){width:82%}.card .lines span:nth-child(3){width:64%}
+/* Organize: folder rows */
+.rows{margin-top:10px;display:grid;gap:5px}
+.row{display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:10px;background:var(--q-bg);font-size:12px}
+.row i{color:var(--ic-ink);font-size:15px}.row b{font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row span{color:var(--paper-ink2);font-size:11px}
+/* Understand: sources under the answer */
+.srcs{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px}
+.srcs span{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:7px;background:var(--q-bg);font-size:10.5px;color:var(--paper-ink2)}
+/* Connect: AI tools */
+.ttl{margin-top:10px}
+.tools{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+.tools span{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 10px;border-radius:9px;background:var(--q-bg);font-size:12px;font-weight:600}
+.tools i{color:var(--ic-ink);font-size:14px}
+.q{margin-top:12px;padding:9px 11px;border-radius:12px 12px 12px 4px;background:var(--q-bg);font-size:12px;font-weight:500}
+.a{margin-top:8px;padding:9px 11px;border-radius:12px 12px 4px 12px;background:var(--brand);color:#fff;font-size:12px;line-height:1.4}
+.a small{display:block;opacity:.85;font-size:10.5px;margin-top:3px}
+/* Tuck peeks over the front file. He is drawn upright, facing you (not flattened onto the file), and stands
+   in the gap between the middle and the front file: the front file's top edge hides his lower body and his
+   hands rest on that edge. Two markers on the edge give its position and slope on screen every frame. */
+.emk{position:absolute;top:0;left:0;width:0;height:0;padding:0;margin:0;background:none;pointer-events:none}.emk.ea{left:40px}.emk.eb{left:132px}
+.peek{position:absolute;left:0;top:0;width:124px;height:160px;transform-origin:0 0;z-index:3;cursor:grab;--ang:0deg}
+.peek .clip{position:absolute;inset:0}
+.peek .fig{position:absolute;left:0;top:54px;width:124px;height:136px;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+/* Round mitten hands rest on the edge, drooping just over its front, with a full outline */
+.peek .hands{position:absolute;left:0;top:133px;width:124px;height:40px;transform-origin:50% 50%;transform:rotate(var(--ang));transition:opacity .2s,transform .5s cubic-bezier(.34,1.56,.64,1)}
+.peek .fig.arms{opacity:0}
+.peek:hover .fig{transform:translateY(-20px)}
+.peek:hover .fig.arms{opacity:1}
+.peek:hover .hands{opacity:0;transform:rotate(var(--ang)) translateY(-6px)}
+.peek.out{visibility:hidden}
+.card:last-child .in{padding-top:30px}
+
+/* Tuck out of the file: the desktop roaming Tuck (prototypes/roam), same physics and poses, scaled up 1.6x.
+   Feet are his point; the window's bottom is the floor and its sides are walls. */
+.tk{position:fixed;left:0;top:0;width:102px;height:112px;z-index:30;transform-origin:51px 96px;will-change:transform;cursor:grab;touch-action:none;display:none}
+.tk.on{display:block}.tk.drag{cursor:grabbing}
+/* only Tuck's body takes clicks, so the empty corners of his box never cover a button */
+.tk{pointer-events:none}.tk .hit{position:absolute;inset:26px 14px 8px 14px;pointer-events:auto}
+.tk img{position:absolute;inset:0;width:100%;height:100%;visibility:hidden;pointer-events:none;-webkit-user-drag:none}
+.tk img.on{visibility:visible}
+.tk.flip img{transform:scaleX(-1)}
+.tk-sh{position:fixed;left:0;top:0;width:84px;height:14px;border-radius:50%;background:rgba(20,30,60,.22);filter:blur(2px);z-index:29;pointer-events:none;display:none}
+.tk-sh.on{display:block}
+.puff{position:fixed;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.98),rgba(222,228,240,.9));box-shadow:0 1px 2px rgba(30,45,90,.10);z-index:29;pointer-events:none;animation:puff .6s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes puff{0%{transform:translate(0,0) scale(calc(.5*var(--s,1)));opacity:.95}100%{transform:translate(calc(var(--dx)*1.6),-16px) scale(calc(1.9*var(--s,1)));opacity:0}}
+.puff.trail{animation-duration:.45s}
+/* Speech bubble: one short line, pointing at Tuck */
+.say{position:fixed;left:0;top:0;z-index:31;max-width:260px;padding:9px 13px;border-radius:14px;background:var(--ink);color:var(--win);font:500 13px/1.35 var(--f);
+  box-shadow:0 10px 24px -10px rgba(20,30,60,.5);pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .35s var(--ease)}
+.say::after{content:"";position:absolute;right:22px;bottom:-6px;width:12px;height:12px;background:inherit;transform:rotate(45deg);border-radius:2px}
+.say.on{opacity:1;transform:none}
+.say.right::after{left:-5px;right:auto;bottom:auto;top:calc(50% - 6px)}.say.left::after{right:-5px;left:auto;bottom:auto;top:calc(50% - 6px)}
+@media (prefers-reduced-motion:reduce){.peek .fig,.peek .hands{transition:none}}
+
+/* Theme switch, outside the product window */
+.theme{position:fixed;right:16px;bottom:16px;display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--win);box-shadow:0 0 0 1px var(--line);font-size:12px}
+.theme button{height:26px;padding:0 10px;border-radius:999px;color:var(--ink2)}.theme button[aria-pressed="true"]{background:var(--soft2);color:var(--ink)}
+
+@media (max-width:900px){
+  .win{grid-template-columns:1fr;border-radius:26px}
+  .left{padding:20px 14px}
+  .stage{min-height:460px;order:-1}
+  .steps .lbl{display:none}
+}
+/* ---------- Onboarding steps (same tokens, type and controls as the welcome page) ---------- */
+.win{height:min(760px,calc(100dvh - 64px));min-height:680px}
+.left{min-height:0;overflow:hidden}
+.prog{display:flex;gap:3px}
+.prog i{width:8px;height:4px;border-radius:4px;background:var(--soft2);transition:width .3s var(--ease),background .3s}
+.prog i.past{background:color-mix(in srgb,var(--ac) 45%,var(--soft2));cursor:pointer}
+.prog i.on{width:20px;background:var(--brand)}
+.stepwrap{display:flex;flex-direction:column;flex:1;min-height:0;max-width:440px}
+.stepwrap.anim>*{animation:stepin .45s var(--ease) both}
+.stepwrap.anim>*:nth-child(2){animation-delay:.04s}.stepwrap.anim>*:nth-child(3){animation-delay:.08s}.stepwrap.anim>*:nth-child(4){animation-delay:.12s}
+@keyframes stepin{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.stepwrap.anim>*{animation:none}}
+h2.st{margin-top:44px;font:800 36px/1.04 var(--fd);letter-spacing:-.03em;text-wrap:balance}
+.why{margin-top:12px;font-size:15px;line-height:1.5;color:var(--ink2);text-wrap:pretty}
+.body{margin-top:22px;flex:1;min-height:0;overflow:auto;padding:2px 2px 6px;margin-left:-2px;margin-right:-2px;scrollbar-width:thin}
+.actions{display:flex;align-items:center;gap:10px;padding-top:16px}
+.actions .pill{height:48px;padding:0 22px;font-size:14.5px}
+.actions .pill.primary{margin-left:auto;min-width:168px}
+.actions .pill.soft{padding:0 16px}
+.skip{height:48px;padding:0 12px;color:var(--ink3);font-weight:500;font-size:14px}.skip:hover{color:var(--ink)}
+.actions .pill.primary.off,.actions .pill.primary:disabled{background:var(--soft)!important;color:var(--ink3)!important;box-shadow:none!important;cursor:not-allowed}
+.needhint{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink3);max-width:46%;line-height:1.3}.needhint i{color:var(--ac);font-size:14px;flex:none}
+.needhint+.pill.primary{margin-left:0}.needhint.shake{animation:nshake .4s}@keyframes nshake{20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+.lbl{font:600 12px var(--f);color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 9px}.lbl:first-child{margin-top:0}
+/* the plan on the Start step: one row per stage, filling the column */
+.plan{display:grid;gap:10px}
+.pl{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:18px;background:var(--soft)}
+.pl .n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--win);color:var(--ac-ink);font-weight:700;font-size:13px;box-shadow:inset 0 0 0 1.5px var(--line)}
+.pl>i{flex:none;font-size:24px;color:var(--ac)}
+.pl b{display:block;font-size:15.5px;font-weight:600}.pl small{display:block;margin-top:3px;font-size:13px;line-height:1.4;color:var(--ink3)}
+.pl .grow{flex:1;min-width:0}.pl .t{flex:none;font-size:12px;color:var(--ink3);font-weight:500}
+/* option tiles */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.opts.one{grid-template-columns:1fr}
+.opt{position:relative;display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:16px;background:var(--soft);text-align:left;box-shadow:inset 0 0 0 1.5px transparent;transition:background .2s,box-shadow .2s}
+.opt:hover{background:var(--soft2)}
+.opt.on{background:color-mix(in srgb,var(--ac) 8%,var(--win));box-shadow:inset 0 0 0 1.5px var(--ac)}
+.opt>i{font-size:20px;color:var(--ac);margin-top:1px}
+.opt b{display:block;font-size:14px;font-weight:600}.opt small{display:block;margin-top:2px;font-size:12px;line-height:1.35;color:var(--ink3)}
+.opt .tick{position:absolute;right:10px;top:10px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--ac);color:#fff;font-size:10px;opacity:0;transform:scale(.6);transition:.2s var(--ease)}
+.opt.on .tick{opacity:1;transform:none}
+.opt .mini{margin-top:9px;display:grid;gap:3px;font-size:11.5px;color:var(--ink2)}
+.opt .mini span{display:flex;align-items:center;gap:6px}.opt .mini i{color:var(--ac);font-size:12px}
+/* inputs */
+.fld{display:grid;gap:6px}.fld+.fld{margin-top:10px}
+.fld label{font-size:12.5px;font-weight:500;color:var(--ink3)}
+.lbl .req,.fld label .req{text-transform:none;letter-spacing:0;font-style:normal;font-weight:500;font-size:11px;color:var(--ac);margin-left:6px}
+.fld input,.fld select{height:48px;border-radius:14px;background:var(--soft);padding:0 15px;font:500 15px var(--f);color:var(--ink);border:1.5px solid transparent;outline:none;width:100%}
+.fld input.big{height:58px;font-size:20px;font-weight:600}
+.fld input:focus,.fld select:focus{border-color:var(--ac);background:var(--win)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.det{padding:14px;border-radius:16px;background:var(--soft)}.det+.det{margin-top:10px}
+.det h4{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:10px}.det h4 i{color:var(--ac);font-size:17px}
+.det .fld input{background:var(--win)}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips button{height:34px;padding:0 13px;border-radius:10px;background:var(--soft);font-size:13px;font-weight:500;color:var(--ink2);box-shadow:inset 0 0 0 1.5px transparent;display:inline-flex;align-items:center;gap:6px}
+.chips button.on{background:color-mix(in srgb,var(--ac) 9%,var(--win));color:var(--ac-ink);box-shadow:inset 0 0 0 1.5px var(--ac)}
+/* rows with switches / ticks */
+.li{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:14px;background:var(--soft);font-size:13.5px}.li+.li{margin-top:7px}
+.li>i{font-size:19px;color:var(--ac);flex:none}.li b{font-weight:600}.li small{display:block;color:var(--ink3);font-size:12px;margin-top:1px}
+.li .grow{flex:1;min-width:0}.li .meta{color:var(--ink3);font-size:12px;white-space:nowrap}
+.sw{flex:none;position:relative;width:40px;height:24px;border-radius:12px;background:var(--ac);transition:background .2s}
+.sw::after{content:"";position:absolute;left:18px;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s var(--ease)}
+.sw.off{background:var(--soft2)}.sw.off::after{left:2px}
+.cb{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--win);box-shadow:inset 0 0 0 1.5px var(--line);color:transparent;font-size:12px;transition:.15s}
+.li.on .cb{background:var(--ac);box-shadow:none;color:#fff}
+button.li{width:100%;text-align:left}
+.hint{margin-top:12px;display:flex;gap:7px;font-size:12.5px;color:var(--ink3);line-height:1.45}.hint i{margin-top:2px}
+/* reading */
+.rtop{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.bigc{font:800 46px/1 var(--fd);letter-spacing:-.03em}
+.rbar{margin-top:14px;height:8px;border-radius:8px;background:var(--soft2);overflow:hidden}.rbar i{display:block;height:100%;width:0;background:var(--brand);border-radius:inherit;transition:width .5s var(--ease)}
+.rmeta{margin-top:8px;font-size:12.5px;color:var(--ink3)}
+.feed .li{animation:stepin .35s var(--ease) both}
+.tchip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:8px;background:color-mix(in srgb,var(--ac) 9%,transparent);color:var(--ac-ink);font-size:11.5px;font-weight:600;white-space:nowrap}
+/* questions */
+.qcard{padding:18px;border-radius:18px;background:var(--soft)}
+.qcard .ctx{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink3)}.qcard .ctx i{color:var(--ac);font-size:16px}
+.qcard h3{margin-top:8px;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.qcard .ans{margin-top:14px;display:grid;gap:7px}
+.qcard .ans button{height:44px;border-radius:12px;background:var(--win);text-align:left;padding:0 14px;font-weight:500;box-shadow:inset 0 0 0 1.5px var(--line)}
+.qcard .ans button:hover{box-shadow:inset 0 0 0 1.5px var(--ac)}
+.qdone .li{margin-top:7px}
+/* editor */
+.ed .li input{flex:1;min-width:0;height:30px;border:0;background:none;font:600 14px var(--f);color:var(--ink);outline:none;border-radius:8px;padding:0 6px;margin-left:-6px}
+.ed .li input:focus{background:var(--win);box-shadow:inset 0 0 0 1.5px var(--ac)}
+.ed .x{width:28px;height:28px;border-radius:8px;color:var(--ink3);display:grid;place-items:center}.ed .x:hover{background:var(--soft2);color:var(--ink)}
+.addf{margin-top:8px;height:42px;width:100%;border-radius:14px;border:1.5px dashed var(--line);color:var(--ink2);font-weight:500;display:flex;align-items:center;justify-content:center;gap:7px}
+.addf:hover{border-color:var(--ac);color:var(--ac-ink)}
+/* Ask Tuck popover */
+.askpop{position:absolute;z-index:5;width:300px;padding:14px 16px;border-radius:16px;background:var(--win);box-shadow:0 0 0 1px var(--line),0 18px 40px -16px rgba(20,30,60,.35);font-size:13.5px;line-height:1.5;opacity:0;transform:translateY(-4px);pointer-events:none;transition:.2s var(--ease)}
+.askpop.on{opacity:1;transform:none;pointer-events:auto}
+.askpop b{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ac-ink);margin-bottom:4px}
+.left{position:relative}
+/* live preview: the file being edited glows softly */
+.card.focus .slab.face{box-shadow:inset 0 1px 0 var(--face-hi),inset 0 0 0 2px color-mix(in srgb,var(--ac) 55%,transparent)}
+.dim{opacity:.45}
+.row.phold b{font-weight:500;color:var(--paper-ink2)}
+.prow{margin-top:10px}
+.pbar{margin-top:6px;height:6px;border-radius:6px;background:var(--lines);overflow:hidden}.pbar i{display:block;height:100%;background:var(--brand);border-radius:inherit;transition:width .5s var(--ease)}
+.pnum{font:600 12px var(--f);color:var(--paper-ink2)}
+.lockp{margin-top:9px;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--lock-ink)}
+.badge{margin-top:10px;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:9px;background:var(--chip-bg);color:var(--chip-ink);font-size:12px;font-weight:600}
+
+/* inlined idle drawings (eyes follow the pointer) */
+.face svg{width:100%;height:100%;display:block}
+.face .eyes{transform:translate(var(--ex,0),var(--ey,0))}
+.tk .face{position:absolute;inset:0;visibility:hidden;pointer-events:none}.tk .face.on{visibility:visible}
+.tk.flip .face{transform:scaleX(-1)}
+.gsh{position:absolute;width:290px;height:40px;border-radius:22px;background:var(--gsh,rgba(30,45,95,.32));filter:blur(var(--b));opacity:var(--o);transform:translateZ(-2px) scale(var(--s),var(--s));pointer-events:none;transition:filter .45s var(--ease),opacity .45s var(--ease),transform .45s var(--ease)}
+:root[data-theme="dark"]{--gsh:rgba(0,0,0,.6)}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--gsh:rgba(0,0,0,.6)}}
+.tm{width:20px;height:21px;flex:none;margin:-2px 0;filter:drop-shadow(0 0 .6px rgba(30,45,90,.55)) drop-shadow(0 1px 1.5px rgba(30,45,90,.25))}
+.ask .tm{width:18px;height:19px}
+/* peeking, his face sits higher on his body, so less of him shows above the edge and he reads as Tuck */
+
+/* Intro: each shadow arrives with its own file, not after the whole stack has landed.
+   A file's floor shadow starts faint, small and blurred and settles over the same 1.2s, with the same delay, as the file rises.
+   The band a front file casts on the file behind fades in on the front file's timing, since that file casts it.
+   Only Tuck's bubble waits for everything to land. */
+.shade{transition:opacity .5s var(--ease);animation:shin 1.2s var(--ease) backwards;animation-delay:var(--df,0s)}
+@keyframes shin{from{opacity:0}}
+.gsh{animation:gshin 1.2s var(--ease) backwards;animation-delay:var(--d,0s)}
+@keyframes gshin{from{opacity:0;filter:blur(16px);transform:translateZ(-2px) scale(.72,.72)}}
+@media (prefers-reduced-motion:reduce){.gsh,.shade{animation:none}}
+.intro .say{opacity:0!important}
+
+/* ---------- Colour schemes: Blue (default), Mint (blue and mint glass), Meadow (lemon, sea green, teal) ---------- */
+:root[data-scheme="mint"]{--ac:#14a88c;--ac-ink:#0d8a73;--ac-fill:rgba(20,168,140,.08);--ac-fill2:rgba(20,168,140,.15);--ok:#14a88c;--chip-bg:rgba(20,168,140,.10);--chip-ink:#0d8a73;--ic-ink:#14a88c;
+  --brand:linear-gradient(120deg,#7d97ff,#3fd3b2);--btn:linear-gradient(135deg,#6f8cff,#2fc3a2);--btn-hi:linear-gradient(135deg,#7f99ff,#3ad0ae);--btn-edge:rgba(10,90,90,.22);
+  --page-bg:linear-gradient(160deg,#f2f5ff 0%,#ffffff 45%,#effbf7 100%);
+  --st-bg:radial-gradient(60% 55% at 78% 22%,rgba(140,165,255,.35),transparent 70%),radial-gradient(55% 50% at 30% 70%,rgba(70,215,180,.30),transparent 70%),linear-gradient(155deg,#f6f8ff,#f3fcf9);--st-lines:rgba(20,150,130,.07)}
+:root[data-scheme="meadow"]{--ac:#2f9a6a;--ac-ink:#1f7a50;--ac-fill:rgba(47,154,106,.09);--ac-fill2:rgba(47,154,106,.16);--ok:#2f9a6a;--chip-bg:rgba(47,154,106,.10);--chip-ink:#1f7a50;--ic-ink:#2f9a6a;
+  --brand:linear-gradient(120deg,#d6c93a,#3aa98a 60%,#2f8f77);--btn:linear-gradient(135deg,#9ccb4f,#2f9a6a 55%,#2a8a80);--btn-hi:linear-gradient(135deg,#a8d65c,#36a674 55%,#309487);--btn-edge:rgba(20,80,50,.25);
+  --page-bg:radial-gradient(45% 40% at 12% 8%,rgba(236,226,90,.28),transparent 70%),radial-gradient(40% 40% at 90% 95%,rgba(60,170,140,.22),transparent 70%),linear-gradient(160deg,#fbfbef,#f2f8f3);
+  --st-bg:radial-gradient(45% 55% at 30% 28%,rgba(232,222,80,.45),transparent 70%),radial-gradient(50% 55% at 72% 70%,rgba(80,175,150,.42),transparent 72%),radial-gradient(30% 30% at 85% 92%,rgba(46,150,95,.4),transparent 70%),linear-gradient(160deg,#fcfcf2,#f2f8f4);--st-lines:rgba(40,130,90,.07)}
+
+:root[data-scheme="sky"]{--ac:#2d9cf0;--ac-ink:#1878c4;--ac-fill:rgba(45,156,240,.09);--ac-fill2:rgba(45,156,240,.16);--ok:#2d9cf0;--chip-bg:rgba(45,156,240,.10);--chip-ink:#1878c4;--ic-ink:#2d9cf0;
+  --brand:linear-gradient(120deg,#e9b9d2,#9fd3f5 45%,#4aa8f5);--btn:radial-gradient(120% 140% at 50% 110%,#2f9af2,#62b6f3 60%,#9ccdf0);--btn-hi:radial-gradient(120% 140% at 50% 110%,#3ea3f4,#70bdf4 60%,#a8d3f1);--btn-edge:rgba(20,90,150,.25);
+  --page-bg:linear-gradient(160deg,#f6f3ef 0%,#f6f8fb 50%,#eef5fc 100%);
+  --st-bg:radial-gradient(55% 55% at 50% 70%,rgba(110,190,255,.55),transparent 70%),radial-gradient(45% 40% at 30% 25%,rgba(245,215,230,.6),transparent 70%),radial-gradient(40% 40% at 75% 22%,rgba(240,232,210,.7),transparent 70%),linear-gradient(160deg,#fbfaf8,#f2f7fd);--st-lines:rgba(40,130,210,.07)}
+:root[data-scheme="dawn"]{--ac:#7c8ff2;--ac-ink:#5a6ed6;--ac-fill:rgba(124,143,242,.10);--ac-fill2:rgba(124,143,242,.18);--ok:#7c8ff2;--chip-bg:rgba(124,143,242,.12);--chip-ink:#5a6ed6;--ic-ink:#7c8ff2;
+  --brand:linear-gradient(120deg,#8ea4f5,#e9a8d8);--btn:linear-gradient(180deg,#7d93ee,#c48ad8);--btn-hi:linear-gradient(180deg,#899ef0,#cc96de);--btn-edge:rgba(90,80,170,.22);
+  --page-bg:linear-gradient(180deg,#eef1fb 0%,#f7f2fb 60%,#fbf1f7 100%);
+  --st-bg:linear-gradient(180deg,#d2dcfb 0%,#e8e3fb 45%,#fbe6f4 100%);--st-lines:rgba(110,110,210,.07)}
+:root[data-scheme="bloom"]{--ac:#b24fd0;--ac-ink:#9234b3;--ac-fill:rgba(178,79,208,.09);--ac-fill2:rgba(178,79,208,.16);--ok:#b24fd0;--chip-bg:rgba(178,79,208,.10);--chip-ink:#9234b3;--ic-ink:#b24fd0;
+  --brand:linear-gradient(120deg,#6f86f2,#c483e6 45%,#f08aa8);--btn:linear-gradient(120deg,#7186f0,#c27ee4 50%,#ef8aa6);--btn-hi:linear-gradient(120deg,#7d91f2,#ca8ae8 50%,#f297b0);--btn-edge:rgba(110,40,120,.25);
+  --page-bg:linear-gradient(160deg,#f7f5f3,#faf7f6);
+  --st-bg:radial-gradient(60% 70% at 15% 85%,rgba(110,135,240,.75),transparent 70%),radial-gradient(55% 60% at 45% 40%,rgba(200,130,230,.6),transparent 70%),radial-gradient(45% 60% at 70% 30%,rgba(255,225,235,.9),transparent 70%),radial-gradient(55% 65% at 95% 60%,rgba(240,130,160,.7),transparent 70%),linear-gradient(135deg,#a9b4f4,#f4b7c8);--st-lines:rgba(255,255,255,.12)}
+:root[data-scheme="bloom"] .stage::before,:root[data-scheme="bloom"] .art::before{content:"";position:absolute;inset:0;z-index:-1;opacity:.35;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+:root[data-scheme="tulip"]{--ac:#e8616b;--ac-ink:#c9434e;--ac-fill:rgba(232,97,107,.09);--ac-fill2:rgba(232,97,107,.16);--ok:#e8616b;--chip-bg:rgba(232,97,107,.10);--chip-ink:#c9434e;--ic-ink:#e8616b;
+  --brand:linear-gradient(120deg,#f08a8f,#f6c3b0 50%,#6fa6d6);--btn:linear-gradient(135deg,#f3878c,#e45d68);--btn-hi:linear-gradient(135deg,#f59397,#e86a74);--btn-edge:rgba(140,30,40,.22);
+  --page-bg:linear-gradient(170deg,#eef4fa 0%,#f8f3f1 60%,#fbefee 100%);
+  --st-bg:radial-gradient(45% 50% at 35% 55%,rgba(242,120,125,.55),transparent 70%),radial-gradient(40% 45% at 70% 35%,rgba(248,190,180,.65),transparent 70%),radial-gradient(35% 30% at 15% 15%,rgba(255,225,205,.7),transparent 70%),linear-gradient(170deg,#9cc2e0,#c9dcec 60%,#e7eef4);--st-lines:rgba(255,255,255,.14)}
+:root[data-scheme="lily"]{--ac:#4f9a7e;--ac-ink:#357a61;--ac-fill:rgba(79,154,126,.09);--ac-fill2:rgba(79,154,126,.16);--ok:#4f9a7e;--chip-bg:rgba(79,154,126,.10);--chip-ink:#357a61;--ic-ink:#4f9a7e;
+  --brand:linear-gradient(120deg,#3e8f8a,#7fb79a 50%,#c9dcae);--btn:linear-gradient(180deg,rgba(120,170,150,.95),rgba(78,140,118,.95));--btn-hi:linear-gradient(180deg,rgba(130,180,160,.95),rgba(88,150,128,.95));--btn-edge:rgba(255,255,255,.35);
+  --page-bg:linear-gradient(160deg,#eef5f2 0%,#f7f9f4 55%,#e9f3f0 100%);
+  --st-bg:radial-gradient(50% 45% at 30% 60%,rgba(250,252,240,.95),transparent 70%),radial-gradient(45% 55% at 85% 55%,rgba(40,130,80,.55),transparent 72%),radial-gradient(40% 40% at 50% 15%,rgba(170,175,90,.45),transparent 70%),linear-gradient(135deg,#5fa7a6,#cfe3cf 50%,#4f9f6f);--st-lines:rgba(255,255,255,.14)}
+:root[data-scheme="aqua"]{--ac:#1f8fe8;--ac-ink:#1371bd;--ac-fill:rgba(31,143,232,.09);--ac-fill2:rgba(31,143,232,.16);--ok:#1f8fe8;--chip-bg:rgba(31,143,232,.10);--chip-ink:#1371bd;--ic-ink:#1f8fe8;
+  --brand:linear-gradient(120deg,#5a9cf5,#5fc8f2 55%,#a8e8fb);--btn:linear-gradient(135deg,#4f97f3,#3db6ef);--btn-hi:linear-gradient(135deg,#5ca1f5,#4cbdf1);--btn-edge:rgba(20,80,150,.24);
+  --page-bg:linear-gradient(160deg,#eaf3fe 0%,#f2f9fe 55%,#e9f6fd 100%);
+  --st-bg:radial-gradient(45% 40% at 30% 75%,rgba(220,245,255,.85),transparent 70%),radial-gradient(40% 50% at 75% 25%,rgba(200,240,255,.8),transparent 70%),radial-gradient(50% 60% at 55% 45%,rgba(60,170,240,.5),transparent 72%),linear-gradient(150deg,#79b3f4,#8fd2f6 55%,#c2ecfb);--st-lines:rgba(255,255,255,.16)}
+:root[data-scheme="lily"] .pill.primary,:root[data-scheme="lily"] .btn.pri{backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.3),0 6px 16px -8px rgba(40,100,80,.5)!important}
+:root[data-scheme] body{background:var(--page-bg)!important}
+:root[data-scheme="meadow"] .stage::before,:root[data-scheme="meadow"] .art::before{content:"";position:absolute;inset:0;z-index:-1;opacity:.35;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .55 0 0 0 0 .5 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+:root[data-scheme] .pill.primary,:root[data-scheme] .btn.pri,:root[data-scheme] .askb.pri{background:var(--btn)!important;box-shadow:inset 0 -2px 0 var(--btn-edge),0 1px 2px rgba(16,36,40,.14)!important}
+:root[data-scheme] .pill.primary:hover,:root[data-scheme] .btn.pri:hover{background:var(--btn-hi)!important}
+:root[data-scheme] .wg-badge,:root[data-scheme] .row .n.hot,:root[data-scheme] .me .cbub,:root[data-scheme] .core{background:var(--ac)!important;fill:var(--ac)}
+/* he casts a soft shadow on the file behind him (never on his own face) */
+/* his shadow is a soft dark copy of his own outline (not a box), falling on the file behind him a little right and down, as from a light above-left; it rises with him */
+.peek .bshade{position:absolute;left:0;top:54px;width:124px;height:136px;filter:brightness(0) blur(2.5px);opacity:.26;transform:translate(9px,7px);transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.peek:hover .bshade{transform:translate(9px,-13px)}
+/* Tuck's shadow is cast by his body, so it rises with him from the first frame; only his bubble waits */
+/* ---------- Profile pick lists ---------- */
+.lbl.sm{margin:12px 0 7px;font-size:11px}
+.two{align-items:start}
+/* rows never run past the card: the grid column can shrink, the name truncates with an ellipsis, the side note gives way first */
+.face .in .rows{grid-template-columns:minmax(0,1fr)}.face .in .row{min-width:0}.face .in .row b{min-width:0}.face .in .row span{flex:0 1 auto;min-width:0;max-width:34%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.face .in p{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.det .two+.two,.det .two+.lbl,.det .fld+.two,.det .two+.chips,.det .fld+.fld,.det .fld+.lbl{margin-top:10px}.two .fld+.fld{margin-top:0}
+.det .chips button{background:var(--win)}
+.cmbbox{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:48px;border-radius:14px;background:var(--win);padding:6px 34px 6px 12px;border:1.5px solid transparent}
+.cmbbox:focus-within{border-color:var(--ac)}
+.fld.cmb .cmbbox input{flex:1;min-width:80px;height:34px;border:0;background:none;padding:0;font:500 14.5px var(--f);outline:none;color:var(--ink)}
+.fld.cmb .cmbbox input:focus{background:none}
+.cmb .cv{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ink3);cursor:pointer}
+.tag{display:inline-flex;align-items:center;gap:3px;height:28px;padding:0 4px 0 10px;border-radius:9px;background:color-mix(in srgb,var(--ac) 10%,var(--win));color:var(--ac-ink);font-size:13px;font-weight:600;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ac) 28%,transparent)}
+.tag button{width:20px;height:20px;display:grid;place-items:center;border-radius:6px;color:inherit;font-size:11px}.tag button:hover{background:color-mix(in srgb,var(--ac) 14%,transparent)}
+.cmbl{position:fixed;z-index:200;max-height:300px;overflow:auto;padding:6px;border-radius:14px;background:var(--win);box-shadow:0 0 0 1px var(--line),0 18px 40px -12px rgba(20,30,60,.35);font-family:var(--f)}
+.cmbl button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px 10px;border-radius:9px;font-size:13.5px;color:var(--ink)}.cmbl button b{color:var(--ac-ink)}
+.cmbl button.hi{background:color-mix(in srgb,var(--ac) 10%,var(--win))}.cmbl .own{color:var(--ac-ink);font-weight:600}
+.cmbf{font-size:11.5px;color:var(--ink3);padding:7px 10px 3px;border-top:1px solid var(--line);margin-top:4px}
+/* free-text answers: flagged with a small "Your words" tag so they're easy to spot */
+.otag{display:inline-flex;align-items:center;height:18px;padding:0 7px;margin-right:7px;border-radius:6px;background:color-mix(in srgb,#e0a03a 18%,var(--win));color:#9a5b0b;font:700 10px var(--f);letter-spacing:.04em;text-transform:uppercase;vertical-align:1px}
+.fld.open label em{font-style:normal;color:var(--ink3);font-weight:400}
+.fld textarea{border-radius:14px;background:var(--soft);padding:12px 15px;font:500 14.5px var(--f);color:var(--ink);border:1.5px solid transparent;outline:none;width:100%;resize:vertical}.fld textarea:focus{border-color:var(--ac);background:var(--win)}
+.ownchip{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px;border-radius:10px;border:1.5px dashed var(--line);color:var(--ink3)}.ownchip input{width:110px;border:0;background:none;outline:none;font:500 13px var(--f);color:var(--ink)}
+.qown{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 6px 0 12px;border-radius:12px;background:var(--win);box-shadow:inset 0 0 0 1.5px var(--line)}.qown:focus-within{box-shadow:inset 0 0 0 1.5px var(--ac)}
+.qown input{flex:1;border:0;background:none;outline:none;font:500 13.5px var(--f);color:var(--ink);min-width:0}.qown button{width:32px;height:32px;border-radius:9px;background:var(--ac);color:#fff;display:grid;place-items:center}
+/* answer chip in flight, and the card it lands on */
+.flyer{position:fixed;left:0;top:0;z-index:400;pointer-events:none;padding:6px 12px;border-radius:10px;background:var(--ac);color:#fff;font:600 12.5px var(--f);white-space:nowrap;box-shadow:0 10px 24px -8px rgba(31,91,255,.55);transition:transform .58s cubic-bezier(.5,0,.2,1)}
+.flyer.go{transition:transform .58s cubic-bezier(.5,0,.2,1),opacity .2s .45s;opacity:0}
+.card.got .slab.face{animation:gotit .7s var(--ease)}
+@keyframes gotit{30%{box-shadow:inset 0 1px 0 var(--face-hi),inset 0 0 0 3px color-mix(in srgb,var(--ac) 70%,transparent),0 0 0 6px color-mix(in srgb,var(--ac) 18%,transparent)}}
+/* ---------- Find files: stacked levels ---------- */
+.opt .tick .lvn{font:700 11px var(--f);line-height:1}
+.mixbar .chips button{height:30px;font-size:12px}
+/* ---------- Folders and subfolders ---------- */
+.fgrp+.fgrp,.fgrp+.li,.li+.fgrp{margin-top:7px}
+.cb3{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--win);box-shadow:inset 0 0 0 1.5px var(--line);color:transparent;font-size:12px;transition:.15s}
+.li.all .cb3,.li.some .cb3{background:var(--ac);box-shadow:none;color:#fff}
+.li.fl small{display:block;font-size:11.5px;color:var(--ac-ink);font-weight:500}
+.exp{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:var(--ink3);transition:transform .2s}.fgrp.open .exp{transform:rotate(180deg)}.exp:hover{background:var(--win);color:var(--ink)}
+.subs{margin:5px 0 0 34px;display:grid;gap:4px;animation:stepin .25s var(--ease)}
+.sub{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:var(--soft);font-size:13px;text-align:left;width:100%}
+.sub .ph-folder{color:var(--ac)}.sub.on .cb{background:var(--ac);box-shadow:none;color:#fff}.sub .meta{font-size:11.5px}
+.li .x{width:28px;height:28px;border-radius:8px;color:var(--ink3);display:grid;place-items:center;flex:none}.li .x:hover{background:var(--win);color:var(--ink)}
+/* ---------- Quick questions ---------- */
+.qcard .ans button{height:auto;min-height:44px;padding:9px 14px}.qcard .ans b{display:block;font-weight:600}.qcard .ans small{display:block;font-size:12px;color:var(--ink3);font-weight:400;margin-top:2px}
+.qex{margin-top:6px;font-size:12px;color:var(--ink3)}
+.li.ql{cursor:pointer;margin-top:7px}.li.ql small{display:block;font-size:12px;color:var(--ink3)}.li.ql em{display:block;font-style:normal;font-size:12px;color:var(--ac-ink);margin-top:2px}
+/* ---------- Right panel: new or changed rows slide in with a brief highlight (transform and colour only) ---------- */
+.row.fresh{animation:rowin .7s var(--ease) both}
+@keyframes rowin{0%{transform:translateX(14px);background:color-mix(in srgb,var(--ac) 26%,var(--q-bg))}55%{transform:none;background:color-mix(in srgb,var(--ac) 18%,var(--q-bg))}}
+.face .in p.learn{color:var(--ac-ink);font-weight:500}
+/* ---------- Mac file picker (prototype of the system Open panel) ---------- */
+.mpick{position:fixed;inset:0;z-index:300;display:grid;place-items:center;background:rgba(20,25,40,.25);animation:stepin .2s}
+.mpw{width:min(640px,94vw);border-radius:12px;background:#fff;box-shadow:0 30px 80px -10px rgba(0,0,0,.45),0 0 0 .5px rgba(0,0,0,.3);overflow:hidden;font:13px -apple-system,BlinkMacSystemFont,var(--f);color:#1d1d1f}
+.mpt{display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;background:#f6f6f6;border-bottom:1px solid #e3e3e3}
+.mpl{display:flex;gap:7px;margin-right:6px}.mpl i{width:12px;height:12px;border-radius:50%;background:#ff5f57}.mpl i:nth-child(2){background:#febc2e}.mpl i:nth-child(3){background:#28c840}
+.mpnav{width:26px;height:24px;border-radius:6px;color:#aaa}
+.mploc{display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:6px;background:#fff;box-shadow:0 0 0 .5px #ccc;font-weight:500}.mploc .ph-folder{color:#3b8cf5}
+.mpsr{margin-left:auto;display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;background:#e9e9ea;color:#888;width:150px}
+.mpb{display:grid;grid-template-columns:150px 1fr;height:300px}
+.mps{background:#f0f0f2;padding:10px 8px;display:flex;flex-direction:column;gap:2px}.mps small{font-size:11px;color:#999;font-weight:600;padding:4px 8px}
+.mps button{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;text-align:left;color:#1d1d1f}.mps button i{color:#3b8cf5;font-size:15px}.mps button.on{background:#dcdcdf}
+.mpf{overflow:auto}.mph{display:grid;grid-template-columns:1fr 100px;padding:6px 14px 6px 42px;font-size:11.5px;color:#888;border-bottom:1px solid #eee}
+.mpr{display:grid;grid-template-columns:20px 1fr 100px;align-items:center;gap:8px;width:100%;text-align:left;padding:5px 14px;color:#1d1d1f}.mpr:nth-child(odd){background:#f8f8fa}
+.mpr i{font-size:16px;color:#3b8cf5}.mpr small{color:#888}.mpr.on{background:#2f6bff!important;color:#fff}.mpr.on i,.mpr.on small{color:#fff}.mpr.dis{opacity:.4}
+.mpfoot{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid #e3e3e3;background:#f6f6f6}.mpfoot span{flex:1;color:#666}
+.mpbtn{height:26px;padding:0 14px;border-radius:6px;background:#fff;box-shadow:0 0 0 .5px #bbb,0 1px 1px rgba(0,0,0,.05);font-weight:500;color:#1d1d1f}.mpbtn.pri{background:#2f6bff;color:#fff;box-shadow:none}.mpbtn:disabled{opacity:.45}
+
+</style>
+<style>.pf-back,.pf-note{position:fixed;z-index:9999;font:500 13px/1 -apple-system,system-ui,sans-serif;padding:8px 12px;border-radius:999px;background:#ffffffe6;color:#1e2131;box-shadow:0 2px 10px #0002}.pf-back{left:12px;bottom:12px;text-decoration:none;color:#1a4bc4}.pf-back:focus-visible{outline:3px solid #1a4bc4;outline-offset:2px}.pf-note{left:50%;bottom:12px;translate:-50% 0;color:#4a4f63;white-space:nowrap}@media (max-width:900px){.pf-note{display:none}}</style>
+</head>
+<body><span class="pf-note">Interactive prototype by Alana Kwan. Nothing you type is saved or sent.</span>
+<main class="win">
+  <section class="left">
+    <div class="askpop" id="askpop" role="dialog" aria-label="Tuck explains this step"></div>
+    <div class="top">
+      <div class="mark"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDI0IDEwMjQiIHdpZHRoPSIxMDI0IiBoZWlnaHQ9IjEwMjQiIHhtbG5zOmMycGE9Imh0dHA6Ly9jMnBhLm9yZy9tYW5pZmVzdCI+CjxkZWZzPjxjbGlwUGF0aCBpZD0ic3EiPjxyZWN0IHg9IjEwMCIgeT0iMTAwIiB3aWR0aD0iODI0IiBoZWlnaHQ9IjgyNCIgcng9IjE4NSIvPjwvY2xpcFBhdGg+PGZpbHRlciBpZD0ic2giIHg9Ii0yMCUiIHk9Ii0yMCUiIHdpZHRoPSIxNDAlIiBoZWlnaHQ9IjE0MCUiPjxmZURyb3BTaGFkb3cgZHg9IjAiIGR5PSIxNCIgc3RkRGV2aWF0aW9uPSIxNiIgZmxvb2QtY29sb3I9IiMwQzFBM0EiIGZsb29kLW9wYWNpdHk9Ii4yOCIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiM3RkIwRkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjxyYWRpYWxHcmFkaWVudCBpZD0iaGwiIGN4PSIuMyIgY3k9Ii4xIiByPSIuNyI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9Ii40NSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+PC9yYWRpYWxHcmFkaWVudD48ZmlsdGVyIGlkPSJyIiB4PSItMTAlIiB5PSItMTAlIiB3aWR0aD0iMTIwJSIgaGVpZ2h0PSIxMjAlIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC4wMzUiIG51bU9jdGF2ZXM9IjIiIHNlZWQ9IjQiLz48ZmVEaXNwbGFjZW1lbnRNYXAgaW49IlNvdXJjZUdyYXBoaWMiIHNjYWxlPSIzIi8+PC9maWx0ZXI+PC9kZWZzPgo8ZyBmaWx0ZXI9InVybCgjc2gpIj48ZyBjbGlwLXBhdGg9InVybCgjc3EpIj48cmVjdCB3aWR0aD0iMTAyNCIgaGVpZ2h0PSIxMDI0IiBmaWxsPSJ1cmwoI2JnKSIvPjxyZWN0IHdpZHRoPSIxMDI0IiBoZWlnaHQ9IjEwMjQiIGZpbGw9InVybCgjaGwpIi8+PGVsbGlwc2UgY3g9IjUxMiIgY3k9IjkzMCIgcng9IjMwMCIgcnk9IjYwIiBmaWxsPSIjMEMyQTdBIiBvcGFjaXR5PSIuMjUiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1MiAxNzApIHNjYWxlKDQuNikiIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz48cmVjdCB4PSIzOCIgeT0iNDAiIHdpZHRoPSI1NiIgaGVpZ2h0PSIzMCIgcng9IjExIiBmaWxsPSIjRENFMkVDIiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPjxyZWN0IHg9IjM0IiB5PSI1NCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxMTYiIHJ4PSIyNiIgZmlsbD0iI0YyRjNGNyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz48cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48ZWxsaXBzZSBjeD0iODIiIGN5PSIxMjQiIHJ4PSI2LjUiIHJ5PSI4LjUiIGZpbGw9IiMxODIzM0EiLz48ZWxsaXBzZSBjeD0iMTIwIiBjeT0iMTIxIiByeD0iNi41IiByeT0iOC41IiBmaWxsPSIjMTgyMzNBIi8+PGNpcmNsZSBjeD0iODQiIGN5PSIxMjEiIHI9IjIiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxMjIiIGN5PSIxMTgiIHI9IjIiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNOTUgMTQwIFExMDEgMTQ1IDEwNyAxMzkiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE4MjMzQSIgc3Ryb2tlLXdpZHRoPSIzLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxnIHRyYW5zZm9ybT0ic2NhbGUoMC4yMTczOSkgdHJhbnNsYXRlKC01MiAtMTcwKSI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAzMCkgcm90YXRlKC0zIDI4NiA4NzApIj48ZWxsaXBzZSBjeD0iMjcyIiBjeT0iODg0IiByeD0iNzAiIHJ5PSIyMCIgZmlsbD0iIzBDMkE3QSIgb3BhY2l0eT0iLjIyIi8+PHBhdGggZD0iTTIyMCA4OTQgQzIxMiA4NTIgMjQ0IDgxNiAyODIgODE4IEMzMTYgODIwIDMzOCA4MzQgMzQ0IDg1MiBDMzY0IDg1MCAzNzAgODcyIDM1MiA4ODQgQzM0NCA5MDAgMzIyIDkwNiAyODggOTA1IEMyNTIgOTA1IDIyNiA5MDYgMjIwIDg5NCBaIiBmaWxsPSIjRjJGM0Y3IiBzdHJva2U9IiNDOUQyRTMiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0yMjYgODkyIEMyNTYgOTAyIDMxNiA5MDIgMzQ4IDg4NCBDMzQyIDkwNCAzMTYgOTA4IDI4NiA5MDcgQzI1MiA5MDcgMjMwIDkwNiAyMjYgODkyIFoiIGZpbGw9IiNEQ0UyRUMiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAzMCkgcm90YXRlKDMgNzM4IDg3MCkiPjxlbGxpcHNlIGN4PSI3MjQiIGN5PSI4ODQiIHJ4PSI3MCIgcnk9IjIwIiBmaWxsPSIjMEMyQTdBIiBvcGFjaXR5PSIuMjIiLz48cGF0aCBkPSJNODA0IDg5NCBDODEyIDg1MiA3ODAgODE2IDc0MiA4MTggQzcwOCA4MjAgNjg2IDgzNCA2ODAgODUyIEM2NjAgODUwIDY1NCA4NzIgNjcyIDg4NCBDNjgwIDkwMCA3MDIgOTA2IDczNiA5MDUgQzc3MiA5MDUgNzk4IDkwNiA4MDQgODk0IFoiIGZpbGw9IiNGMkYzRjciIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTc5OCA4OTIgQzc2OCA5MDIgNzA4IDkwMiA2NzYgODg0IEM2ODIgOTA0IDcwOCA5MDggNzM4IDkwNyBDNzcyIDkwNyA3OTQgOTA2IDc5OCA4OTIgWiIgZmlsbD0iI0RDRTJFQyIvPjwvZz48L2c+PC9nPjwvZz48L2c+CjxyZWN0IHg9IjEwMSIgeT0iMTAxIiB3aWR0aD0iODIyIiBoZWlnaHQ9IjgyMiIgcng9IjE4NCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjM1IiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+" alt="">Tuck</div>
+      <div class="steps"></div>
+    </div>
+
+    <div class="stepwrap" id="step">
+    <div class="copy">
+      <h1>Hi, I'm Tuck.<br><em>Your files, sorted.</em></h1>
+      <p class="lead">I sort the folders you choose the way you'd sort them, then answer questions about what's inside.</p>
+      <div class="facts">
+        <span><i class="ph-bold ph-push-pin"></i>Files stay where they are</span>
+        <span><i class="ph-bold ph-lock-simple"></i>Private files stay on this Mac</span>
+        <span><i class="ph-bold ph-arrow-counter-clockwise"></i>Undo any sort</span>
+      </div>
+    </div>
+
+    <div class="acct">
+      <h2>Make Tuck yours</h2>
+      <button class="pill primary"><span class="gl"><svg class="g" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg></span>Continue with Google</button>
+      <button class="pill soft"><i class="ph-fill ph-apple-logo"></i>Continue with Apple</button>
+    </div>
+    </div>
+
+    <p class="note"><i class="ph-fill ph-shield-check"></i>An account only syncs your settings. Your files never leave this Mac.</p>
+
+  </section>
+
+  <section class="stage" aria-label="What Tuck does">
+    <div class="cap"><b>What Tuck does</b><span>Examples, not your files</span></div>
+    <div class="scene" aria-hidden="true">
+      <div class="iso">
+        <div class="box">
+
+          <div class="card" style="--x:70px;--y:96px;--h:232px;--z:128px;--ry:-10deg;--d:.4s">
+            <span class="chip"><i class="ph-fill ph-folder-simple"></i>Organize</span>
+            <div class="rows">
+              <div class="row"><i class="ph-fill ph-folder"></i><b>Biology 201</b><span>18 notes</span></div>
+              <div class="row"><i class="ph-fill ph-folder"></i><b>Internship applications</b><span>6 files</span></div>
+              <div class="row"><i class="ph-fill ph-folder"></i><b>Taxes 2025</b><span>9 files</span></div>
+            </div>
+          </div>
+          <div class="card" style="--x:35px;--y:236px;--h:222px;--z:66px;--ry:-10deg;--d:.22s">
+            <span class="chip"><i class="ph-fill ph-sparkle"></i>Understand</span>
+            <div class="q">Find the screenshot with the Wi-Fi password</div>
+            <div class="a">Found it, from your Airbnb booking.<small>Screenshot from Sep 14, Desktop</small></div>
+          </div>
+          <div class="card" style="--x:0px;--y:376px;--h:212px;--z:6px;--ry:-10deg;--d:.05s">
+            <span class="chip"><i class="ph-fill ph-plugs-connected"></i>Connect</span>
+            <h3 class="ttl">Your context, in the AI you use</h3>
+            <div class="tools"><span><i class="ph-fill ph-check-circle"></i>Claude</span><span><i class="ph-fill ph-check-circle"></i>ChatGPT</span><span><i class="ph-fill ph-check-circle"></i>Cursor</span></div>
+            <p>Only the folders you allow.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="theme" role="group" aria-label="Theme">
+  <button data-t="light">Light</button><button data-t="dark">Dark</button>
+</div>
+<script>
+const cards=[...document.querySelectorAll('.card')];
+cards.forEach((c,i)=>c.classList.add('c'+i));
+const PEEK_ARMLESS='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzIiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz48cmVjdCB4PSIxMTAiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz4KPHJlY3QgeD0iMzQiIHk9IjU0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjExNiIgcng9IjI2IiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPgo8cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48ZWxsaXBzZSBjeD0iODIiIGN5PSIxMjQiIHJ4PSI2LjUiIHJ5PSI4LjUiIGZpbGw9IiMxODIzM0EiLz48ZWxsaXBzZSBjeD0iMTIwIiBjeT0iMTIxIiByeD0iNi41IiByeT0iOC41IiBmaWxsPSIjMTgyMzNBIi8+PGNpcmNsZSBjeD0iODQiIGN5PSIxMjEiIHI9IjIiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxMjIiIGN5PSIxMTgiIHI9IjIiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNOTUgMTQwIFExMDEgMTQ1IDEwNyAxMzkiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE4MjMzQSIgc3Ryb2tlLXdpZHRoPSIzLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvZz4KPC9zdmc+';
+/* Peeking, his hands are on the edge, so the figure has no side arms; standing (hover) he gets them back */
+const PEEK_FIG='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzIiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz48cmVjdCB4PSIxMTAiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz4KPHJlY3QgeD0iMzQiIHk9IjU0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjExNiIgcng9IjI2IiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPgo8cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzAgMTE4IEMxOCAxMjAgMTQgMTM2IDI0IDE0MiBDMzIgMTQ2IDM4IDEzOCAzNiAxMzAgWiIgZmlsbD0iI0YyRjNGNyIvPjxwYXRoIGQ9Ik0xNjggMTEyIEMxODAgMTEyIDE4NiAxMjggMTc2IDEzNSBDMTY4IDE0MCAxNjIgMTMyIDE2NCAxMjQgWiIgZmlsbD0iI0YyRjNGNyIvPjxlbGxpcHNlIGN4PSI4MiIgY3k9IjEyNCIgcng9IjYuNSIgcnk9IjguNSIgZmlsbD0iIzE4MjMzQSIvPjxlbGxpcHNlIGN4PSIxMjAiIGN5PSIxMjEiIHJ4PSI2LjUiIHJ5PSI4LjUiIGZpbGw9IiMxODIzM0EiLz48Y2lyY2xlIGN4PSI4NCIgY3k9IjEyMSIgcj0iMiIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjEyMiIgY3k9IjExOCIgcj0iMiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik05NSAxNDAgUTEwMSAxNDUgMTA3IDEzOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTgyMzNBIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9nPgo8L3N2Zz4=';
+const TUCK_HANDS='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjQgNDAiIHdpZHRoPSIxMjQiIGhlaWdodD0iNDAiPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMyIDI1KSBzY2FsZSgtMC42OCAwLjY4KSB0cmFuc2xhdGUoLTMyIC0yNSkiPjxlbGxpcHNlIGN4PSIzMyIgY3k9IjI2LjYiIHJ4PSIxMiIgcnk9IjIiIGZpbGw9InJnYmEoMzAsNDUsOTAsLjE0KSIvPjxwYXRoIGQ9Ik0yMiwyNC41IEMxNS41LDI0LjUgMTQuNSwxNi41IDIwLDE0LjUgQzIyLDggMjgsNSAzNCw1IEM0Miw1IDQ3LjUsMTEgNDcuNSwxOCBDNDcuNSwyMi41IDQ1LDI1IDQxLDI1IEMzNSwyNS42IDI4LDI1LjIgMjIsMjQuNSBaIiBmaWxsPSIjRjJGM0Y3IiBzdHJva2U9IiNDOUQyRTMiIHN0cm9rZS13aWR0aD0iMS4zIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDkyIDI1KSBzY2FsZSgwLjY4IDAuNjgpIHRyYW5zbGF0ZSgtOTIgLTI1KSI+PGVsbGlwc2UgY3g9IjkzIiBjeT0iMjYuNiIgcng9IjEyIiByeT0iMiIgZmlsbD0icmdiYSgzMCw0NSw5MCwuMTQpIi8+PHBhdGggZD0iTTgyLDI0LjUgQzc1LjUsMjQuNSA3NC41LDE2LjUgODAsMTQuNSBDODIsOCA4OCw1IDk0LDUgQzEwMiw1IDEwNy41LDExIDEwNy41LDE4IEMxMDcuNSwyMi41IDEwNSwyNSAxMDEsMjUgQzk1LDI1LjYgODgsMjUuMiA4MiwyNC41IFoiIGZpbGw9IiNGMkYzRjciIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSIxLjMiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L2c+PC9zdmc+';
+/* Ground shadows: a soft pool right under each file on the floor. The higher the file sits (its depth plus
+   any hover lift), the wider, softer and fainter its shadow, and it updates live as the file moves. */
+cards.forEach((c,i)=>{const cs=getComputedStyle(c),x=parseFloat(cs.getPropertyValue('--x')),y=parseFloat(cs.getPropertyValue('--y'));
+  c.parentElement.insertAdjacentHTML('afterbegin',`<i class="gsh" data-i="${i}" style="left:${x+20}px;top:${y-20}px;--d:${cs.getPropertyValue('--d').trim()||'0s'}"></i>`)});
+const GSH=[...document.querySelectorAll('.gsh')];
+function groundShadows(){cards.forEach((c,i)=>{const cs=getComputedStyle(c),h=(parseFloat(cs.getPropertyValue('--z'))||0)+(parseFloat(cs.getPropertyValue('--lift'))||0);
+  const g=GSH[i];g.style.setProperty('--b',(5+h*.08).toFixed(1)+'px');g.style.setProperty('--o',Math.max(.12,.75-h*.0035).toFixed(2));g.style.setProperty('--s',(1+h*.0025).toFixed(3))})}
+groundShadows();
+cards.forEach((c,n)=>{const inner=c.innerHTML;let h='';for(let i=14;i>=1;i--)h+=`<div class="slab" style="--i:${(i*1.6).toFixed(1)}"></div>`;
+  c.innerHTML=h+`<div class="slab rim" style="--i:.5"></div><div class="slab face" style="--i:0"><div class="in">${inner}</div>${n<cards.length-1?'<div class="shade"></div>':''}</div>`;
+  if(n<cards.length-1){const f=cards[n+1];c.style.setProperty('--df',getComputedStyle(f).getPropertyValue('--d').trim()||'0s');c.style.setProperty('--zf',getComputedStyle(f).getPropertyValue('--z').trim()||'0px');c.style.setProperty('--hf',getComputedStyle(f).getPropertyValue('--h').trim())}
+  if(n===cards.length-1){c.insertAdjacentHTML('beforeend','<span class="emk ea"></span><span class="emk eb"></span>');document.querySelector('.stage').insertAdjacentHTML('beforeend',`<div class="peek" title="Hover to say hi, drag to take Tuck out"><div class="clip"><img class="bshade" src="${PEEK_ARMLESS}" alt=""><img class="fig" src="${PEEK_ARMLESS}" alt=""><img class="fig arms" src="${PEEK_FIG}" alt=""></div><img class="hands" src="${TUCK_HANDS}" alt="Tuck"></div>`)}});
+
+/* Hover a file: it floats up a little; the file behind it hears about it so its shadow band follows */
+cards.forEach((c,n)=>{
+  c.addEventListener('pointerenter',()=>{c.style.setProperty('--lift','18px');setTimeout(groundShadows);if(n>0)cards[n-1].style.setProperty('--flift','18px')});
+  c.addEventListener('pointerleave',()=>{c.style.setProperty('--lift','0px');setTimeout(groundShadows);if(n>0)cards[n-1].style.setProperty('--flift','0px')});
+});
+
+/* Place the files: measure them at rest, then scale and shift so that
+   - they line up with the left column: top of the back file level with the heading, bottom of the front file
+     level with the sign-in buttons (one shared horizon across both halves),
+   - they sit centred left to right, with even breathing room to the panel's edges,
+   - they are as large as that band allows. */
+const stage=document.querySelector('.stage'),scene=document.querySelector('.scene'),iso=document.querySelector('.iso');
+function fit(){
+  document.body.classList.add('measure');iso.style.setProperty('--zoom',1);scene.style.translate='0 0';
+  let L=1e9,T=1e9,R=-1e9,B=-1e9;
+  cards.forEach(c=>{const r=c.querySelector('.face').getBoundingClientRect();L=Math.min(L,r.left);T=Math.min(T,r.top);R=Math.max(R,r.right);B=Math.max(B,r.bottom)});
+  T-=30; /* room for the folder tabs */
+  const st=stage.getBoundingClientRect(),pad=Math.max(36,st.width*.08),aw=st.width-pad*2;
+  const h1={top:document.querySelector('.top').getBoundingClientRect().bottom+44,bottom:document.querySelector('.top').getBoundingClientRect().bottom+120},acct=document.querySelector('.note').getBoundingClientRect();acct.bottom=acct.top-28;
+  const stacked=st.top>h1.bottom||st.bottom<acct.top; /* narrow window: panel above the text, use the panel itself */
+  const top=stacked?st.top+64:Math.max(st.top+64,h1.top),bot=stacked?st.bottom-pad:Math.min(st.bottom-pad,acct.bottom),ah=bot-top;
+  const z=Math.min(1.5,aw/(R-L),ah/(B-T));
+  const sx=scene.getBoundingClientRect();
+  /* the scene origin is the scale centre: move it so the scaled group's centre lands on the band's centre */
+  const gx=(L+R)/2-sx.left,gy=(B+T)/2-sx.top,tx=st.left+st.width/2,ty=top+ah/2;
+  iso.style.setProperty('--zoom',z);
+  scene.style.translate=`${tx-(sx.left+gx*z)}px ${ty-(sx.top+gy*z)}px`;
+  document.body.classList.remove('measure');
+}
+addEventListener('resize',fit);document.fonts.ready.then(fit);fit();
+
+/* ================= Onboarding steps =================
+   One shell for all 13 steps. The three files on the right are a live preview of what Tuck is building:
+   front = About you, middle = What I read, back = Your folders. Each step edits one of them. */
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* What each step needs before Continue works. Returns '' when complete, else what is missing. */
+const NEED_DET={student:['edu','field'],working:['employer','title'],freelance:['service'],founder:['company'],research:['rfield'],jobs:['target'],creative:['craft'],life:['admin'],
+  teaching:['tsubject'],health:['hrole'],legal:['lrole'],parent:['kids'],creator:['platform'],volunteer:['vorg'],hobby:['hobby'],retired:['ret']};
+const filled=k=>{const v=pv(k);return Array.isArray(v)?v.length>0:!!String(v||'').trim()};
+const NEED={name:()=>S.name?'':'Type your name to continue',
+  roles:()=>S.roles.size||(S.p.otherRole||'').trim()?'':'Pick at least one, or write your own',
+  details:()=>{const miss=[...S.roles].filter(r=>!(NEED_DET[r]||[]).every(filled));return miss.length?`Fill in ${miss.map(r=>RD[r][1]).join(', ')} to continue`:''},
+  feel:()=>S.levels.length?'':'Pick at least one way, or a mix',
+  folders:()=>FOLDERS.some(([n])=>fstate(n)!=='none')||S.extraFolders.length?'':'Tick at least one folder to read',
+  reading:()=>S.readDone||S.readN>=4402?'':'Wait for reading to finish',
+  questions:()=>(S.qs||[]).every(x=>S.qa[x.id]!=null)?'':'Answer each question to continue',
+  editor:()=>(S.edit||[]).length?'':'Keep at least one folder',
+  done:()=>S.mode>=0?'':'Pick one to finish'};
+function need(){const s=STEPS[si];return s&&NEED[s.id]?NEED[s.id]():''}
+function gate(shake){const nb=$('#step [data-next]');if(!nb)return;const m=need();nb.disabled=!!m;nb.classList.toggle('off',!!m);
+  let h=$('#step .needhint');if(m){if(!h){h=document.createElement('span');h.className='needhint';nb.parentNode.insertBefore(h,nb)}h.innerHTML=`<i class="ph ph-info"></i>${esc(m)}`;if(shake){h.classList.remove('shake');void h.offsetWidth;h.classList.add('shake')}}else if(h)h.remove()}
+const $=q=>document.querySelector(q),$$=q=>[...document.querySelectorAll(q)];
+const S={name:'',roles:new Set(),det:{school:'Columbia',subject:'Physics',year:'Second year',work:'GRC Associates',role:'',clients:'',company:'',field:''},
+  feel:-1,read:0,priv:new Set(['IDs and passports','Tax and bank','Health']),ai:{local:true,cloud:true},
+  folders:{Desktop:true,Documents:false,Downloads:true,Pictures:false,'iCloud Drive':false},readN:0,readDone:false,
+  keep:{ids:true,tax:true,health:true,chat:true},ans:[],edit:null,mode:-1,finished:false,
+  p:{edu:'Bachelor’s',school:'Columbia University',field:['Physics'],year:'Second year',employer:'GRC Associates'},levels:[],qa:{},qs:null,hidden:[],extraFolders:[],openF:{},
+  sub:{Desktop:{School:true,Projects:true,Screenshots:true,Misc:true},Documents:{},Downloads:{Installers:true,PDFs:true,Images:true,Zips:true},Pictures:{},'iCloud Drive':{}}};
+const RD={student:['graduation-cap','Student','Classes, labs, assignments'],working:['briefcase','Working','A job and its paperwork'],
+  freelance:['handshake','Freelance','Your own clients'],founder:['rocket-launch','Founder','Your own business'],
+  research:['flask','Researcher','Papers and data'],jobs:['paper-plane-tilt','Job hunting','Resumes and applications'],
+  creative:['palette','Creative work','Design, photo, video, music'],life:['house-line','Life admin','Bills, taxes, health, home'],
+  teaching:['chalkboard-teacher','Teaching','Lessons, grading, classes'],health:['stethoscope','Healthcare','Shifts, notes, records'],
+  legal:['scales','Legal','Cases, contracts, filings'],parent:['baby','Parent or carer','Kids, school forms, care'],
+  creator:['video-camera','Content creator','Posts, videos, sponsors'],volunteer:['hand-heart','Volunteering','A club, cause or community'],
+  hobby:['game-controller','Hobbies','Side projects and interests'],retired:['sun-horizon','Retired','Travel, family, finances']};
+const ORGF=()=>({'A client':'Clients','A past job':'Archive','My employer':'Work'})[S.qa.org]||'Work';
+const FOLD={student:()=>['graduation-cap',S.qa.terms==='By term'?`School › Fall 2026 › ${S.det.subject||'Classes'}`:S.qa.terms==='By year'?`School › 2026 › ${S.det.subject||'Classes'}`:`School › ${S.det.subject||'Classes'}`,'48 files'],working:()=>['briefcase',S.qa.org==='Not important'?'Work':`${ORGF()} › ${S.det.work||'Your job'}`,'71 files'],
+  freelance:()=>['handshake','Clients','33 files'],founder:()=>['rocket-launch',S.det.company||'Company','40 files'],research:()=>['flask','Research › Papers','52 files'],
+  jobs:()=>['paper-plane-tilt',S.qa.versions==='Newest on top'?'Job search › Resume (newest)':S.qa.versions==='By company'?'Job search › Applications':'Job search › Resumes','11 files'],creative:()=>['palette','Creative › Projects','26 files'],life:()=>['house-line','Life admin › Taxes & bills','19 files'],
+  teaching:()=>['chalkboard-teacher',`Teaching › ${pv('tsubject')[0]||'Classes'}`,'37 files'],health:()=>['stethoscope','Clinical › Notes','24 files'],legal:()=>['scales','Legal › Matters','29 files'],
+  parent:()=>['baby','Family › School & care','22 files'],creator:()=>['video-camera',`Content › ${pv('platform')[0]||'Posts'}`,'44 files'],volunteer:()=>['hand-heart',S.p.vorg||'Volunteering','14 files'],
+  hobby:()=>['game-controller',`Hobbies › ${pv('hobby')[0]||'Projects'}`,'18 files'],retired:()=>['sun-horizon','Personal › Admin','21 files']};
+const FEEL=[['squares-four','By what it\'s for','"my physics stuff", "GRC"',[['folder','School'],['folder','PHYS 1401'],['file-pdf','Lab 3.pdf']]],
+  ['calendar','By when','"last semester", "2025 taxes"',[['folder','2026'],['folder','Fall'],['file-pdf','Lab 3.pdf']]],
+  ['files','By what it is','"a PDF", "a screenshot"',[['folder','PDFs'],['file-pdf','Lab 3.pdf'],['folder','Images']]]];
+const FOLDERS=[['Desktop','desktop','2,590 files'],['Documents','file-text','1,204 files'],['Downloads','download-simple','1,812 files'],['Pictures','image','Photos library'],['iCloud Drive','cloud','312 files']];
+const PRIV=[['ids','identification-card','IDs and immigration',2,'I-94 Response.pdf, Passport scan.jpg'],['tax','bank','Tax and bank',6,'W-2 2025.pdf, 1099-INT.pdf'],
+  ['health','heartbeat','Health',1,'Vaccination record.pdf'],['chat','chat-circle-dots','Chat screenshots',214,'Screenshot 2026-10-22.png']];
+const QS=[['handshake','71 files mention GRC Associates.','Is GRC Associates a client you work for?',['Yes, a client','My employer','A past job','Not important']],
+  ['copy','11 versions of your resume.','Keep only the newest on top?',['Yes','No, keep all']],
+  ['calendar','Your courses span two terms.','Split school by term?',['Yes','No, by course only']]];
+const MODES=[['hand-palm','Ask me first','Tuck suggests, you tap Yes'],['lightning','Sort the obvious ones','Asks only when unsure'],['robot','Do it all','You can undo anything']];
+
+/* ---------- Profile pick lists, bundled offline. Based on the usual classifications job and school forms use
+   (education levels, fields of study, industries, job functions, common titles); "Other" is always allowed. ---------- */
+const EDU=['High school','Community college','Associate degree','Bachelor’s','Master’s','MBA','PhD / doctorate','Medical school (MD)','Law school (JD)','Bootcamp or certificate','Exchange or visiting','Continuing education'];
+const YEARS=['First year','Second year','Third year','Fourth year','Final year','Graduate','Just graduated'];
+const SCHOOLS=['Columbia University','Barnard College','New York University','The New School','CUNY Hunter College','Baruch College','Cornell University','Princeton University','Yale University','Harvard University','MIT','Stanford University','UC Berkeley','UCLA','University of Michigan','University of Chicago','Northwestern University','Duke University','University of Pennsylvania','Brown University','Dartmouth College','Johns Hopkins University','Carnegie Mellon University','Georgia Tech','University of Texas at Austin','University of Washington','University of Toronto','McGill University','University of British Columbia','University of Oxford','University of Cambridge','Imperial College London','UCL','LSE','King’s College London','University of Edinburgh','ETH Zürich','EPFL','TU Munich','Sciences Po','HEC Paris','Bocconi University','University of Amsterdam','KU Leuven','University of Melbourne','University of Sydney','ANU','National University of Singapore','Nanyang Technological University','University of Hong Kong','HKUST','Tsinghua University','Peking University','Fudan University','University of Tokyo','Kyoto University','Seoul National University','KAIST','Yonsei University','IIT Bombay','IIT Delhi','Technion','Tel Aviv University','American University of Beirut','University of Cape Town'];
+const FIELDS=['Accounting','Actuarial Science','Aerospace Engineering','African American Studies','Agricultural Science','Animation','Anthropology','Applied Mathematics','Applied Physics','Archaeology','Architecture','Art History','Astronomy','Astrophysics','Biochemistry','Bioengineering','Bioinformatics','Biology','Biomedical Engineering','Biophysics','Biostatistics','Business Administration','Chemical Engineering','Chemistry','Civil Engineering','Classics','Cognitive Science','Communications','Comparative Literature','Computer Engineering','Computer Science','Construction Management','Creative Writing','Criminology','Cybersecurity','Dance','Data Science','Dentistry','Design','Earth Science','East Asian Studies','Ecology','Economics','Education','Electrical Engineering','Energy Engineering','Engineering Physics','English','Entrepreneurship','Environmental Engineering','Environmental Science','Ethnic Studies','Fashion Design','Film and Media Studies','Finance','Fine Arts','Food Science','Forensic Science','French','Game Design','Gender Studies','Genetics','Geography','Geology','German','Global Health','Graphic Design','Health Sciences','History','Hospitality Management','Human Resources','Human-Computer Interaction','Industrial Design','Industrial Engineering','Information Systems','Interior Design','International Business','International Relations','Italian','Japanese','Journalism','Kinesiology','Korean','Latin American Studies','Law','Linguistics','Management','Marketing','Materials Science','Mathematics','Mechanical Engineering','Media Arts','Medicine','Middle Eastern Studies','Microbiology','Molecular Biology','Music','Music Production','Neuroscience','Nuclear Engineering','Nursing','Nutrition','Oceanography','Operations Research','Petroleum Engineering','Pharmacology','Pharmacy','Philosophy','Photography','Physical Therapy','Physics','Political Science','Pre-Law','Pre-Med','Psychology','Public Health','Public Policy','Real Estate','Religious Studies','Robotics','Russian','Social Work','Sociology','Software Engineering','Spanish','Sports Management','Statistics','Supply Chain Management','Sustainability','Theatre','Urban Planning','Veterinary Science','Visual Arts','Zoology'];
+const INDUSTRIES=['Accounting','Advertising and marketing','Aerospace and defense','Agriculture','Airlines and aviation','Apparel and fashion','Architecture and planning','Arts and culture','Automotive','Banking','Biotechnology','Broadcast media','Chemicals','Civic and social organization','Cloud and SaaS','Construction','Consulting (management)','Consulting (IT)','Consumer electronics','Consumer goods','Cybersecurity','Design','E-commerce','Education (higher ed)','Education (K-12)','E-learning','Energy (oil and gas)','Energy (renewables)','Entertainment','Environmental services','Events','Film and video','Financial services','Fintech','Food and beverage','Gaming','Government','Graphic design','Healthcare (hospitals)','Healthcare (clinics and private practice)','Health tech','Hospitality','Human resources','Import and export','Insurance','Interior design','Internet','Investment banking','Investment management','Journalism and news','Law (law firm)','Legal services','Logistics and supply chain','Luxury goods','Manufacturing','Maritime','Market research','Media production','Medical devices','Mining','Museums','Music','Nonprofit','Packaging','Pharmaceuticals','Philanthropy','Photography','Political organization','Printing','Private equity','Public relations','Public safety','Publishing','Real estate','Recruiting and staffing','Research','Restaurants','Retail','Robotics','Semiconductors','Software','Sports','Telecommunications','Think tanks','Tourism and travel','Transportation','Utilities','Venture capital','Veterinary','Warehousing','Wellness and fitness','Wholesale','Writing and editing'];
+const FUNCTIONS=['Accounting','Administrative','Arts and design','Business development','Community and social services','Consulting','Customer success and support','Data and analytics','Education and teaching','Engineering','Entrepreneurship','Finance','Healthcare services','Human resources','Information technology','Legal','Marketing','Media and communications','Military and protective services','Operations','Product management','Program and project management','Purchasing','Quality assurance','Real estate','Research','Sales','Software development','Strategy','Supply chain'];
+const TITLES=['Account Executive','Account Manager','Accountant','Actuary','Administrative Assistant','Analyst','Architect','Art Director','Associate','Associate Consultant','Attorney','Auditor','Barista','Bookkeeper','Brand Manager','Business Analyst','Business Development Representative','Buyer','Chef','Chief of Staff','Civil Engineer','Clinical Research Coordinator','Communications Manager','Community Manager','Consultant','Content Creator','Content Strategist','Copywriter','Counselor','Creative Director','Customer Success Manager','Customer Support Specialist','Data Analyst','Data Engineer','Data Scientist','Dentist','Designer','DevOps Engineer','Director','Doctor','Editor','Electrical Engineer','Engineering Manager','Event Coordinator','Executive Assistant','Financial Advisor','Financial Analyst','Founder','Freelance Designer','Freelance Developer','Freelance Writer','Front-end Developer','Full-stack Developer','Game Developer','Graphic Designer','HR Generalist','HR Manager','Illustrator','Intern','Investment Banking Analyst','IT Specialist','Journalist','Lab Technician','Lawyer','Lecturer','Legal Assistant','Librarian','Machine Learning Engineer','Management Consultant','Marketing Coordinator','Marketing Manager','Mechanical Engineer','Medical Assistant','Mobile Developer','Motion Designer','Musician','Nurse','Office Manager','Operations Associate','Operations Manager','Paralegal','Pharmacist','Photographer','Physical Therapist','Physician Assistant','Policy Analyst','Postdoctoral Researcher','Producer','Product Designer','Product Manager','Professor','Program Manager','Project Manager','Psychologist','Public Relations Specialist','QA Engineer','Real Estate Agent','Recruiter','Research Assistant','Research Scientist','Sales Associate','Sales Manager','Security Engineer','Social Media Manager','Social Worker','Software Engineer','Solutions Architect','Speech Therapist','Store Manager','Strategy Analyst','Student Worker','Supply Chain Analyst','Talent Acquisition Specialist','Teacher','Teaching Assistant','Technical Writer','Therapist','Translator','Tutor','UX Designer','UX Researcher','Veterinarian','Video Editor','Web Developer','Writer'];
+const SENIORITY=['Intern','Entry level','Associate','Mid level','Senior','Lead','Manager','Director','Executive','Owner'];
+const RROLES=['Undergraduate RA','Master’s student','PhD student','Postdoc','Faculty','Lab manager','Industry researcher','Independent'];
+const STAGES=['Idea','Pre-launch','Launched','Raising','Growing','Side project'];
+const JOBTYPES=['Internships','Full-time','Part-time','Grad school','Fellowships','Freelance work'];
+const TLEVELS=['Primary','Secondary','College or university','Tutoring','Corporate training','Online courses'];
+const HROLES=['Nurse','Physician','Resident','Therapist','Pharmacist','Dentist','Technician','Admin','Student'];
+const LROLES=['Attorney','Paralegal','Law student','Clerk','Compliance','In-house counsel'];
+const LAREAS=['Corporate','Litigation','Immigration','Family','Real estate','Criminal','IP','Employment','Tax'];
+const KIDS=['Newborn','Toddler','School age','Teen','Adult kids','Elder care'];
+const PLATFORMS=['YouTube','TikTok','Instagram','Podcast','Newsletter','Twitch','Blog','LinkedIn'];
+const CAUSES=['Church or faith','Sports club','School or PTA','Charity','Politics','Environment','Arts','Mutual aid'];
+const HOBBIES=['Gaming','Cooking','Fitness','Travel','Reading','DIY and repairs','Gardening','Collecting','Cars','Crafts'];
+const RETIRED=['Travel','Family','Health','Finances','Hobbies','Volunteering','Property'];
+/* ---------- Pick list (typeahead): search a long list, or keep what you typed. Single or several values. ---------- */
+const PK={year:YEARS,edu:EDU,school:SCHOOLS,field:FIELDS,industry:INDUSTRIES,func:FUNCTIONS,title:TITLES,target:TITLES,tind:INDUSTRIES,rfield:FIELDS,findustry:INDUSTRIES,service:FUNCTIONS,cindustry:INDUSTRIES,
+  tschool:SCHOOLS,tsubject:FIELDS,hplace:[],larea:LAREAS,vorg:[]};
+const pv=k=>S.p[k]==null?(PMULTI[k]?[]:''):S.p[k];
+const OWNCHIP={craft:1,admin:1,kids:1,platform:1,cause:1,hobby:1,ret:1,hrole:1,lrole:1,tlevel:1};
+const PMULTI={field:2,rfield:2,target:3,tind:3,clients:6,jobtype:9,craft:9,admin:9,tsubject:3,tlevel:9,kids:9,platform:9,cause:9,hobby:9,ret:9};
+const REQ=new Set(Object.values(NEED_DET).flat());
+function combo(k,label,ph){const m=PMULTI[k],v=pv(k);
+ return `<div class="fld cmb${m?' multi':''}" data-cmb="${k}"><label>${label}${REQ.has(k)?'<em class="req">required</em>':''}</label><div class="cmbbox">${m?v.map((x,i)=>`<span class="tag">${esc(x)}<button data-untag="${i}" aria-label="Remove ${esc(x)}"><i class="ph ph-x"></i></button></span>`).join(''):''}<input value="${m?'':esc(v)}" placeholder="${esc(m&&v.length>=m?'':ph)}" aria-label="${esc(label)}" autocomplete="off" ${m&&v.length>=m?'disabled':''}><i class="ph ph-caret-down cv"></i></div></div>`}
+function chipsPick(k,opts,multi){const v=pv(k),on=x=>multi?(v||[]).includes(x):v===x,all=multi?[...opts,...(v||[]).filter(x=>!opts.includes(x))]:opts;
+ return `<div class="chips" data-pk="${k}" ${multi?'data-multi="1"':''}>${all.map(x=>`<button class="${on(x)?'on':''}" data-pv="${esc(x)}">${esc(x)}</button>`).join('')}${OWNCHIP[k]?`<span class="ownchip"><i class="ph ph-plus"></i><input data-own="${k}" placeholder="Add your own" aria-label="Add your own"></span>`:''}</div>`}
+let CMBL=null;
+function wireCombos(root){root.querySelectorAll('[data-cmb]').forEach(w=>{const k=w.dataset.cmb,list=PK[k]||[],inp=w.querySelector('input'),m=PMULTI[k];let hi=0,items=[];
+  const close=()=>{if(CMBL){CMBL.remove();CMBL=null}};
+  const choose=val=>{val=val.trim();if(!val)return;flyAnswer(inp,val,2);if(m){const a=pv(k).slice();if(!a.includes(val)&&a.length<m)a.push(val);S.p[k]=a}else S.p[k]=val;
+   syncDet();close();const step=STEPS[si];$('#step .body').innerHTML=step.body();step.wire();paintCards();
+   const again=$(`[data-cmb="${k}"] input`);if(again&&m&&!again.disabled)again.focus()};
+  const open=()=>{const cur=inp.value.trim(),picked=list.find(x=>x.toLowerCase()===cur.toLowerCase());const q=picked?'':cur.toLowerCase();const starts=list.filter(x=>x.toLowerCase().startsWith(q)),has=list.filter(x=>!x.toLowerCase().startsWith(q)&&x.toLowerCase().includes(q));
+   items=[...starts,...has].filter(x=>!(m&&pv(k).includes(x))).slice(0,q?8:list.length);if(q&&!list.some(x=>x.toLowerCase()===q))items.push({own:inp.value.trim()});hi=picked?Math.max(0,items.indexOf(picked)):0;close();
+   if(!items.length)return;const r=inp.getBoundingClientRect();CMBL=document.createElement('div');CMBL.className='cmbl';CMBL.setAttribute('role','listbox');
+   const up=r.bottom+310>innerHeight&&r.top>320;CMBL.style.cssText=`left:${r.left-14}px;${up?`bottom:${innerHeight-r.top+12}px`:`top:${r.bottom+12}px`};width:${Math.max(r.width+28,240)}px`;
+   CMBL.innerHTML=items.map((x,i)=>x.own?`<button data-ci="${i}" class="own"><i class="ph ph-plus"></i>Use “${esc(x.own)}”</button>`:`<button data-ci="${i}">${q?esc(x).replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','i'),'<b>$1</b>'):esc(x)}</button>`).join('')+(q?'':`<div class="cmbf">${list.length} options · type to search, or write your own</div>`);
+   document.body.appendChild(CMBL);paintHi();if(picked){const h=CMBL.querySelector('.hi');if(h)h.scrollIntoView({block:'center'})}CMBL.querySelectorAll('[data-ci]').forEach(b=>b.onmousedown=e=>{e.preventDefault();const x=items[+b.dataset.ci];choose(x.own||x)})};
+  const paintHi=()=>{if(CMBL)CMBL.querySelectorAll('[data-ci]').forEach((b,i)=>b.classList.toggle('hi',i===hi))};
+  inp.onfocus=()=>{open();if(inp.value)inp.select()};inp.oninput=()=>{if(!m){S.p[k]=inp.value;syncDet();paintCards()}open()};inp.onblur=()=>{const mine=CMBL;setTimeout(()=>{if(CMBL===mine)close()},120)};
+  inp.onkeydown=e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();hi=(hi+(e.key==='ArrowDown'?1:-1)+items.length)%items.length;paintHi()}
+   else if(e.key==='Enter'){e.preventDefault();const x=items[hi];if(x)choose(x.own||x);else choose(inp.value)}else if(e.key==='Escape')close()
+   else if(e.key==='Backspace'&&m&&!inp.value&&pv(k).length){S.p[k]=pv(k).slice(0,-1);choose('')}};
+  w.querySelector('.cv').onclick=()=>inp.focus();
+  w.querySelectorAll('[data-untag]').forEach(b=>b.onclick=()=>{const a=pv(k).slice();a.splice(+b.dataset.untag,1);S.p[k]=a;syncDet();const step=STEPS[si];$('#step .body').innerHTML=step.body();step.wire();paintCards()})});
+ root.querySelectorAll('[data-pk]').forEach(g=>{const k=g.dataset.pk,multi=g.dataset.multi;g.querySelectorAll('[data-pv]').forEach(b=>b.onclick=()=>{const v=b.dataset.pv;
+  if(multi){const a=pv(k).slice(),i=a.indexOf(v);i<0?a.push(v):a.splice(i,1);S.p[k]=a;b.classList.toggle('on')}else{S.p[k]=S.p[k]===v?'':v;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b&&S.p[k]===v))}
+  syncDet();paintCards()})});
+ root.querySelectorAll('[data-own]').forEach(i=>i.onkeydown=e=>{if(e.key!=='Enter'||!i.value.trim())return;e.preventDefault();const k=i.dataset.own,a=pv(k).slice();if(!a.includes(i.value.trim()))a.push(i.value.trim());S.p[k]=a;
+  const step=STEPS[si];$('#step .body').innerHTML=step.body();step.wire();paintCards();const n=$(`[data-own="${k}"]`);if(n)n.focus()})}
+/* the old single fields still feed folder names and tips */
+function syncDet(){S.det.school=S.p.school||'';S.det.subject=(pv('field')[0])||'';S.det.year=S.p.year||'';S.det.work=S.p.employer||'';S.det.role=S.p.title||'';S.det.company=S.p.company||'';S.det.field=pv('rfield')[0]||''}
+/* one line per role, shown on the About you card and saved to the profile */
+function roleLine(r){const p=S.p,j=(...a)=>a.filter(Boolean).join(' · ');
+ return ({student:j(p.edu,pv('field').join(' + '),p.school&&p.school.replace(/ University$/,''),p.year),working:j(p.title,p.employer,p.industry),freelance:j(p.service,pv('clients').length?pv('clients').length+' clients':'',p.findustry),
+  founder:j(p.company,p.cindustry,p.stage),research:j(pv('rfield').join(' + '),p.rrole),jobs:j(pv('target').slice(0,2).join(', '),pv('jobtype').join(', ')),creative:pv('craft').join(', '),life:pv('admin').join(', '),
+  teaching:j(pv('tsubject').join(' + '),p.tschool,pv('tlevel').join(', ')),health:j(p.hrole,p.hplace),legal:j(p.lrole,p.larea),parent:pv('kids').join(', '),creator:pv('platform').join(', '),
+  volunteer:j(p.vorg,pv('cause').join(', ')),hobby:pv('hobby').join(', '),retired:pv('ret').join(', ')})[r]||''}
+const DET=r=>({
+ student:`<div class="two">${combo('edu','Level','e.g. Bachelor’s')}${combo('year','Year','e.g. Second year')}</div><div class="two">${combo('school','School','Start typing your school')}${combo('field','Field of study','e.g. Physics')}</div>`,
+ working:`<div class="two">${combo('employer','Where you work','Company or organisation')}${combo('title','Your role','e.g. Analyst')}</div><div class="two">${combo('industry','Industry','Search industries')}${combo('func','Team or function','e.g. Finance')}</div><div class="lbl sm">Level</div>${chipsPick('level',SENIORITY)}`,
+ freelance:`${combo('clients','Clients','Names, press Enter after each')}<div class="two">${combo('service','What you do','e.g. Design')}${combo('findustry','For which industry','Search industries')}</div>`,
+ founder:`<div class="two">${combo('company','Company','Company name')}${combo('cindustry','Industry','Search industries')}</div><div class="lbl sm">Stage</div>${chipsPick('stage',STAGES)}`,
+ research:`${combo('rfield','Field','e.g. Neuroscience')}<div class="lbl sm">You are</div>${chipsPick('rrole',RROLES)}`,
+ jobs:`${combo('target','Roles you’re applying for','e.g. Data Analyst')}${combo('tind','Industries','Search industries')}<div class="lbl sm">Looking for</div>${chipsPick('jobtype',JOBTYPES,1)}`,
+ creative:`<div class="lbl sm">What you make<em class="req">required</em></div>`+chipsPick('craft',['Design','Photos','Video','Music','Writing','3D','Illustration','Podcast'],1),
+ life:`<div class="lbl sm">What you handle<em class="req">required</em></div>`+chipsPick('admin',['Taxes','Bills','Health','Car','Home','Travel','Pets','Insurance','Kids'],1),
+ teaching:`<div class="two">${combo('tschool','Where you teach','School or institution')}${combo('tsubject','Subjects','e.g. Mathematics')}</div><div class="lbl sm">Level</div>${chipsPick('tlevel',TLEVELS,1)}`,
+ health:`<div class="lbl sm">You are<em class="req">required</em></div>${chipsPick('hrole',HROLES)}${combo('hplace','Where you work','Hospital, clinic or practice')}`,
+ legal:`<div class="lbl sm">You are<em class="req">required</em></div>${chipsPick('lrole',LROLES)}${combo('larea','Practice area','e.g. Immigration')}`,
+ parent:`<div class="lbl sm">Who you care for<em class="req">required</em></div>${chipsPick('kids',KIDS,1)}`,
+ creator:`<div class="lbl sm">Where you post<em class="req">required</em></div>${chipsPick('platform',PLATFORMS,1)}`,
+ volunteer:`${combo('vorg','Organisation','Club, church, charity')}<div class="lbl sm">Kind</div>${chipsPick('cause',CAUSES,1)}`,
+ hobby:`<div class="lbl sm">What you\'re into<em class="req">required</em></div>${chipsPick('hobby',HOBBIES,1)}`,
+ retired:`<div class="lbl sm">What your files are mostly about<em class="req">required</em></div>${chipsPick('ret',RETIRED,1)}`})[r];
+['clients'].forEach(k=>PK[k]=[]);
+
+/* ---------- Find files: pick one or more styles; their order becomes the folder levels ---------- */
+const SAMP=[['file-pdf','Lab 3.pdf',['School › PHYS 1401','2026 › Fall','PDFs']],['file-doc','Invoice 0043.pdf',['Work › GRC Associates','2026 › October','PDFs']],['image','Screenshot Oct 22.png',['Personal','2026 › October','Images']]];
+const MIXES=[[0,1],[1,0],[2,1],[0]];
+const lvlName=['What it’s for','When','What it is'];
+const samplePath=s=>S.levels.map(l=>s[2][l]).join(' › ');
+
+/* ---------- Folders: each folder opens into its subfolders; tick all, some or none ---------- */
+const SUB={Desktop:[['School',412],['Projects',890],['Screenshots',214],['Misc',1074]],Documents:[['Work',402],['Taxes',38],['Personal',211],['Old stuff',553]],
+ Downloads:[['Installers',312],['PDFs',980],['Images',420],['Zips',100]],Pictures:[['Photos Library',0],['Screenshots',2300],['Wallpapers',40]],'iCloud Drive':[['Notes',60],['Shared',152],['Keynote',100]]};
+const fstate=n=>{const c=SUB[n].filter(([s])=>S.sub[n][s]).length;return c===0?'none':c===SUB[n].length?'all':'some'};
+const fcount=n=>SUB[n].filter(([s])=>S.sub[n][s]).reduce((a,[,c])=>a+c,0);
+function syncFolders(){FOLDERS.forEach(([n])=>S.folders[n]=fstate(n)!=='none')}
+
+/* ---------- Mac file picker (prototype of NSOpenPanel) ---------- */
+const PFS={Desktop:[['School','f'],['Projects','f'],['Screenshots','f'],['Passport scan copy.jpg','i'],['Therapy notes.pdf','p'],['Bank statement Sep.pdf','p']],
+ Documents:[['Taxes','f'],['Medical','f'],['Work','f'],['Personal','f'],['Journal.docx','d'],['Lease 2026.pdf','p']],
+ Downloads:[['Old Phone Backup','f'],['Installers','f'],['1099-INT.pdf','p'],['Offer letter.pdf','p'],['IMG_2210.HEIC','i']],
+ 'iCloud Drive':[['Notes','f'],['Shared','f'],['Family','f'],['Diary.pages','d']]};
+function macPicker({title,prompt,folders},done){let loc='Desktop',sel=new Set();const D=document.createElement('div');D.className='mpick';
+ const paint=()=>{D.innerHTML=`<div class="mpw" role="dialog" aria-label="${esc(title)}"><div class="mpt"><span class="mpl"><i></i><i></i><i></i></span><button class="mpnav" disabled><i class="ph ph-caret-left"></i></button><button class="mpnav" disabled><i class="ph ph-caret-right"></i></button><span class="mploc"><i class="ph-fill ph-folder"></i>${esc(loc)}<i class="ph ph-caret-up-down"></i></span><span class="mpsr"><i class="ph ph-magnifying-glass"></i>Search</span></div>
+  <div class="mpb"><nav class="mps"><small>Favourites</small>${Object.keys(PFS).map(n=>`<button class="${n===loc?'on':''}" data-loc="${esc(n)}"><i class="ph ph-${({Desktop:'desktop',Documents:'file-text',Downloads:'download-simple','iCloud Drive':'cloud'})[n]}"></i>${esc(n)}</button>`).join('')}</nav>
+  <div class="mpf"><div class="mph"><span>Name</span><span>Kind</span></div>${PFS[loc].map(([n,k])=>{const id=loc+'/'+n,dis=folders&&k!=='f';return `<button class="mpr${sel.has(id)?' on':''}${dis?' dis':''}" data-id="${esc(id)}" ${dis?'disabled':''}><i class="ph${k==='f'?'-fill':''} ph-${k==='f'?'folder':k==='i'?'image':k==='d'?'file-doc':'file-pdf'}"></i><span>${esc(n)}</span><small>${k==='f'?'Folder':k==='i'?'Image':'Document'}</small></button>`}).join('')}</div></div>
+  <div class="mpfoot"><span>${sel.size?`${sel.size} selected`:prompt}</span><button class="mpbtn" data-mx>Cancel</button><button class="mpbtn pri" data-mok ${sel.size?'':'disabled'}>${esc(title)}</button></div></div>`;
+  D.querySelectorAll('[data-loc]').forEach(b=>b.onclick=()=>{loc=b.dataset.loc;paint()});
+  D.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const id=b.dataset.id;sel.has(id)?sel.delete(id):sel.add(id);paint()});
+  D.querySelector('[data-mx]').onclick=()=>D.remove();
+  D.querySelector('[data-mok]').onclick=()=>{D.remove();done([...sel].map(id=>{const [l,...r]=id.split('/'),n=r.join('/'),k=(PFS[l].find(x=>x[0]===n)||[])[1];return {id,name:n,loc:l,folder:k==='f'}}))}};
+ paint();document.body.appendChild(D)}
+
+/* ---------- Quick questions, built from what reading found. Each signal has a question, answers, and what each answer
+   teaches Tuck (a profile fact and a sorting rule). The three most useful for this person are asked. ---------- */
+const SIGNALS=()=>{const org=S.p.employer||(pv('clients')[0])||'GRC Associates',sub=pv('field')[0]||'Physics',co=S.p.company||'Your company',vo=S.p.vorg||'Your club',R=k=>S.roles.has(k);return [
+ /* each question comes from something seen while reading, only for roles you picked, and every one takes your own words too */
+ {id:'org',ic:'handshake',seen:`${org} appears in 71 files`,ex:['Invoice 0043.pdf','GRC Website Proposal.docx','Contract draft.pdf'],q:`What is ${org} to you?`,open:'e.g. my parent’s business, a club I run',w:(R('working')||R('freelance'))?10:(R('founder')?6:3),
+  a:[['My employer',`${org} is your employer`,`Files about ${org} go to Work › ${org}`],['A client',`${org} is a client`,`Files about ${org} go to Clients › ${org}`],['A past job',`You used to work at ${org}`,`Files about ${org} go to Archive › ${org}`],
+     ['Not important',`${org} is not a folder of its own`,`Files about ${org} are sorted by what they are`]]},
+ {id:'terms',ic:'calendar',seen:'Your courses span two terms',ex:['Spring 2026 syllabus.pdf','PHYS 1401 Lab 3.pdf'],q:'How should school be split?',open:'e.g. by professor',w:R('student')?9:0,
+  a:[['By term','You think of school by term',`School › Fall 2026 › ${sub}`],['By course only','You think of school by course',`School › ${sub}`],['By year','You think of school by year',`School › 2026 › ${sub}`],['By kind','You keep notes, assignments and readings apart',`School › ${sub} › Assignments`]]},
+ {id:'versions',ic:'copy',seen:'11 versions of your resume',ex:['Resume (6).pdf','Resume (5).pdf','Resume final FINAL.pdf'],q:'How should applications be kept?',open:'e.g. by recruiter',w:R('jobs')?9:0,
+  a:[['Newest on top','You keep the newest resume','Job search › Resume (newest), older ones in Old versions'],['Keep every version','You want every version side by side','All versions stay together'],['By company','You track applications by company','Job search › Applications › Google'],['By role','You track applications by role','Job search › Data Analyst']]},
+ {id:'clients',ic:'briefcase',seen:'Invoices and contracts for 4 clients',ex:['Invoice 0043.pdf','SOW Acme.docx','Brand deck v3.pdf'],q:'How should client work be kept?',open:'e.g. by retainer',w:R('freelance')?9:0,
+  a:[['By client','You think client first','Clients › Acme › Invoice 0043.pdf'],['By year, then client','You look things up by year','Clients › 2026 › Acme'],['By kind','You keep invoices and contracts apart','Clients › Invoices, Clients › Contracts'],['Money apart','Invoices live in one place','Clients › Acme for work, Finance › Invoices for money']]},
+ {id:'company',ic:'rocket-launch',seen:`Pitch decks, contracts and finances for ${co}`,ex:['Pitch deck v7.pdf','SAFE Acme.pdf','P&L Q3.xlsx'],q:`How should ${co} be arranged?`,open:'e.g. by investor',w:R('founder')?9:0,
+  a:[['By function','You think in teams',`${co} › Finance, Legal, Product`],['By project','You think in launches',`${co} › Launch v2`],['By quarter','You think by quarter',`${co} › 2026 Q4`],['One folder','You want it all in one place',`${co}, sorted inside by what each file is`]]},
+ {id:'papers',ic:'flask',seen:'23 papers and 6 datasets',ex:['Smith 2024 sleep.pdf','trial_data_v3.csv'],q:'How should research be kept?',open:'e.g. by grant',w:R('research')?9:0,
+  a:[['By project','You think by study','Research › Sleep study › Papers'],['By topic','You think by subject','Research › Neuroscience'],['Papers and data apart','You keep reading and data separate','Research › Papers, Research › Data'],['By year','You think by when','Research › 2026']]},
+ {id:'projects',ic:'palette',seen:'26 design and video files',ex:['Brand refresh v4.fig','Promo cut 3.mp4'],q:'How should creative work be grouped?',open:'e.g. by season',w:R('creative')?8:0,
+  a:[['By project','You think in projects','Creative › Brand refresh'],['By client','You think in clients','Creative › Acme'],['By medium','You keep design, video and audio apart','Creative › Video, Creative › Design'],['By year','You think by when','Creative › 2026']]},
+ {id:'classes',ic:'chalkboard-teacher',seen:'Lessons and grading for 3 classes',ex:['Fractions lesson.key','Math 9 grades.xlsx'],q:'How should teaching be kept?',open:'e.g. by period',w:R('teaching')?9:0,
+  a:[['By class','You think class first','Teaching › Math 9'],['By term, then class','You think by term','Teaching › Fall 2026 › Math 9'],['By kind','You keep lessons and grading apart','Teaching › Lessons, Teaching › Grading'],['By unit','You think by topic','Teaching › Math 9 › Fractions']]},
+ {id:'clinic',ic:'stethoscope',seen:'Rotas, notes and training certificates',ex:['Rota Oct.pdf','BLS certificate.pdf'],q:'How should work files be kept?',open:'e.g. by ward',w:R('health')?9:0,
+  a:[['By kind','You think by what a file is','Clinical › Rotas, Notes, Training'],['By month','You think by when','Clinical › 2026-10'],['Work and training apart','You keep CPD separate','Clinical, Training'],['By workplace','You work in more than one place','Clinical › Mount Sinai']]},
+ {id:'matters',ic:'scales',seen:'Filings and contracts across 5 matters',ex:['Smith v Jones brief.docx','Acme MSA.pdf'],q:'How should matters be kept?',open:'e.g. by court',w:R('legal')?9:0,
+  a:[['By matter','You think matter first','Legal › Smith v. Jones'],['By client','You think client first','Legal › Acme › Contracts'],['By kind','You keep contracts and filings apart','Legal › Contracts, Legal › Filings'],['By year','You think by when','Legal › 2026']]},
+ {id:'kids',ic:'baby',seen:'School forms and health records for your family',ex:['Permission slip.pdf','Vaccination card.jpg'],q:'How should family files be kept?',open:'e.g. by school',w:R('parent')?9:0,
+  a:[['By person','You think per child','Family › Maya › School'],['By kind','You think by what a file is','Family › School, Family › Health'],['One family folder','You want it all in one place','Family'],['By year','You think by when','Family › 2026']]},
+ {id:'posts',ic:'video-camera',seen:'44 clips, thumbnails and scripts',ex:['Ep 12 thumb.png','Ep 12 script.docx'],q:'How should content be kept?',open:'e.g. by series',w:R('creator')?9:0,
+  a:[['By video or post','You think per piece','Content › Ep 12 › Clips'],['By platform','You think per channel','Content › YouTube'],['By month','You think by when','Content › 2026-10'],['By kind','You keep scripts and thumbnails apart','Content › Scripts, Content › Thumbnails']]},
+ {id:'club',ic:'hand-heart',seen:`Flyers and sign-up sheets for ${vo}`,ex:['Spring fair flyer.pdf','Sign-ups.xlsx'],q:`How should ${vo} files be kept?`,open:'e.g. by committee',w:R('volunteer')?8:0,
+  a:[['By event','You think per event',`${vo} › Spring fair`],['By kind','You think by what a file is',`${vo} › Flyers, Sign-ups`],['By year','You think by when',`${vo} › 2026`],['One folder','You want it all in one place',vo]]},
+ {id:'hobbies',ic:'game-controller',seen:'Files from 3 hobbies',ex:['Sourdough notes.md','Deck build plan.pdf'],q:'How should hobby files be kept?',open:'e.g. by season',w:R('hobby')?7:0,
+  a:[['By hobby','You think per hobby','Hobbies › Cooking'],['By project','You think per project','Hobbies › Deck build'],['One folder','You want it all in one place','Hobbies'],['Mixed with the rest','Hobbies are not special','Sorted by what each file is about']]},
+ {id:'personal',ic:'sun-horizon',seen:'Travel bookings, pension letters and photos',ex:['Italy itinerary.pdf','Pension statement.pdf'],q:'How should personal files be kept?',open:'e.g. by family member',w:R('retired')?9:0,
+  a:[['By kind','You think by what a file is','Personal › Travel, Pension, Photos'],['By year','You think by when','Personal › 2026'],['By trip or event','You think by occasion','Personal › Italy 2026'],['One folder','You want it all in one place','Personal']]},
+ {id:'shots',ic:'image-square',seen:'214 screenshots on your Desktop',ex:['Screenshot 2026-10-22.png','Screenshot 2026-10-19.png'],q:'What should happen to screenshots?',open:'e.g. keep receipts, bin the rest',w:6,
+  a:[['Group by month','You keep screenshots for later','Screenshots go to Screenshots › Month'],['Sort them by topic','Screenshots matter to your work','Screenshots join the folder they are about'],['Clear after 30 days','Screenshots are temporary','Screenshots older than 30 days are suggested for Tidy Up'],['Leave them','Screenshots stay put','Screenshots are never moved']]},
+ {id:'bills',ic:'receipt',seen:'19 bills and receipts',ex:['Con Edison Sep.pdf','Order #1123.pdf'],q:'Keep bills and receipts how?',open:'e.g. by card',w:(R('life')||R('retired')||R('parent'))?8:3,
+  a:[['By year','You file money things by year','Bills go to Life admin › Bills › 2026'],['By who sent them','You look up bills by company','Bills go to Life admin › Bills › Con Edison'],['By kind','You keep utilities and shopping apart','Life admin › Utilities, Life admin › Receipts'],['Receipts only','Bills are paid and done','Receipts kept, bills suggested for Tidy Up']]}
+ ].filter(x=>x.w>0).sort((x,y)=>y.w-x.w).slice(0,3)};
+
+
+/* ---------- Every answer travels: a small chip carrying what you picked flies from the left into the card it changes,
+   the card pulses, and the changed line slides in. Transform-only, so the 3D cards keep their thickness. ---------- */
+const CARD_FOR={name:2,roles:2,details:2,feel:0,protect:1,folders:1,private:1,questions:0,editor:0,done:2};
+function flyAnswer(from,text,ci){if(!text||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const c=cards[ci];if(!c)return;const a=from.getBoundingClientRect(),t=c.querySelector('.face .in').getBoundingClientRect();
+ const f=document.createElement('div');f.className='flyer';f.textContent=text.length>34?text.slice(0,32)+'…':text;document.body.appendChild(f);
+ const w=f.offsetWidth,h=f.offsetHeight,x0=a.left+a.width/2-w/2,y0=a.top+a.height/2-h/2,x1=t.left+t.width*.45-w/2,y1=t.top+t.height*.42-h/2;
+ f.style.transform=`translate(${x0}px,${y0}px) scale(1)`;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{f.style.transform=`translate(${x1}px,${y1}px) scale(.82)`;f.classList.add('go')}));
+ setTimeout(()=>{f.remove();c.classList.remove('got');void c.offsetWidth;c.classList.add('got')},620)}
+document.addEventListener('click',e=>{const st=$('#step');if(!st||!st.contains(e.target))return;const s=STEPS[si];if(!s||s.welcome)return;
+ const b=e.target.closest('[data-role],[data-feel],[data-mix],[data-pv],[data-read],[data-priv],[data-ai],[data-fold],[data-sub],[data-keep],[data-a],[data-mode],[data-unhide],[data-untag]');if(!b)return;
+ let txt=(b.querySelector('b')||b).textContent.trim();
+ if(b.matches('.sw,[data-ai],[data-keep]')){const row=b.closest('.li');const name=row&&row.querySelector('b')?row.querySelector('b').textContent.split(' · ')[0]:'';txt=(b.classList.contains('off')?'Off: ':'On: ')+name}
+ if(b.matches('[data-fold],[data-sub]')){const row=b.closest('.li,.sub');txt=row?(row.querySelector('b')||row.querySelector('.grow')).textContent.trim():txt}
+ if(b.matches('[data-unhide],[data-untag]'))txt='Removed';
+ const ci=s.id==='questions'&&b.matches('[data-a]')?0:CARD_FOR[s.id]??s.focus;setTimeout(()=>flyAnswer(b,txt,ci),0)},true);
+/* typed answers fly when you finish (Enter, pick from a list, or leave the box) */
+document.addEventListener('change',e=>{const st=$('#step');if(!st||!st.contains(e.target)||!e.target.value)return;const s=STEPS[si];flyAnswer(e.target,e.target.value.trim(),CARD_FOR[s.id]??2)},true);
+
+function proposed(){
+  if(S.edit)return S.edit.map(x=>[x.ic,x.name,x.n]);
+  let r=[...S.roles].map(k=>FOLD[k]());
+  const L=S.levels;
+  if(L[0]===1)r=r.map(([ic,n,c])=>['calendar',`2026 › ${n}`,c]);
+  else if(L[0]===2)r=[['file-pdf','PDFs','1,980 files'],['image','Images','1,104 files'],['file-text','Documents','612 files']].map(([ic,n,c])=>[ic,L[1]===1?`${n} › 2026`:L[1]===0?`${n} › by topic`:n,c]);
+  else if(L[1]===1)r=r.map(([ic,n,c])=>[ic,`${n} › 2026`,c]);
+  else if(L[1]===2)r=r.map(([ic,n,c])=>[ic,`${n} › PDFs`,c]);
+  if(S.keepShown)r.push(['lock-simple','Private',`${223+S.hidden.length} ${S.hidden.length?'items':'files'}, never sent`]);
+  return r;
+}
+const chip=(ic,t,cls='')=>`<span class="chip ${cls}"><i class="ph-fill ph-${ic}"></i>${esc(t)}</span>`;
+const rows=list=>`<div class="rows">${list.map(([ic,n,c,ph])=>`<div class="row${ph?' phold':''}"><i class="ph-fill ph-${ic}"></i><b>${esc(n)}</b><span>${esc(c||'')}</span></div>`).join('')}</div>`;
+/* What Tuck says on each step: specific to the page, using what he already knows about you */
+const nm=(pre=', ')=>S.name?pre+S.name:'';
+const TIPS={
+  account:()=>"Hi! Sign in with Google or Apple and we'll get going.",
+  start:()=>"Press Let's Start. You can stop at any step, and nothing moves in Finder.",
+  name:()=>S.name?`Nice to meet you${nm()}! Press Enter or Continue.`:"What should I call you? Press Enter when you're done.",
+  roles:()=>S.roles.size?`${S.roles.size} picked${nm()}. Add more if they fit, then Continue.`:`Pick everything you use this Mac for${nm()}. I'll look for those.`,
+  details:()=>S.roles.has('student')?`I'll look for ${S.det.subject||'your subject'} and ${S.det.school||'your school'} inside your files.`:S.roles.has('working')?`I'll look for ${S.det.work||'your workplace'} inside your files.`:"Names here help me spot your files.",
+  feel:()=>S.levels.length?`${S.levels.map(l=>lvlName[l]).join(', then ')}. Watch where the files go on the right.`:"Tap one or more. The order you tap becomes the order of folders.",
+  protect:()=>`${[...S.priv].map(x=>x.split(' ')[0]).join(', ')||'Nothing'} stay private. Tap a chip to change that.`,
+  folders:()=>{const n=Object.values(S.folders).filter(Boolean).length+S.extraFolders.length;return n?`${n} folder${n>1?'s':''} ticked. Open one to choose its subfolders.`:"Tick at least one folder for me to read."},
+  reading:()=>S.readN>=4402?"Done reading. Continue to check what stays private.":"I'm reading on this Mac. You can continue, I'll keep going.",
+  private:()=>"These look private. Switch off anything that isn't, and I'll sort it normally.",
+  questions:()=>S.qs&&S.qs.every(x=>S.qa[x.id]!=null)?"Thanks! I saved these to your profile.":"I found these while reading. Each answer changes your folders on the right.",
+  editor:()=>`${(S.edit||[]).length} folders. Click a name to rename it, or add your own.`,
+  done:()=>"Most people pick 'Sort the obvious ones'. You can change it per folder later.",
+  finished:()=>`All set${nm()}! Find me in the menu bar any time.`};
+function tipText(){return (S.finished?TIPS.finished:TIPS[STEPS[si].id]||(()=>''))()}
+function sayTip(){if(typeof T==='undefined'||['held','air'].includes(T.mode))return;say(tipText())}
+function paintCards(){
+  const ins=cards.map(c=>c.querySelector('.face .in')),id=(STEPS[si]||{}).id;
+  /* back: Your folders, or, while choosing how you find files, where three real files would land */
+  if(id==='feel'&&S.levels.length)ins[0].innerHTML=chip('arrow-bend-down-right','Where your files would go')+rows(SAMP.map(x=>[x[0],samplePath(x),x[1]]));
+  else{let f=proposed();const more=f.length>3?f.length-2:0;if(more)f=[...f.slice(0,2),['dots-three','+'+more+' more','']];
+   ins[0].innerHTML=chip('tree-structure','Your folders')+(f.length?rows(f):rows([['folder','Waiting for your answers','',1],['folder','Built from what you pick','',1]]))}
+  /* middle: What I read (folders, the subfolders picked, what stays private) */
+  const pct=Math.round(S.readN/4402*100),pick=FOLDERS.filter(([n])=>fstate(n)!=='none').map(([n,ic])=>[ic,n,fstate(n)==='all'?fcount(n).toLocaleString()+' files':`${SUB[n].filter(([x])=>S.sub[n][x]).length} of ${SUB[n].length} folders`]).concat(S.extraFolders.map(x=>['folder-plus',x.name,'added']));
+  const lim=S.readN?2:3,fr=pick.length>lim?[...pick.slice(0,lim-1),['dots-three',`+${pick.length-lim+1} more`,'']]:pick;
+  ins[1].innerHTML=chip('book-open-text','What I read')+
+    (S.readN?`<div class="prow"><span class="pnum">${S.readN.toLocaleString()} of 4,402 files read</span><div class="pbar"><i style="width:${pct}%"></i></div></div>`:'')+
+    rows(fr.length?fr:[['folder','No folders yet','',1]])+
+    (id==='protect'?`<div class="lockp"><i class="ph-fill ph-${S.read?'text-aa':'files'}"></i>${S.read?'Names and details only':'Every page, on this Mac'} · AI: ${[S.ai.local&&'on-device',S.ai.cloud&&'Claude'].filter(Boolean).join(' + ')||'off'}</div>`:'')+
+    (si>=6?`<div class="lockp"><i class="ph-fill ph-lock-simple"></i>Private: ${esc([...S.priv].map(x=>x.split(' ')[0]).join(', ')||'nothing')}${S.hidden.length?` + ${S.hidden.length} you added`:''}</div>`:'');
+  /* front: About you, one line per role from the pick lists */
+  const r=[...S.roles];
+  setTimeout(refreshTip);
+  const tail=id==='questions'&&S.lastFact?`<p class="learn">Learned: ${esc(S.lastFact)}.</p>`:S.mode>=0?`<span class="badge"><i class="ph-fill ph-${MODES[S.mode][0]}"></i>${MODES[S.mode][1]}</span>`:
+     (r.length>2||S.levels.length)?`<p>${[r.length>2?'+'+(r.length-2)+' more':'',S.levels.length?'Finds files by '+S.levels.map(l=>lvlName[l].toLowerCase()).join(', then '):''].filter(Boolean).join(' · ')}.</p>`:'';
+  ins[2].innerHTML=chip('user','About you')+`<h3 class="ttl${S.name?'':' dim'}">${esc(S.name||'Your name')}</h3>`+
+    (r.length||S.p.otherRole?rows([...r.slice(0,2).map(k=>{const l=roleLine(k);return [RD[k][0],l||RD[k][1],l?RD[k][1]:RD[k][2]]}),...(S.p.otherRole&&r.length<2?[['user-plus',S.p.otherRole,'Your words']]:[])]):'')+tail;
+  /* rows that are new or changed slide in, so the panel visibly answers what you just did */
+  ins.forEach(el=>{const now=[...el.querySelectorAll('.row')].map(x=>x.textContent);if(el._prev)el.querySelectorAll('.row').forEach((x,i)=>{if(!el._prev.includes(now[i]))x.classList.add('fresh')});el._prev=now});
+  gate();
+}
+function refreshTip(){if(typeof bubble!=='undefined'&&bubble.classList.contains('on')&&bubble.textContent!==tipText())bubble.textContent=tipText()}
+function focusCard(i){cards.forEach((c,k)=>c.classList.toggle('focus',k===i))}
+
+const STEPS=[
+ {id:'account',label:'Account',welcome:1,focus:-1},
+ {id:'start',label:'Start',title:'Ready to sort your Mac?',why:'About 5 minutes. Stop any time. Nothing moves in Finder.',next:'Let\'s Start',focus:-1,guide:'Press Start when you\'re ready',
+  body:()=>`<div class="plan">${[['user-circle','About you','What you use this Mac for.','1 min'],['folders','Pick folders','What I read, and what stays private.','1 min'],['book-open-text','I read your files','Every page, right here on this Mac.','2 min'],['tree-structure','Your folders','I propose them, you edit every one.','1 min']].map(([ic,b,s,t],i)=>`<div class="pl"><span class="n">${i+1}</span><i class="ph ph-${ic}"></i><span class="grow"><b>${b}</b><small>${s}</small></span><span class="t">${t}</span></div>`).join('')}</div>`},
+ {id:'name',label:'Name',title:'What should I call you?',why:'So I can talk to you like a person.',focus:2,guide:'Type your name, then Continue',
+  body:()=>`<div class="fld"><input class="big" id="nm" value="${esc(S.name)}" placeholder="Your first name" aria-label="Your name" autocomplete="given-name"></div>`,
+  wire:()=>{const n=$('#nm');n.focus();n.oninput=()=>{S.name=n.value.trim();paintCards()};n.onkeydown=e=>{if(e.key==='Enter')go(1)}}},
+ {id:'roles',label:'Roles',title:'What do you use this Mac for?',why:'Pick all that apply. Nothing is picked until you tap.',focus:2,guide:'Pick what fits, then Continue',
+  body:()=>`<div class="opts">${Object.entries(RD).map(([id,[ic,l,s]])=>`<button class="opt${S.roles.has(id)?' on':''}" data-role="${id}"><i class="ph ph-${ic}"></i><span><b>${l}</b><small>${s}</small></span><span class="tick"><i class="ph-bold ph-check"></i></span></button>`).join('')}</div><div class="fld open" style="margin-top:10px"><label><span class="otag">Your words</span>Something else?</label><input id="roleother" value="${esc(S.p.otherRole||'')}" placeholder="e.g. Caregiver, athlete, church volunteer"></div>`,
+  wire:()=>{$$('[data-role]').forEach(b=>b.onclick=()=>{const k=b.dataset.role;S.roles.has(k)?S.roles.delete(k):S.roles.add(k);b.classList.toggle('on');paintCards()});
+   const o=$('#roleother');if(o)o.oninput=()=>{S.p.otherRole=o.value;paintCards()}}},
+ {id:'details',label:'Details',title:'Tell me a bit more',why:'Only about what you picked. Names help me spot your files.',focus:0,guide:'Fill these in, then Continue',
+  body:()=>S.roles.size?[...S.roles].map(r=>`<div class="det"><h4><i class="ph ph-${RD[r][0]}"></i>${RD[r][1]}</h4>${DET(r)}</div>`).join(''):`<div class="li"><i class="ph ph-info"></i><span class="grow">You didn't pick anything, so there's nothing to ask. Continue.</span></div>`,
+  wire:()=>wireCombos($('#step'))},
+ {id:'feel',label:'Feel',title:'How do you usually look for a file?',why:'Just the general feel. I propose the actual folders after I read your files, and you edit every one.',focus:0,guide:'Pick one, then Continue',
+  body:()=>`<div class="opts one">${FEEL.map(([ic,l,s,mini],i)=>{const pos=S.levels.indexOf(i);return `<button class="opt${pos>=0?' on':''}" data-feel="${i}"><i class="ph ph-${ic}"></i><span><b>${l}</b><small>${s}</small><span class="mini">${mini.map(([mi,mn],d)=>`<span style="padding-left:${d*12}px"><i class="ph-fill ph-${mi}"></i>${mn}</span>`).join('')}</span></span><span class="tick">${pos>=0?`<span class="lvn">${pos+1}</span>`:''}</span></button>`}).join('')}</div>
+   <div class="mixbar"><div class="lbl sm">Or pick a mix</div><div class="chips">${MIXES.map(m=>`<button data-mix="${m.join(',')}" class="${m.join()===S.levels.join()?'on':''}">${m.map(l=>lvlName[l]).join(' › ')}</button>`).join('')}</div></div>
+   <div class="hint"><i class="ph ph-info"></i>Tap one or more. The first is the top folder, the next goes inside it. Tap again to remove.</div>`,
+  wire:()=>{const re=()=>{S.feel=S.levels.length?S.levels[0]:-1;$('#step .body').innerHTML=STEPS[si].body();STEPS[si].wire();paintCards()};
+   $$('[data-feel]').forEach(b=>b.onclick=()=>{const i=+b.dataset.feel,p=S.levels.indexOf(i);p<0?S.levels.push(i):S.levels.splice(p,1);re()});
+   $$('[data-mix]').forEach(b=>b.onclick=()=>{S.levels=b.dataset.mix.split(',').map(Number);re()})}},
+ {id:'protect',label:'Privacy',title:'Your privacy, before I open anything',why:'Reading happens on this Mac. Change it any time in Tuck › Privacy and AI.',focus:1,guide:'Check these, then Continue',
+  body:()=>`<div class="lbl">How much may I read?</div><div class="opts">${[['files','Everything, on this Mac','Recommended. How I sort well.'],['text-aa','Names and details only','Faster, much less accurate.']].map(([ic,l,s],i)=>`<button class="opt${S.read===i?' on':''}" data-read="${i}"><i class="ph ph-${ic}"></i><span><b>${l}</b><small>${s}</small></span><span class="tick"><i class="ph-bold ph-check"></i></span></button>`).join('')}</div>
+   <div class="lbl">Keep these private</div><div class="chips">${['IDs and passports','Tax and bank','Health','Chat screenshots','Photos of people'].map(x=>`<button class="${S.priv.has(x)?'on':''}" data-priv="${esc(x)}">${x}</button>`).join('')}</div>
+   <div class="hint"><i class="ph ph-info"></i>Private files are read on this Mac only, never sent to any AI, and never moved without asking.</div>
+   <div class="lbl">AI</div>
+   <div class="li"><i class="ph ph-cpu"></i><span class="grow"><b>On-device AI</b><small>Reads and sorts on this Mac. Nothing is sent.</small></span><button class="sw${S.ai.local?'':' off'}" data-ai="local" aria-label="On-device AI"></button></div>
+   <div class="li"><i class="ph ph-cloud"></i><span class="grow"><b>Claude (cloud AI)</b><small>Better folders and chat. Never sees private files.</small></span><button class="sw${S.ai.cloud?'':' off'}" data-ai="cloud" aria-label="Claude cloud AI"></button></div>`,
+  wire:()=>{$$('[data-read]').forEach(b=>b.onclick=()=>{S.read=+b.dataset.read;$$('[data-read]').forEach(x=>x.classList.toggle('on',x===b));paintCards()});
+   $$('[data-priv]').forEach(b=>b.onclick=()=>{const k=b.dataset.priv;S.priv.has(k)?S.priv.delete(k):S.priv.add(k);b.classList.toggle('on');paintCards()});
+   $$('[data-ai]').forEach(b=>b.onclick=()=>{S.ai[b.dataset.ai]=!S.ai[b.dataset.ai];b.classList.toggle('off');paintCards()})}},
+ {id:'folders',label:'Folders',title:'Which folders should I read?',why:'Nothing is read until the next step. Code projects and app folders are always skipped.',next:'Allow and Start Reading',focus:1,guide:'Tick folders, then start reading',
+  body:()=>FOLDERS.map(([n,ic,c])=>{const st=fstate(n),op=S.openF[n],k=SUB[n].filter(([x])=>S.sub[n][x]).length;return `<div class="fgrp${op?' open':''}"><div class="li fl ${st}"><button class="cb3" data-fold="${esc(n)}" aria-label="Read ${esc(n)}"><i class="ph-bold ph-${st==='some'?'minus':'check'}"></i></button><i class="ph ph-${ic}"></i><span class="grow"><b>${n}</b>${st==='some'?`<small>${k} of ${SUB[n].length} subfolders</small>`:''}</span><span class="meta">${c}</span><button class="exp" data-open="${esc(n)}" aria-label="Show subfolders of ${esc(n)}" aria-expanded="${!!op}"><i class="ph ph-caret-down"></i></button></div>${op?`<div class="subs">${SUB[n].map(([x,cn])=>`<button class="sub${S.sub[n][x]?' on':''}" data-sub="${esc(n)}|${esc(x)}"><span class="cb"><i class="ph-bold ph-check"></i></span><i class="ph-fill ph-folder"></i><span class="grow">${esc(x)}</span><span class="meta">${cn?cn.toLocaleString()+' files':'Library'}</span></button>`).join('')}</div>`:''}</div>`}).join('')
+   +S.extraFolders.map((x,i)=>`<div class="li fl all"><span class="cb3"><i class="ph-bold ph-check"></i></span><i class="ph-fill ph-folder-plus"></i><span class="grow"><b>${esc(x.name)}</b><small>in ${esc(x.loc)}</small></span><button class="x" data-rmf="${i}" aria-label="Remove ${esc(x.name)}"><i class="ph ph-x"></i></button></div>`).join('')
+   +`<button class="addf" id="addfold"><i class="ph ph-plus"></i>Add another folder…</button><div class="hint"><i class="ph ph-shield-warning"></i>Open a folder to pick its subfolders. macOS asks you to allow each folder when you continue.</div>`,
+  wire:()=>{const re=()=>{syncFolders();$('#step .body').innerHTML=STEPS[si].body();STEPS[si].wire();paintCards();refreshTip()};
+   $$('[data-fold]').forEach(b=>b.onclick=()=>{const n=b.dataset.fold,on=fstate(n)!=='all';SUB[n].forEach(([x])=>S.sub[n][x]=on);re()});
+   $$('[data-open]').forEach(b=>b.onclick=()=>{const n=b.dataset.open;S.openF[n]=!S.openF[n];re()});
+   $$('[data-sub]').forEach(b=>b.onclick=()=>{const [n,x]=b.dataset.sub.split('|');S.sub[n][x]=!S.sub[n][x];re()});
+   $$('[data-rmf]').forEach(b=>b.onclick=()=>{S.extraFolders.splice(+b.dataset.rmf,1);re()});
+   $('#addfold').onclick=()=>macPicker({title:'Add',prompt:'Choose folders for Tuck to read',folders:true},list=>{list.forEach(x=>{if(!S.extraFolders.some(y=>y.id===x.id))S.extraFolders.push(x)});re()})}},
+ {id:'reading',label:'Reading',title:'Reading your files',why:'Names first, then every page, all on this Mac. You can leave; reading keeps going in the background.',focus:1,guide:'Keep going, I\'ll keep reading',
+  body:()=>`<div class="rtop"><div><div class="bigc" id="rc">${S.readN.toLocaleString()}</div><div class="rmeta" style="margin-top:4px">of 4,402 files read</div></div><button class="pill soft" id="rp" style="height:40px;padding:0 14px;font-size:13.5px"><i class="ph ph-pause"></i>Pause</button></div>
+   <div class="rbar"><i id="rb" style="width:${S.readN/4402*100}%"></i></div><div class="rmeta" id="re">Starting…</div>
+   <div class="lbl">Just read</div><div class="feed" id="feed"></div>`,
+  wire:startReading},
+ {id:'private',label:'Private files',title:'I found files that look private',why:'Using the kinds you chose. These are never read further, never sorted with AI, never sent. Change any of them.',focus:0,guide:'Check these, then Continue',
+  body:()=>PRIV.map(([k,ic,l,n,ex])=>`<div class="li"><i class="ph ph-${ic}"></i><span class="grow"><b>${l} · ${n}</b><small>${esc(ex)}</small></span><button class="sw${S.keep[k]?'':' off'}" data-keep="${k}" aria-label="Keep ${l} private"></button></div>`).join('')+`<div class="hint"><i class="ph ph-info"></i>Switch off anything that isn't actually private.</div>`
+   +`<div class="lbl sm">Also keep private${S.hidden.length?` · ${S.hidden.length}`:''}</div>`+S.hidden.map((x,i)=>`<div class="li"><i class="ph ph-${x.folder?'folder-lock':'file-lock'}"></i><span class="grow"><b>${esc(x.name)}</b><small>${x.folder?'Whole folder':'File'} in ${esc(x.loc)}</small></span><button class="x" data-unhide="${i}" aria-label="Stop hiding ${esc(x.name)}"><i class="ph ph-x"></i></button></div>`).join('')
+   +`<button class="addf" id="hidemore"><i class="ph ph-eye-slash"></i>Hide more files or folders…</button>`,
+  enter:()=>{S.keepShown=true},
+  wire:()=>{const re=()=>{$('#step .body').innerHTML=STEPS[si].body();STEPS[si].wire();paintCards()};
+   $$('[data-keep]').forEach(b=>b.onclick=()=>{S.keep[b.dataset.keep]=!S.keep[b.dataset.keep];b.classList.toggle('off')});
+   $$('[data-unhide]').forEach(b=>b.onclick=()=>{S.hidden.splice(+b.dataset.unhide,1);re()});
+   $('#hidemore').onclick=()=>macPicker({title:'Keep Private',prompt:'Choose files or whole folders to keep private'},list=>{list.forEach(x=>{if(!S.hidden.some(y=>y.id===x.id))S.hidden.push(x)});re()})}},
+ {id:'questions',label:'Questions',title:'A few quick questions',why:'From what I saw while reading, only about what you picked. Answers stay on this Mac.',focus:0,guide:'Answer, then Continue',
+  enter:()=>{S.qs=SIGNALS()},body:()=>`<div id="qq"></div>`,wire:paintQ},
+ {id:'editor',label:'Your folders',title:'Your folders',why:'Built from what I read and your answers. Rename, remove or add. Nothing moves in Finder.',next:'Use These Folders',focus:0,guide:'Happy with these? Continue',
+  enter:()=>{if(!S.edit)S.edit=proposed().map(([ic,name,n])=>({ic,name,n}))},
+  body:()=>`<div class="ed" id="ed"></div><button class="addf" id="addf"><i class="ph ph-plus"></i>Add folder</button>`,wire:paintEd},
+ {id:'done',label:'How hands-on',title:'How hands-on should I be from now on?',why:'For new files that arrive. Change it per folder any time.',next:'Finish and Open Tuck',focus:2,guide:'Pick one and finish',
+  enter:()=>{if(S.mode<0)S.mode=1},
+  body:()=>`<div class="opts one">${MODES.map(([ic,l,s],i)=>`<button class="opt${S.mode===i?' on':''}" data-mode="${i}"><i class="ph ph-${ic}"></i><span><b>${l}</b><small>${s}</small></span><span class="tick"><i class="ph-bold ph-check"></i></span></button>`).join('')}</div>`,
+  wire:()=>$$('[data-mode]').forEach(b=>b.onclick=()=>{S.mode=+b.dataset.mode;$$('[data-mode]').forEach(x=>x.classList.toggle('on',x===b));paintCards()})}];
+
+const HELP={account:'An account only syncs your settings across your Macs. Your files never leave this Mac.',start:'Nothing moves until you say so. I ask a few questions, read the folders you pick, then you edit the folders I propose.',
+  name:'Only so I can talk to you naturally. It stays on this Mac.',roles:'Roles tell me what to look for: courses for students, clients for freelancers, applications for job hunting.',
+  details:'It helps me recognise your school or company names inside files. Only the first field of each is required.',feel:'This only sets the general shape. You edit every folder later.',
+  protect:'I read on this Mac. Private kinds are recognised here and never sent to any AI.',folders:'Pick as few or as many as you like. You can add folders later from Tuck.',
+  reading:'Reading continues in the background if you move on or close the window.',private:'Switch off anything that isn\'t private, and I\'ll sort it normally.',
+  questions:'Your answers rename and regroup the proposed folders on the right.',editor:'Folders here are Tuck\'s view. Finder stays exactly as it is.',done:'You can change this per folder any time in Tuck.'};
+
+let si=0,RT=0;
+/* Questions come from signals found while reading (see SIGNALS). An answer saves a profile fact and a sorting rule. */
+function paintQ(){const Q=$('#qq');if(!Q)return;const qs=S.qs||(S.qs=SIGNALS()),k=qs.findIndex(x=>S.qa[x.id]==null);
+  const learned=qs.filter(x=>S.qa[x.id]!=null).map(x=>{const a=x.a.find(a=>a[0]===S.qa[x.id]);return `<div class="li ql" data-redo="${x.id}" title="Change this answer"><i class="ph ph-${x.ic}"></i><span class="grow"><small>${esc(x.q)}</small><b>${esc(a[0])}</b><em>${esc(a[2])}</em></span><span class="x"><i class="ph ph-pencil-simple"></i></span></div>`}).join('');
+  if(k<0){Q.innerHTML=learned+`<div class="fld open" style="margin-top:12px"><label><span class="otag">Your words</span>Anything else I should know? <em>Optional</em></label><textarea id="qnote" rows="2" placeholder="e.g. I keep tax stuff together by year. Never touch my Thesis folder.">${esc(S.p.note||'')}</textarea></div><div class="hint"><i class="ph ph-check-circle"></i>Saved to your profile. Change any answer later in Settings › About You.</div>`;
+   const nt=$('#qnote');nt.oninput=()=>{S.p.note=nt.value}}
+  else{const x=qs[k];Q.innerHTML=`<div class="qcard"><div class="ctx"><i class="ph ph-${x.ic}"></i>${esc(x.seen)} · ${k+1} of ${qs.length}</div><h3>${esc(x.q)}</h3><div class="qex">For example ${x.ex.map(esc).join(', ')}</div><div class="ans">${x.a.map(([l,,rule])=>`<button data-a="${esc(l)}"><b>${esc(l)}</b><small>${esc(rule)}</small></button>`).join('')}${x.open?`<div class="qown"><span class="otag">Your words</span><input id="qown" placeholder="Something else… ${esc(x.open)}"><button id="qok" aria-label="Save"><i class="ph-bold ph-arrow-right"></i></button></div>`:''}</div></div>`+learned;
+   const qo=$('#qown');if(qo){const save=()=>{const v=qo.value.trim();if(!v)return;x.a.push([v,`Your words: ${v}`,'Tuck follows this, and asks when unsure']);S.qa[x.id]=v;S.edit=null;S.lastFact=`${v}`;paintCards();paintQ()};qo.onkeydown=e=>{if(e.key==='Enter')save()};$('#qok').onclick=save}
+   $$('[data-a]').forEach(b=>b.onclick=()=>{S.qa[x.id]=b.dataset.a;S.edit=null;S.lastFact=x.a.find(a=>a[0]===b.dataset.a)[1];paintCards();paintQ()})}
+  $$('[data-redo]').forEach(r=>r.onclick=()=>{delete S.qa[r.dataset.redo];S.edit=null;paintQ();paintCards()})}
+function paintEd(){const E=$('#ed');
+  E.innerHTML=S.edit.map((f,i)=>`<div class="li"><i class="ph-fill ph-${f.ic}"></i><input value="${esc(f.name)}" data-ei="${i}" aria-label="Folder name"><span class="meta">${esc(f.n)}</span><button class="x" data-ex="${i}" aria-label="Remove ${esc(f.name)}"><i class="ph ph-x"></i></button></div>`).join('')||`<div class="li"><i class="ph ph-info"></i><span class="grow">No folders. Add one, or go back and pick what you use this Mac for.</span></div>`;
+  $$('[data-ei]').forEach(i=>i.oninput=()=>{S.edit[+i.dataset.ei].name=i.value;paintCards()});
+  $$('[data-ex]').forEach(b=>b.onclick=()=>{S.edit.splice(+b.dataset.ex,1);paintEd();paintCards()});
+  $('#addf').onclick=()=>{S.edit.push({ic:'folder',name:'New folder',n:'0 files'});paintEd();paintCards();const ins=$$('[data-ei]');ins[ins.length-1].select()}}
+function startReading(){clearInterval(RT);if(S.readN>=4402){$('#re').textContent='Done. Next: confirm what stays private.';$('#rp').disabled=true;return}
+  const F=[['PHYS 1401 Lab 3.pdf','Downloads','PHYS 1401','graduation-cap'],['GRC Website Proposal.docx','Desktop','GRC Associates','briefcase'],['Resume (6).pdf','Downloads','Job search','paper-plane-tilt'],['W-2 2025.pdf','Downloads','Private','lock-simple'],['Screenshot 2026-10-22.png','Desktop','Screenshots','image'],['Invoice 0043.pdf','Downloads','GRC Associates','briefcase'],['Lecture 10.pdf','Downloads','PHYS 1401','graduation-cap']];
+  let fi=0,paused=false;
+  $('#rp').onclick=()=>{paused=!paused;$('#rp').innerHTML=paused?'<i class="ph ph-play"></i>Resume':'<i class="ph ph-pause"></i>Pause';if(paused)$('#re').textContent='Paused. Nothing is read while paused.'};
+  const tick=()=>{if(paused)return;const here=!!$('#rc');if(S.readN>=4402){S.readDone=true;if(here)$('#re').textContent='Done. Next: confirm what stays private.';clearInterval(RT);gate();return}
+    S.readN=Math.min(4402,S.readN+211);const [n,loc,t,ic]=F[fi++%F.length];if(!here){paintCards();return}
+    $('#rc').textContent=S.readN.toLocaleString();$('#rb').style.width=(S.readN/4402*100)+'%';
+    const left=Math.round((4402-S.readN)/211*.6);$('#re').textContent=left<1?'Almost done':`About ${left} seconds left`;
+    $('#feed').insertAdjacentHTML('afterbegin',`<div class="li"><i class="ph ph-file"></i><span class="grow"><b>${esc(n)}</b><small>${loc}</small></span><span class="tchip"><i class="ph-fill ph-${ic}"></i>${esc(t)}</span></div>`);
+    [...$('#feed').children].slice(4).forEach(x=>x.remove());paintCards()};
+  tick();RT=setInterval(tick,600)}
+
+/* the shell */
+function progress(){return `<div class="prog" aria-hidden="true">${STEPS.map((x,j)=>`<i class="${j===si?'on':''}${j<si?' past':''}" ${j<si?`data-jump="${j}"`:''} title="${esc(x.label)}"></i>`).join('')}</div><span class="lbl2">${si+1} of ${STEPS.length} · ${esc(STEPS[si].label)}</span>`}
+function go(d){const s=STEPS[si];if(d>0&&need()){gate(true);return}if(s.leave)s.leave();show(si+d)}
+function show(i){
+  const prev=STEPS[si];if(prev&&prev.leave&&i!==si)prev.leave();
+  si=Math.max(0,Math.min(STEPS.length-1,i));const s=STEPS[si];if(s.enter)s.enter();
+  $('.steps').innerHTML=progress();
+  $$('[data-jump]').forEach(b=>b.onclick=()=>show(+b.dataset.jump));
+  $('#askpop').classList.remove('on');
+  const W=$('#step');
+  if(s.welcome){W.innerHTML=WELCOME;W.querySelectorAll('.acct .pill').forEach(b=>b.onclick=()=>go(1))}
+  else W.innerHTML=`<h2 class="st">${esc(s.title)}</h2><p class="why">${esc(s.why)}</p><div class="body">${s.body()}</div>
+    <div class="actions">${si>0?'<button class="pill soft" data-back><i class="ph ph-arrow-left"></i>Back</button>':''}${s.skip?'<button class="skip" data-skip>Skip</button>':''}<button class="pill primary" data-next>${esc(s.next||'Continue')}<i class="ph-bold ph-arrow-right"></i></button></div>`;
+  W.classList.remove('anim');void W.offsetWidth;W.classList.add('anim');
+  $$('#step .chips button').forEach(b=>{if(!b.dataset.priv&&!b.closest('[data-pk]')&&!b.dataset.mix)b.onclick=()=>b.classList.toggle('on')});
+  const nb=$('#step [data-next]');if(nb)nb.onclick=()=>{if(s.id==='done'){finish();return}go(1)};
+  const bb=$('#step [data-back]');if(bb)bb.onclick=()=>go(-1);
+  const sk=$('#step [data-skip]');if(sk)sk.onclick=()=>go(1);
+  if(s.wire)s.wire();gate();
+  $('.note').innerHTML=s.welcome?'<i class="ph-fill ph-shield-check"></i>An account only syncs your settings. Your files never leave this Mac.':'<i class="ph-fill ph-shield-check"></i>Everything here stays on this Mac until you say otherwise.';
+  $('.cap b').textContent=s.welcome?'What Tuck does':'What I\'m building for you';
+  $('.cap span').textContent=s.welcome?'Examples, not your files':'Updates as you answer';
+  if(s.welcome)restoreWelcomeCards();else paintCards();
+  focusCard(s.focus);
+  if(window.onStep)onStep(s);
+  sayTip();
+}
+function finish(){
+  S.finished=true;$('.steps').innerHTML=progress().replace(/class="on"/,'class="past"');
+  const W=$('#step');W.innerHTML=`<h2 class="st">All set${S.name?', '+esc(S.name):''}.</h2><p class="why">I'm sorting new files in ${esc(FOLDERS.filter(([n])=>S.folders[n]).map(([n])=>n).join(' and ')||'your folders')} the way you chose. Open Tuck any time from the menu bar.</p>
+    <div class="body"><div class="li"><i class="ph ph-tree-structure"></i><span class="grow"><b>${proposed().length} folders ready</b><small>Nothing moved in Finder</small></span></div><div class="li"><i class="ph ph-lock-simple"></i><span class="grow"><b>${S.priv.size} kinds kept private</b><small>Never sent to any AI</small></span></div></div>
+    <div class="actions"><button class="pill primary" id="openTuck">Open Tuck<i class="ph-bold ph-arrow-right"></i></button></div>`;
+  $('#openTuck').onclick=()=>{if(window.parent!==window)parent.postMessage('tuck-ob-done','*')};
+  W.classList.remove('anim');void W.offsetWidth;W.classList.add('anim');paintCards();focusCard(-1);if(window.onStep)onStep({done:1});sayTip();
+}
+let WELCOME='',WCARDS=[];
+function restoreWelcomeCards(){cards.forEach((c,i)=>c.querySelector('.face .in').innerHTML=WCARDS[i])}
+function initSteps(){
+  WELCOME=$('#step').innerHTML;WCARDS=cards.map(c=>c.querySelector('.face .in').innerHTML);
+  const ask=$('.ask'),pop=$('#askpop');
+  if(ask)ask.onclick=e=>{e.stopPropagation();const s=STEPS[si];pop.innerHTML=`<b><img class="tm" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjE0IDIwIDE3MiAxNzgiIHdpZHRoPSIyMDAiIGhlaWdodD0iMjIwIiB4bWxuczpjMnBhPSJodHRwOi8vYzJwYS5vcmcvbWFuaWZlc3QiPgo8ZGVmcz48ZmlsdGVyIGlkPSJyIiB4PSItMTAlIiB5PSItMTAlIiB3aWR0aD0iMTIwJSIgaGVpZ2h0PSIxMjAlIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC4wMzUiIG51bU9jdGF2ZXM9IjIiIHNlZWQ9IjQiLz48ZmVEaXNwbGFjZW1lbnRNYXAgaW49IlNvdXJjZUdyYXBoaWMiIHNjYWxlPSIzLjUiLz48L2ZpbHRlcj48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjAuMyIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0I0RDJGRiIvPjxzdG9wIG9mZnNldD0iLjU1IiBzdG9wLWNvbG9yPSIjM0Q4NEZGIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMUY1QkUwIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+Cgo8ZyBmaWx0ZXI9InVybCgjcikiPjxyZWN0IHg9IjY4IiB5PSIyNiIgd2lkdGg9IjY0IiBoZWlnaHQ9IjQ4IiByeD0iOCIgZmlsbD0iIzlDQzNGRiIgdHJhbnNmb3JtPSJyb3RhdGUoNiAxMDAgNTApIi8+CjxyZWN0IHg9IjM4IiB5PSI0MCIgd2lkdGg9IjU2IiBoZWlnaHQ9IjMwIiByeD0iMTEiIGZpbGw9IiNEQ0UyRUMiIHRyYW5zZm9ybT0icm90YXRlKC00IDEwMCAxMTApIi8+CjxyZWN0IHg9IjcyIiB5PSIxNTgiIHdpZHRoPSIyMCIgaGVpZ2h0PSIzMCIgcng9IjEwIiBmaWxsPSIjRjJGM0Y3Ii8+PHJlY3QgeD0iMTEwIiB5PSIxNTgiIHdpZHRoPSIyMCIgaGVpZ2h0PSIzMCIgcng9IjEwIiBmaWxsPSIjRjJGM0Y3Ii8+CjxyZWN0IHg9IjM0IiB5PSI1NCIgd2lkdGg9IjEzMiIgaGVpZ2h0PSIxMTYiIHJ4PSIyNiIgZmlsbD0iI0YyRjNGNyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHBhdGggZD0iTTM4IDk2IEM3OCA4OCAxMjQgODYgMTY0IDg0IiBmaWxsPSJub25lIiBzdHJva2U9IiNDOUQyRTMiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTMwIDExOCBDMTggMTIwIDE0IDEzNiAyNCAxNDIgQzMyIDE0NiAzOCAxMzggMzYgMTMwIFoiIGZpbGw9IiNGMkYzRjciLz48cGF0aCBkPSJNMTY4IDExMiBDMTgwIDExMiAxODYgMTI4IDE3NiAxMzUgQzE2OCAxNDAgMTYyIDEzMiAxNjQgMTI0IFoiIGZpbGw9IiNGMkYzRjciLz48ZWxsaXBzZSBjeD0iODIiIGN5PSIxMjQiIHJ4PSI2LjUiIHJ5PSI4LjUiIGZpbGw9IiMxODIzM0EiLz48ZWxsaXBzZSBjeD0iMTIwIiBjeT0iMTIxIiByeD0iNi41IiByeT0iOC41IiBmaWxsPSIjMTgyMzNBIi8+PGNpcmNsZSBjeD0iODQiIGN5PSIxMjEiIHI9IjIiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxMjIiIGN5PSIxMTgiIHI9IjIiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNOTUgMTQwIFExMDEgMTQ1IDEwNyAxMzkiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE4MjMzQSIgc3Ryb2tlLXdpZHRoPSIzLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvZz4KPC9zdmc+" alt="">Tuck</b>${esc(HELP[s.id]||'')}`;
+    const a=ask.getBoundingClientRect(),l=$('.left').getBoundingClientRect();pop.style.left=Math.max(12,a.right-l.left-300)+'px';pop.style.top=(a.bottom-l.top+8)+'px';pop.classList.toggle('on')};
+  document.addEventListener('click',e=>{if(!pop.contains(e.target))pop.classList.remove('on')});
+  show(0);
+}
+
+
+/* ---------- Tuck: the desktop roaming Tuck (prototypes/roam/src.html), on this page ----------
+   In the file: hover to make him climb up, press and drag to take him out.
+   Out: drag and throw (gravity, bounces, skids, grabs a wall if thrown hard), double-click to send him home.
+   Left alone, he walks over and stands on the main button to say what to do next. Drop him on the file: home. */
+const POSES={"idle": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzIiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz48cmVjdCB4PSIxMTAiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz4KPHJlY3QgeD0iMzQiIHk9IjU0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjExNiIgcng9IjI2IiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPgo8cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzAgMTE4IEMxOCAxMjAgMTQgMTM2IDI0IDE0MiBDMzIgMTQ2IDM4IDEzOCAzNiAxMzAgWiIgZmlsbD0iI0YyRjNGNyIvPjxwYXRoIGQ9Ik0xNjggMTEyIEMxODAgMTEyIDE4NiAxMjggMTc2IDEzNSBDMTY4IDE0MCAxNjIgMTMyIDE2NCAxMjQgWiIgZmlsbD0iI0YyRjNGNyIvPjxlbGxpcHNlIGN4PSI4MiIgY3k9IjEyNCIgcng9IjYuNSIgcnk9IjguNSIgZmlsbD0iIzE4MjMzQSIvPjxlbGxpcHNlIGN4PSIxMjAiIGN5PSIxMjEiIHJ4PSI2LjUiIHJ5PSI4LjUiIGZpbGw9IiMxODIzM0EiLz48Y2lyY2xlIGN4PSI4NCIgY3k9IjEyMSIgcj0iMiIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjEyMiIgY3k9IjExOCIgcj0iMiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik05NSAxNDAgUTEwMSAxNDUgMTA3IDEzOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTgyMzNBIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9nPgo8L3N2Zz4=", "blink": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzIiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz48cmVjdCB4PSIxMTAiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz4KPHJlY3QgeD0iMzQiIHk9IjU0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjExNiIgcng9IjI2IiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPgo8cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzAgMTE4IEMxOCAxMjAgMTQgMTM2IDI0IDE0MiBDMzIgMTQ2IDM4IDEzOCAzNiAxMzAgWiIgZmlsbD0iI0YyRjNGNyIvPjxwYXRoIGQ9Ik0xNjggMTEyIEMxODAgMTEyIDE4NiAxMjggMTc2IDEzNSBDMTY4IDE0MCAxNjIgMTMyIDE2NCAxMjQgWiIgZmlsbD0iI0YyRjNGNyIvPjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE4MjMzQSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiPjxwYXRoIGQ9Ik03NiAxMjUgTDg4IDEyNSIvPjxwYXRoIGQ9Ik0xMTQgMTIyIEwxMjYgMTIyIi8+PC9nPjxwYXRoIGQ9Ik05NSAxNDAgUTEwMSAxNDUgMTA3IDEzOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTgyMzNBIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9nPgo8L3N2Zz4=", "walkA": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzIiIHk9IjE1MSIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz48cmVjdCB4PSIxMTAiIHk9IjE2MSIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz4KPHJlY3QgeD0iMzQiIHk9IjU0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjExNiIgcng9IjI2IiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPgo8cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzAgMTE4IEMxOCAxMjAgMTQgMTM2IDI0IDE0MiBDMzIgMTQ2IDM4IDEzOCAzNiAxMzAgWiIgZmlsbD0iI0YyRjNGNyIvPjxwYXRoIGQ9Ik0xNjggMTEyIEMxODAgMTEyIDE4NiAxMjggMTc2IDEzNSBDMTY4IDE0MCAxNjIgMTMyIDE2NCAxMjQgWiIgZmlsbD0iI0YyRjNGNyIvPjxlbGxpcHNlIGN4PSI4MiIgY3k9IjEyNCIgcng9IjYuNSIgcnk9IjguNSIgZmlsbD0iIzE4MjMzQSIvPjxlbGxpcHNlIGN4PSIxMjAiIGN5PSIxMjEiIHJ4PSI2LjUiIHJ5PSI4LjUiIGZpbGw9IiMxODIzM0EiLz48Y2lyY2xlIGN4PSI4NCIgY3k9IjEyMSIgcj0iMiIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjEyMiIgY3k9IjExOCIgcj0iMiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik05NSAxNDAgUTEwMSAxNDUgMTA3IDEzOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTgyMzNBIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9nPgo8L3N2Zz4=", "walkB": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzIiIHk9IjE2MSIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz48cmVjdCB4PSIxMTAiIHk9IjE1MSIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz4KPHJlY3QgeD0iMzQiIHk9IjU0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjExNiIgcng9IjI2IiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPgo8cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzAgMTE4IEMxOCAxMjAgMTQgMTM2IDI0IDE0MiBDMzIgMTQ2IDM4IDEzOCAzNiAxMzAgWiIgZmlsbD0iI0YyRjNGNyIvPjxwYXRoIGQ9Ik0xNjggMTEyIEMxODAgMTEyIDE4NiAxMjggMTc2IDEzNSBDMTY4IDE0MCAxNjIgMTMyIDE2NCAxMjQgWiIgZmlsbD0iI0YyRjNGNyIvPjxlbGxpcHNlIGN4PSI4MiIgY3k9IjEyNCIgcng9IjYuNSIgcnk9IjguNSIgZmlsbD0iIzE4MjMzQSIvPjxlbGxpcHNlIGN4PSIxMjAiIGN5PSIxMjEiIHJ4PSI2LjUiIHJ5PSI4LjUiIGZpbGw9IiMxODIzM0EiLz48Y2lyY2xlIGN4PSI4NCIgY3k9IjEyMSIgcj0iMiIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjEyMiIgY3k9IjExOCIgcj0iMiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Ik05NSAxNDAgUTEwMSAxNDUgMTA3IDEzOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTgyMzNBIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9nPgo8L3N2Zz4=", "held": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzAiIHk9IjE2MCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMxIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciIHRyYW5zZm9ybT0icm90YXRlKDEwIDgwIDE2MikiLz48cmVjdCB4PSIxMTIiIHk9IjE2MCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMxIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciIHRyYW5zZm9ybT0icm90YXRlKC0xMCAxMjIgMTYyKSIvPgo8cmVjdCB4PSIzNCIgeT0iNTQiIHdpZHRoPSIxMzIiIGhlaWdodD0iMTE2IiByeD0iMjYiIGZpbGw9IiNGMkYzRjciIHRyYW5zZm9ybT0icm90YXRlKC00IDEwMCAxMTApIi8+CjxwYXRoIGQ9Ik0zOCA5NiBDNzggODggMTI0IDg2IDE2NCA4NCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjQzlEMkUzIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0zMCAxMTggQzE4IDEyMCAxNCAxMzYgMjQgMTQyIEMzMiAxNDYgMzggMTM4IDM2IDEzMCBaIiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSg2MiAzNiAxMjQpIi8+PHBhdGggZD0iTTE2OCAxMTIgQzE4MCAxMTIgMTg2IDEyOCAxNzYgMTM1IEMxNjggMTQwIDE2MiAxMzIgMTY0IDEyNCBaIiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNjIgMTY0IDExOCkiLz48ZWxsaXBzZSBjeD0iODIiIGN5PSIxMjQiIHJ4PSI2LjUiIHJ5PSI4LjUiIGZpbGw9IiMxODIzM0EiLz48ZWxsaXBzZSBjeD0iMTIwIiBjeT0iMTIxIiByeD0iNi41IiByeT0iOC41IiBmaWxsPSIjMTgyMzNBIi8+PGNpcmNsZSBjeD0iODQiIGN5PSIxMjEiIHI9IjIiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxMjIiIGN5PSIxMTgiIHI9IjIiIGZpbGw9IiNmZmYiLz48ZWxsaXBzZSBjeD0iMTAxIiBjeT0iMTQyIiByeD0iNSIgcnk9IjUuOCIgZmlsbD0iIzE4MjMzQSIvPjwvZz4KPC9zdmc+", "happy": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzIiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz48cmVjdCB4PSIxMTAiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz4KPHJlY3QgeD0iMzQiIHk9IjU0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjExNiIgcng9IjI2IiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPgo8cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzAgMTE4IEMxOCAxMjAgMTQgMTM2IDI0IDE0MiBDMzIgMTQ2IDM4IDEzOCAzNiAxMzAgWiIgZmlsbD0iI0YyRjNGNyIvPjxwYXRoIGQ9Ik0xNjggMTEyIEMxODAgMTEyIDE4NiAxMjggMTc2IDEzNSBDMTY4IDE0MCAxNjIgMTMyIDE2NCAxMjQgWiIgZmlsbD0iI0YyRjNGNyIvPjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE4MjMzQSIgc3Ryb2tlLXdpZHRoPSI0LjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+PHBhdGggZD0iTTc1IDEyNyBRODIgMTE3IDg5IDEyNyIvPjxwYXRoIGQ9Ik0xMTMgMTI0IFExMjAgMTE0IDEyNyAxMjQiLz48L2c+PHBhdGggZD0iTTkzIDEzOCBRMTAxIDE0OCAxMDkgMTM3IiBmaWxsPSJub25lIiBzdHJva2U9IiMxODIzM0EiIHN0cm9rZS13aWR0aD0iMy44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L2c+Cjwvc3ZnPg==", "rest": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzIiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz48cmVjdCB4PSIxMTAiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz4KPHJlY3QgeD0iMzQiIHk9IjU0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjExNiIgcng9IjI2IiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPgo8cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzAgMTE4IEMxOCAxMjAgMTQgMTM2IDI0IDE0MiBDMzIgMTQ2IDM4IDEzOCAzNiAxMzAgWiIgZmlsbD0iI0YyRjNGNyIvPjxwYXRoIGQ9Ik0xNjggMTEyIEMxODAgMTEyIDE4NiAxMjggMTc2IDEzNSBDMTY4IDE0MCAxNjIgMTMyIDE2NCAxMjQgWiIgZmlsbD0iI0YyRjNGNyIvPjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE4MjMzQSIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiPjxwYXRoIGQ9Ik03NSAxMjQgUTgyIDEzMCA4OSAxMjQiLz48cGF0aCBkPSJNMTEzIDEyMSBRMTIwIDEyNyAxMjcgMTIxIi8+PC9nPjxwYXRoIGQ9Ik05NyAxNDEgUTEwMSAxNDQgMTA1IDE0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTgyMzNBIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvZz48ZyBmaWxsPSIjMTgyMzNBIiBvcGFjaXR5PSIuNTUiIGZvbnQtZmFtaWx5PSJNYW5yb3BlLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9IjgwMCI+PHRleHQgeD0iMTUwIiB5PSI0NCIgZm9udC1zaXplPSIyMCI+ejwvdGV4dD48dGV4dCB4PSIxNjgiIHk9IjI2IiBmb250LXNpemU9IjE0Ij56PC90ZXh0PjwvZz4KPC9zdmc+", "carry": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjIwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIyMCI+CjxkZWZzPjxmaWx0ZXIgaWQ9InIiIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjAzNSIgbnVtT2N0YXZlcz0iMiIgc2VlZD0iNCIvPjxmZURpc3BsYWNlbWVudE1hcCBpbj0iU291cmNlR3JhcGhpYyIgc2NhbGU9IjMuNSIvPjwvZmlsdGVyPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMC4zIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjQjREMkZGIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiMzRDg0RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxRjVCRTAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KCjxnIGZpbHRlcj0idXJsKCNyKSI+PHJlY3QgeD0iNjgiIHk9IjI2IiB3aWR0aD0iNjQiIGhlaWdodD0iNDgiIHJ4PSI4IiBmaWxsPSIjOUNDM0ZGIiB0cmFuc2Zvcm09InJvdGF0ZSg2IDEwMCA1MCkiLz4KPHJlY3QgeD0iMzgiIHk9IjQwIiB3aWR0aD0iNTYiIGhlaWdodD0iMzAiIHJ4PSIxMSIgZmlsbD0iI0RDRTJFQyIgdHJhbnNmb3JtPSJyb3RhdGUoLTQgMTAwIDExMCkiLz4KPHJlY3QgeD0iNzIiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz48cmVjdCB4PSIxMTAiIHk9IjE1OCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjMwIiByeD0iMTAiIGZpbGw9IiNGMkYzRjciLz4KPHJlY3QgeD0iMzQiIHk9IjU0IiB3aWR0aD0iMTMyIiBoZWlnaHQ9IjExNiIgcng9IjI2IiBmaWxsPSIjRjJGM0Y3IiB0cmFuc2Zvcm09InJvdGF0ZSgtNCAxMDAgMTEwKSIvPgo8cGF0aCBkPSJNMzggOTYgQzc4IDg4IDEyNCA4NiAxNjQgODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5RDJFMyIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48ZWxsaXBzZSBjeD0iODIiIGN5PSIxMjQiIHJ4PSI2LjUiIHJ5PSI4LjUiIGZpbGw9IiMxODIzM0EiLz48ZWxsaXBzZSBjeD0iMTIwIiBjeT0iMTIxIiByeD0iNi41IiByeT0iOC41IiBmaWxsPSIjMTgyMzNBIi8+PGNpcmNsZSBjeD0iODQiIGN5PSIxMjEiIHI9IjIiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxMjIiIGN5PSIxMTgiIHI9IjIiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNOTUgMTQwIFExMDEgMTQ1IDEwNyAxMzkiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE4MjMzQSIgc3Ryb2tlLXdpZHRoPSIzLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvZz48ZyBmaWx0ZXI9InVybCgjcikiPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY2IDE2MCkgcm90YXRlKC0zKSI+PHJlY3QgeD0iNiIgeT0iLTgiIHdpZHRoPSI1NiIgaGVpZ2h0PSIzNCIgcng9IjciIGZpbGw9InVybCgjZykiLz48cmVjdCB4PSIwIiB5PSI0IiB3aWR0aD0iNzAiIGhlaWdodD0iMzgiIHJ4PSI5IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIuNzgiLz48cmVjdCB4PSIwIiB5PSI0IiB3aWR0aD0iNzAiIGhlaWdodD0iMzgiIHJ4PSI5IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMS41Ii8+PHJlY3QgeD0iMTIiIHk9IjE4IiB3aWR0aD0iMzAiIGhlaWdodD0iNSIgcng9IjIuNSIgZmlsbD0iIzFGNUJFMCIvPjxyZWN0IHg9IjEyIiB5PSIyOCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjUiIHJ4PSIyLjUiIGZpbGw9IiM5Q0MzRkYiLz48L2c+PHBhdGggZD0iTTQyIDE3MCBDMzAgMTc0IDMyIDE5MiA0NiAxOTAgTDcwIDE4NiBDNzYgMTg0IDc2IDE3NiA3MCAxNzQgWiIgZmlsbD0iI0YyRjNGNyIvPjxwYXRoIGQ9Ik0xNjAgMTY2IEMxNzIgMTcwIDE3MCAxODggMTU2IDE4NiBMMTMyIDE4MiBDMTI2IDE4MCAxMjYgMTcyIDEzMiAxNzAgWiIgZmlsbD0iI0YyRjNGNyIvPjwvZz4KPC9zdmc+"};
+const K=1.6, HW=24*K, HEAD=54*K, G=2600, AIR=.55, MAXV=2800, GRAB_V=1250, WALK=58*K, SKID=6.5;
+/* Guiding is a purposeful trot, a bit over twice his wandering pace; he waits under half a second before setting off */
+const GUIDE_WALK=WALK*2.4, GUIDE_WAIT=.4, AUTO_OUT=2.2;
+const win=document.querySelector('.win'),peek=document.querySelector('.peek'),curBtn=()=>document.querySelector('#step .pill.primary');
+const tk=document.createElement('div');tk.className='tk';tk.setAttribute('role','button');tk.setAttribute('aria-label','Tuck');tk.insertAdjacentHTML('beforeend','<div class="hit"></div>');
+const sh=document.createElement('div');sh.className='tk-sh';
+const bubble=document.createElement('div');bubble.className='say';bubble.setAttribute('role','status');
+document.body.append(sh,tk,bubble);
+const imgs={};for(const[k,v]of Object.entries(POSES)){const im=new Image();im.src=v;im.alt='';im.draggable=false;tk.append(im);imgs[k]=im}
+const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
+const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function spring(s,t,k,d,dt){const a=-k*(s.p-t)-d*s.v;s.v+=a*dt;s.p+=s.v*dt}
+const T={mode:'home',x:0,y:0,vx:0,vy:0,face:-1,t:0,t0:0,pose:'idle',sq:{p:0,v:0},tilt:{p:0,v:0},sc:{p:1,v:0},lift:{p:0,v:0},
+  rot:0,bob:0,phase:0,next:0,blinkAt:2,maxSpeed:0,on:null,hover:false};
+const P={x:null,y:null,down:false,dragging:false,id:null,sx:0,sy:0,ox:0,oy:0,samples:[],last:0};
+const B=()=>{const r=win.getBoundingClientRect();return{L:r.left+HW+6,R:r.right-HW-6,TOP:r.top+HEAD+8,FLOOR:r.bottom-18}};
+const setMode=m=>{T.mode=m;T.t0=T.t};const since=()=>T.t-T.t0;
+function homeSpot(){const r=peek.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height*.62}}
+function squash(a){T.sq.p=clamp(a,-.25,.34);T.sq.v=0}
+/* Dust kicked out behind him (dir: -1 left, 1 right); trail puffs are smaller and fade faster */
+function dust(x,y,dir,n,trail){if(reduced())return;for(let i=0;i<n;i++){const p=document.createElement('span');p.className='puff'+(trail?' trail':'');
+  const dx=dir*(14+i*9+rand(0,8)),sz=trail?rand(.5,.8):rand(.9,1.4);
+  p.style.left=(x+dir*(8+i*5)-7)+'px';p.style.top=(y-10+rand(-3,3))+'px';p.style.setProperty('--dx',dx+'px');p.style.setProperty('--s',sz);
+  document.body.append(p);setTimeout(()=>p.remove(),700)}}
+function puffs(x,y,n=3){if(reduced())return;for(let i=0;i<n;i++){const p=document.createElement('span');p.className='puff';const dx=(i-(n-1)/2)*16+rand(-3,3);
+  p.style.left=(x+dx*.6-6)+'px';p.style.top=(y-8)+'px';p.style.setProperty('--dx',dx+'px');document.body.append(p);setTimeout(()=>p.remove(),520)}}
+function say(text){bubble.textContent=text;bubble.classList.add('on')}
+function hush(){bubble.classList.remove('on')}
+
+/* coming out and going home */
+function comeOut(e){
+  const r=peek.getBoundingClientRect(),fig=peek.querySelector('.fig').getBoundingClientRect();
+  peek.classList.add('out');tk.classList.add('on');sh.classList.add('on');
+  T.x=fig.left+fig.width/2;T.y=fig.top+fig.height*(96/112);T.vx=T.vy=0;T.face=-1;T.on=null;
+  grabAt(e);beginDrag();
+}
+function goHome(){
+  hush();const h=homeSpot();
+  T.hop={x0:T.x,y0:T.y,x1:h.x,y1:h.y,dur:clamp(.42+Math.hypot(h.x-T.x,h.y-T.y)/2600,.45,.95),h:60,home:true};
+  T.face=h.x>=T.x?1:-1;T.on=null;setMode('hop');
+}
+function arriveHome(){tk.classList.remove('on');sh.classList.remove('on');peek.classList.remove('out');setMode('home')}
+
+/* the job: show where to go next */
+/* where he points at the button from: the gap beside it, on the floor, so he never stands over the page */
+function guideSpot(){const r=curBtn().getBoundingClientRect(),st=document.querySelector('.stage').getBoundingClientRect(),fl=B().FLOOR;
+  return st.left-r.right>=84?{x:(r.right+st.left)/2,y:fl}:{x:r.right-46,y:fl}}
+function startGuide(){
+  T.goal=guideSpot();T.tx=T.goal.x;T.face=Math.sign(T.tx-T.x)||T.face;setMode(Math.abs(T.tx-T.x)<8?'climb':'walk');
+}
+function climb(){T.hop={x0:T.x,y0:T.y,x1:T.goal.x,y1:T.goal.y,dur:.45,h:34,toBtn:true};T.face=-1;setMode('hop')}
+
+/* pointer */
+function grabAt(e){Object.assign(P,{down:true,dragging:false,id:e.pointerId,sx:e.clientX,sy:e.clientY,ox:e.clientX-T.x,oy:e.clientY-T.y,samples:[{x:e.clientX,y:e.clientY,t:e.timeStamp}]})}
+function beginDrag(){P.dragging=true;tk.classList.add('drag');hush();T.on=null;T.rot=0;T.bob=0;setMode('held');T.sc.v+=reduced()?0:2.5}
+peek.addEventListener('pointerdown',e=>{if(e.button)return;e.preventDefault();comeOut(e);tk.setPointerCapture?.(e.pointerId)});
+tk.addEventListener('pointerdown',e=>{if(e.button)return;e.preventDefault();tk.setPointerCapture(e.pointerId);grabAt(e)});
+addEventListener('pointermove',e=>{
+  P.x=e.clientX;P.y=e.clientY;if(!P.down||e.pointerId!==P.id)return;
+  for(const c of(e.getCoalescedEvents?e.getCoalescedEvents():[e]))P.samples.push({x:c.clientX,y:c.clientY,t:c.timeStamp});
+  while(P.samples.length>2&&e.timeStamp-P.samples[0].t>90)P.samples.shift();
+  if(!P.dragging&&Math.hypot(e.clientX-P.sx,e.clientY-P.sy)>4)beginDrag();
+});
+function release(e){
+  if(!P.down||(e&&e.pointerId!==P.id))return;P.down=false;tk.classList.remove('drag');
+  if(!P.dragging){const now=performance.now();if(now-P.last<320){P.last=0;goHome()}else P.last=now;return}
+  P.dragging=false;
+  const h=homeSpot();if(Math.hypot(T.x-h.x,T.y-h.y)<120){goHome();return} /* dropped on the file */
+  const s=P.samples,a=s[0],b=s[s.length-1];let vx=0,vy=0;const dt=(b.t-a.t)/1000;
+  if(dt>.008){vx=(b.x-a.x)/dt;vy=(b.y-a.y)/dt}if(e&&e.timeStamp-b.t>70)vx=vy=0;
+  const sp=Math.hypot(vx,vy);if(sp>MAXV){vx*=MAXV/sp;vy*=MAXV/sp}
+  T.vx=vx;T.vy=vy;T.maxSpeed=sp;setMode('air');
+}
+addEventListener('pointerup',release);addEventListener('pointercancel',release);
+tk.addEventListener('pointerenter',()=>T.hover=true);tk.addEventListener('pointerleave',()=>T.hover=false);
+tk.addEventListener('dblclick',goHome);
+
+/* physics, from the desktop prototype */
+function stepAir(h){
+  const b=B();T.vy+=G*h;const k=Math.exp(-AIR*h);T.vx*=k;T.vy*=k;T.x+=T.vx*h;T.y+=T.vy*h;
+  for(const side of['L','R']){const hit=side==='L'?T.x<b.L:T.x>b.R;if(!hit)continue;const into=side==='L'?-T.vx:T.vx;T.x=side==='L'?b.L:b.R;
+    if(into>GRAB_V&&T.y<b.FLOOR-30){T.cling=side;T.vx=0;T.vy=Math.min(T.vy,40);squash(-.2);T.face=side==='L'?1:-1;setMode('cling');return}
+    T.vx=-T.vx*.5;T.vy*=.9;T.tilt.v+=(side==='L'?1:-1)*160}
+  if(T.y<b.TOP){T.y=b.TOP;if(T.vy<0)T.vy=-T.vy*.4;squash(-.12)}
+  if(T.y>=b.FLOOR){T.y=b.FLOOR;const imp=T.vy;
+    if(imp>320){T.vy=-imp*.36;T.vx*=.82;squash(Math.min(.34,imp/3000));if(imp>700)puffs(T.x,b.FLOOR,3)}
+    else{T.vy=0;if(imp>60)squash(Math.min(.2,imp/2600));setMode('skid')}}
+}
+let acc=0;
+function update(dt){
+  const m=T.mode,b=B();let pose='idle',tilt=0,sc=T.hover&&!P.dragging?1.06:1,lift=0;
+  if(m==='home')return;
+  if(m==='held'){
+    const nx=clamp(P.x-P.ox,b.L,b.R),ny=clamp(P.y-P.oy,b.TOP,b.FLOOR),vx=(nx-T.x)/Math.max(dt,1/240);
+    T.x=nx;T.y=ny;pose='held';sc=reduced()?1.06:1.12;lift=1;tilt=reduced()?0:clamp(vx*.02,-26,26);T.face=vx>30?1:vx<-30?-1:T.face;
+  }else if(m==='air'){
+    acc+=dt;const h=1/240;while(acc>=h&&T.mode==='air'){stepAir(h);acc-=h}acc=Math.min(acc,h);
+    pose=Math.abs(T.vy)>250||Math.abs(T.vx)>250?'held':'happy';tilt=clamp(T.vx*.012,-22,22);lift=.55;
+  }else if(m==='skid'){
+    T.vx*=Math.exp(-SKID*dt);T.x+=T.vx*dt;if(T.x<b.L){T.x=b.L;T.vx=-T.vx*.4}if(T.x>b.R){T.x=b.R;T.vx=-T.vx*.4}
+    tilt=clamp(-T.vx*.02,-12,12);pose='happy';
+    if(Math.abs(T.vx)<14){T.vx=0;if(T.maxSpeed>450)setMode('shake');else{setMode('idle');T.next=T.t+GUIDE_WAIT}}
+  }else if(m==='cling'){
+    T.vy+=(150-T.vy)*Math.min(1,5*dt);T.y+=T.vy*dt;pose='happy';T.rot=(T.cling==='L'?1:-1)*(5+2.5*Math.sin(T.t*16));
+    if(T.y>=b.FLOOR){T.y=b.FLOOR;T.rot=0;squash(.12);puffs(T.x,b.FLOOR,2);setMode('shake')}
+  }else if(m==='shake'){
+    const u=since()/.62;pose='happy';T.rot=u<1?9*Math.sin(u*Math.PI*6)*(1-u):0;
+    if(u>=1){T.rot=0;setMode('idle');T.next=T.t+GUIDE_WAIT;T.maxSpeed=0}
+  }else if(m==='hop'){
+    /* Every jump: a crouch (knees bend, body squashes, eyes shut, a little tremble as he
+       gathers himself), then he springs off fast and floats down slowly (ease-out), leaving a burst of
+       dust behind him and a short smoke trail on the way up; he lands with a squash and a puff. */
+    /* crouch length follows the jump: a small hop up to a button is a quick dip, a big leap a longer wind-up */
+    const s=T.hop,dist=Math.max(0,s.y0-s.y1)+Math.abs(s.x1-s.x0)*.3,CROUCH=reduced()?0:Math.min(1,Math.max(.22,.18+dist/260)),t=since(),back=s.x1>s.x0?-1:1;
+    if(t<CROUCH){
+      const k=t/CROUCH,c=Math.min(1,k/.35),c2=1-Math.pow(1-c,3);
+      T.x=s.x0+(k>.35?Math.sin(t*60)*.6:0);T.y=s.y0;T.sq.p=.15*c2+.02*Math.max(0,(k-.35)/.65);T.sq.v=0;pose='blink';
+      tilt=back*5*c2;
+    }else{
+      if(!s.off){s.off=true;T.sq.p=-.22;T.sq.v=0;dust(s.x0,s.y0,back,6);s.lastP=t}
+      const u=Math.min(1,(t-CROUCH)/(s.dur*1.15)),e=1-Math.pow(1-u,3);
+      T.x=s.x0+(s.x1-s.x0)*e;T.y=s.y0+(s.y1-s.y0)*e-Math.sin(Math.PI*e)*s.h;pose='happy';
+      if(u<.35&&t-s.lastP>.045&&!reduced()){s.lastP=t;dust(T.x,T.y,back,1,true)}
+      tilt=(s.x1>s.x0?1:-1)*8*Math.sin(Math.PI*u);lift=.4*Math.sin(Math.PI*u);
+      if(u>=1){T.y=s.y1;squash(.2);if(!s.home)puffs(T.x,T.y,3);if(s.home){arriveHome();return}
+      if(s.toBtn){T.on='btn';setMode('guide');say(tipText())}else{setMode('idle');T.next=T.t+GUIDE_WAIT}}
+    }
+  }else if(m==='walk'){
+    const dir=Math.sign(T.tx-T.x);T.x+=dir*GUIDE_WALK*dt;T.phase+=dt*GUIDE_WALK/(9*K);
+    pose=Math.floor(T.phase/Math.PI)%2?'walkA':'walkB';T.bob=-Math.abs(Math.sin(T.phase))*2.6*K;T.rot=Math.sin(T.phase)*2.2;
+    if((dir>0&&T.x>=T.tx)||(dir<0&&T.x<=T.tx)||dir===0){T.x=T.tx;T.bob=0;T.rot=0;climb()}
+  }else if(m==='guide'){
+    const g=guideSpot();T.x=g.x;T.y=g.y;T.face=-1;
+    if(T.t>T.blinkAt){if(T.t>T.blinkAt+.13)T.blinkAt=T.t+rand(2.4,5);else pose='blink'}
+    T.bob=reduced()?0:-Math.abs(Math.sin(T.t*2.4))*2;
+  }else{ /* idle on the floor: blink, look at the pointer, then go and help */
+    if(T.t>T.blinkAt){if(T.t>T.blinkAt+.13)T.blinkAt=T.t+rand(2.4,5);else pose='blink'}
+    if(P.x!=null&&!P.down&&Math.hypot(P.x-T.x,P.y-(T.y-40))<260)T.face=P.x>T.x?1:-1;
+    if(T.t>T.next&&!P.down)startGuide();
+  }
+  if(reduced()){T.tilt.p=0;T.sq.p=0;T.sc.p=sc;T.lift.p=lift}
+  else{spring(T.tilt,tilt,260,20,dt);spring(T.sq,0,520,15,dt);spring(T.sc,sc,380,22,dt);spring(T.lift,lift,200,24,dt)}
+  if(pose!==T.pose){imgs[T.pose].classList.remove('on');imgs[pose].classList.add('on');T.pose=pose}
+}
+function render(){
+  if(T.mode==='home'){ /* peeking: the bubble sits over his head */
+    if(bubble.classList.contains('on')){const r=peek.querySelector('.fig').getBoundingClientRect();
+      bubble.classList.add('right');bubble.classList.remove('left');bubble.style.left=(r.right+6)+'px';bubble.style.top=(r.top+r.height*.35-bubble.offsetHeight/2)+'px'}
+    return}
+  const s=T.sq.p,k=T.sc.p,sx=(1+s*.9)*k,sy=(1-s)*k,rot=T.rot+T.tilt.p;
+  tk.style.transform=`translate3d(${(T.x-51).toFixed(2)}px,${(T.y-96+T.bob).toFixed(2)}px,0) rotate(${rot.toFixed(2)}deg) scale(${sx.toFixed(4)},${sy.toFixed(4)})`;
+  tk.classList.toggle('flip',T.face>0);
+  const l=T.lift.p,hide=T.mode==='cling';
+  sh.style.opacity=hide?0:(.55-.22*l).toFixed(3);
+  const groundY=T.on==='btn'?T.y:(['held','air','hop'].includes(T.mode)?B().FLOOR:T.y);
+  sh.style.transform=`translate3d(${(T.x-42).toFixed(2)}px,${(groundY-8+l*10).toFixed(2)}px,0) scale(${(1+.45*l)*(1+s*.5)},${1+.35*l})`;
+  if(bubble.classList.contains('on')){ /* beside him, never over the page: to his right, or his left if there's no room */
+    const w=bubble.offsetWidth,h=bubble.offsetHeight,right=T.x+52+w<innerWidth-12;
+    bubble.classList.toggle('right',right);bubble.classList.toggle('left',!right);
+    bubble.style.left=(right?T.x+52:T.x-52-w)+'px';bubble.style.top=(T.y-96+30-h/2)+'px'}
+}
+
+/* ---------- Tuck's eyes follow the pointer while he's idle (peeking, sitting, or waiting on a button) ----------
+   The idle drawings are inlined so the eyes (and mouth) can shift a few units toward the pointer. */
+function faceSvg(uri){let t=atob(uri.split(',')[1]);
+  t=t.replace(/(<ellipse cx="82" cy="124"[^>]*\/>)/,'<g class="eyes">$1').replace(/(<path d="M95 140 Q101 145 107 139"[^>]*\/>)/,'$1</g>');return t}
+function inlineFace(img){const w=document.createElement('div');w.className=img.className+' face';w.innerHTML=faceSvg(img.getAttribute('src'));img.replaceWith(w);return w}
+$$('.peek img.fig').forEach(inlineFace);
+{const old=imgs.idle,w=inlineFace(old);imgs.idle=w;}
+const EYE={x:0,y:0};
+function eyes(dt){
+  const idle=['home','idle','guide'].includes(T.mode)&&P.x!=null&&!P.down;let tx=0,ty=0;
+  if(idle){const el=T.mode==='home'?peek.querySelector('.fig'):tk,r=el.getBoundingClientRect();
+    const dx=P.x-(r.left+r.width/2),dy=P.y-(r.top+r.height*.55),d=Math.hypot(dx,dy)||1,k=Math.min(1,d/160);
+    tx=dx/d*5*k;ty=dy/d*3.5*k;if(T.mode!=='home'&&T.face>0)tx=-tx}
+  const a=Math.min(1,dt*12);EYE.x+=(tx-EYE.x)*a;EYE.y+=(ty-EYE.y)*a;
+  document.documentElement.style.setProperty('--ex',EYE.x.toFixed(2)+'px');document.documentElement.style.setProperty('--ey',EYE.y.toFixed(2)+'px')}
+let last=performance.now();
+/* keep the peeking Tuck on the front file's top edge, whatever the file does (rise, hover, resize) */
+const eA=document.querySelector('.emk.ea'),eB=document.querySelector('.emk.eb'),pClip=peek.querySelector('.clip');
+function placePeek(){const a=eA.getBoundingClientRect(),b=eB.getBoundingClientRect(),st=document.querySelector('.stage').getBoundingClientRect();
+  const dx=b.left-a.left,dy=b.top-a.top,s=dx/124;if(!(s>0))return;
+  peek.style.transform=`translate(${(a.left-st.left).toFixed(1)}px,${(a.top-st.top-160*s).toFixed(1)}px) scale(${s.toFixed(4)})`;
+  pClip.style.clipPath=`polygon(-20px -300px,144px -300px,124px ${(160+dy/s).toFixed(1)}px,0 160px)`;
+  peek.style.setProperty('--ang',(Math.atan2(dy,dx)*180/Math.PI).toFixed(2)+'deg')}
+function loop(now){placePeek();eyes(Math.min(.05,(now-last)/1000));let dt=(now-last)/1000;last=now;if(dt>.05)dt=.05;T.t+=dt;update(dt);render();requestAnimationFrame(loop)}
+imgs.idle.classList.add('on');requestAnimationFrame(t=>{last=t;requestAnimationFrame(loop)});
+/* Nobody has to discover the drag: after a short look around, Tuck hops out of the file on his own and
+   heads for the sign-in button. Any interaction with him first cancels this. */
+let touched=false;peek.addEventListener('pointerdown',()=>touched=true);
+function hopOut(fromStep){
+  if(touched||T.mode!=='home'||(fromStep?si===0:si!==0))return;
+  const fig=peek.querySelector('.fig').getBoundingClientRect(),b=B();
+  peek.classList.add('out');tk.classList.add('on');sh.classList.add('on');
+  T.x=fig.left+fig.width/2;T.y=fig.top+fig.height*(96/112);T.face=-1;T.on=null;
+  T.hop={x0:T.x,y0:T.y,x1:T.x-40,y1:b.FLOOR,dur:.55,h:70};setMode('hop');
+}
+setTimeout(()=>hopOut(false),AUTO_OUT*1000);
+window.__tuck=T;
+/* New step: if Tuck is out, he hops down and heads for the new main button */
+window.onStep=()=>{hush();if(T.mode==='home'&&!touched){hopOut(true);return}if(['home','held','air'].includes(T.mode))return;
+  if(T.on==='btn'||T.mode==='guide'){T.on=null;T.hop={x0:T.x,y0:T.y,x1:T.x-30,y1:B().FLOOR,dur:.5,h:40};setMode('hop')}
+  else{setMode('idle');T.next=T.t+GUIDE_WAIT}};
+try{const sc=localStorage.getItem('tuck-scheme');if(sc&&sc!=='blue')document.documentElement.dataset.scheme=sc}catch(e){}
+const r=document.documentElement,bs=[...document.querySelectorAll('.theme button')];
+const cur=()=>r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+const sync=()=>bs.forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===cur()));
+bs.forEach(b=>b.onclick=()=>{r.dataset.theme=b.dataset.t;try{localStorage.setItem('tuck-theme',b.dataset.t)}catch(e){}sync()});
+try{const t=localStorage.getItem('tuck-theme');if(t)r.dataset.theme=t}catch(e){}
+sync();
+initSteps();
+setTimeout(()=>document.documentElement.classList.remove('intro'),1750);
+</script>
+</body>
+</html>

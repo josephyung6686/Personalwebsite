@@ -19,17 +19,17 @@ import { experience } from '../../data/experience';
 </aside>
 <style>
   .rail { position: sticky; top: 16px; padding-top: 48px; }
-  h2 { font: 700 19px/1.15 var(--font-mono); letter-spacing: -.03em; line-height: 1.15; margin: 0 0 14px; color: var(--ink); }
-  .jobs { list-style: none; margin: 0; padding: 6px; }
-  .job { position: relative; display: block; padding: 12px 28px 12px 12px; border-radius: 0; text-decoration: none; transition: background .12s ease, translate .12s ease; }
-  .job:hover { background: var(--panel-2); box-shadow: inset 0 0 0 2px var(--gold); }
-  .job:active { translate: 2px 2px; }
-  .job:focus-visible { outline: 3px solid var(--columbia); outline-offset: 1px; }
-  .org { display: block; font-family: var(--font-mono); font-size: 14px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; color: var(--ink); }
-  .title { display: block; margin-top: 3px; font-size: 13px; line-height: 1.3; color: var(--columbia); }
-  .meta { display: block; margin-top: 3px; font-size: 12px; color: var(--muted); }
-  .go { position: absolute; right: 12px; top: 50%; translate: 0 -50%; font-size: 9px; color: var(--gold); opacity: .55; transition: opacity .12s ease; }
-  .job:hover .go { opacity: 1; }
-  li + li { border-top: 2px dashed var(--panel-edge); }
+  h2 { font: 700 21px/1.15 var(--font-body); letter-spacing: -.012em; margin: 0 0 14px; color: var(--ink); -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px; filter: url(#wax-edge); }
+  .jobs { list-style: none; margin: 0; padding: 8px; }
+  .job { position: relative; z-index: 5; display: block; padding: 12px 28px 12px 12px; border-radius: var(--wobble-s); text-decoration: none; transition: background .14s ease, translate .14s ease; }
+  .job:hover { background: var(--gold-soft); translate: -1px -1px; }
+  .job:active { translate: 1px 1px; }
+  .job:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+  .org { display: block; font-size: 15px; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; color: var(--ink); }
+  .title { display: block; margin-top: 3px; font-size: 13.5px; line-height: 1.3; color: var(--columbia); }
+  .meta { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+  .go { position: absolute; right: 12px; top: 50%; translate: 0 -50%; font-size: 10px; color: var(--gold-deep); opacity: .7; transition: opacity .14s ease, translate .14s ease; }
+  .job:hover .go { opacity: 1; translate: 2px -50%; }
+  li + li { background: url(/wax/rule-ink.webp) 0 0 / auto 7px repeat-x; padding-top: 4px; }
   @media (max-width: 1100px) { .rail { position: static; padding-bottom: 8px; } }
 </style>

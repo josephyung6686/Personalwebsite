@@ -10,9 +10,9 @@ import { site } from '../../data/site';
     <div class="body bio">
       <p class="intro">{site.bio.intro}</p>
       <p>{site.bio.why}</p>
+      <p>{site.bio.business}</p>
       <p class="lead">{site.bio.howLead}</p>
       <ul>{site.bio.how.map((h) => <li>{h}</li>)}</ul>
-      <p class="now">{site.bio.now}</p>
       <p>{site.bio.outro}</p>
       <dl class="personal">
         <div><dt>Languages</dt><dd>{site.languages}</dd></div>
@@ -27,8 +27,7 @@ import { site } from '../../data/site';
   .bio p { margin: 0 0 14px; }
   .bio .intro { font-size: 18px; color: var(--ink); font-weight: 600; }
   .bio .lead { margin-bottom: 6px; }
-  .bio ul { margin: 0 0 14px; padding-left: 20px; } .bio li { margin: 4px 0; } .bio li::marker { color: var(--gold); }
-  .bio .now { color: var(--ink); font-weight: 600; padding: 8px 12px; background: var(--gold-soft); border-radius: 0; }
+  .bio ul { margin: 0 0 14px; padding-left: 20px; } .bio li { margin: 4px 0; } .bio li::marker { color: var(--c-red); }
   .personal { margin: 0 0 18px; display: grid; gap: 6px; }
   .personal div { display: grid; grid-template-columns: 92px 1fr; gap: 10px; }
   .personal dt { color: var(--muted); } .personal dd { margin: 0; color: var(--ink); }

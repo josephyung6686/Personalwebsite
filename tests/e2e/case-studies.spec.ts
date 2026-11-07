@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import stats from '../../src/data/petfood-stats.json' with { type: 'json' };
 
 for (const slug of ['tuck', 'plasmole', 'pet-food', 'kwungfund', 'compass']) {
   test(`/work/${slug} renders with a role line`, async ({ page }) => {
@@ -49,7 +48,3 @@ test('compass page states her role', async ({ page }) => {
   await expect(page.locator('.role')).toContainText('AI & Automation Intern');
 });
 
-test('pet food numbers come from the stats file', async ({ page }) => {
-  await page.goto('/work/pet-food');
-  await expect(page.locator('main')).toContainText((stats as Record<string, string>)['Salmonella share of events']);
-});

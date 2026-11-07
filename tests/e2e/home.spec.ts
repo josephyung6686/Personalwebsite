@@ -46,7 +46,7 @@ test('no résumé anywhere on the site', async ({ page }) => {
 
 test('featured Tuck section and about section render', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Tuck: a file app people can trust' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tuck: the agentic AI brain that sorts your files' })).toBeVisible();
   await expect(page.locator('#about')).toContainText("Hi, I'm Alana.");
   await expect(page.locator('footer')).toContainText('Thanks for stopping by.');
 });
