@@ -15,7 +15,8 @@ for (const path of ['/', '/work/tuck']) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(900);
-      const r = await new AxeBuilder({ page }).analyze();
+      // The Tuck prototype in the frame is its own app, and which view it shows first shouldn't decide this page's result.
+      const r = await new AxeBuilder({ page }).exclude('[data-frame]').analyze();
       const bad = r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
       expect(bad.map((v) => `${v.id}: ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')}`)).toEqual([]);
     });

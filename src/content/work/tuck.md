@@ -1,12 +1,12 @@
 ---
 title: "Tuck: the agentic AI brain that sorts your files"
-role: "Building the engine in a team of two, from reading files and sorting them to the assistant and the checks."
-summary: "A Mac app I'm building in a team of two. It reads your files, sorts them into virtual folders and answers questions about them."
+role: "Building the engine, from reading files and sorting them to the assistant and the checks."
+summary: "A Mac app I'm building. It reads your files, sorts them into virtual folders and answers questions about them."
 chips: ["Agentic AI", "Sorting engine", "AI agents", "Evals with answer keys", "Privacy by design"]
 demo: tuck
 glance:
   - { label: "Role", value: "The engine" }
-  - { label: "Team", value: "Team of two" }
+  - { label: "Platform", value: "macOS" }
   - { label: "Rule", value: "Nothing moves on disk" }
   - { label: "Checked with", value: "27 sample homes with answer keys" }
 ---
@@ -15,7 +15,7 @@ glance:
 
 Tuck is a Mac app that organizes your files by reading what's in them. It sorts them into virtual folders that live inside the app, so nothing moves in Finder. When it can't make a decision alone it asks you, and nothing changes until you answer. You can also ask it questions, and it answers from the same index the sorter built.
 
-I'm building it in a team of two. My teammate leads the product and the interface, and I work on the engine underneath. So far it has been built and tested on sample home folders, and real users come next. The [demo at the top of this page](#demo) is a small rebuild of the Needs You screen with sample files. The code is private, and I'm happy to walk through it on a call.
+My teammate leads the product and the interface, and I work on the engine underneath. So far it has been built and tested on sample home folders, and real users come next. The [demo at the top of this page](#demo) is a small rebuild of the Needs You screen with sample files. The code is private, and I'm happy to walk through it on a call.
 
 ![Tuck's Today screen: what it sorted today, each with Undo, and the decisions that need you](/work/tuck/today.webp)
 *The Today screen in the current prototype, with sample files. It shows what Tuck sorted, each with Undo, and what needs you.*

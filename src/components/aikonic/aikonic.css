@@ -362,8 +362,8 @@
 .aik .btn[aria-disabled="true"]::before { border-image-source: url(/wax/btn-line.webp); background-color: transparent; }
 .aik .aik-spotlit { outline-color: var(--c-blue) !important; }
 
-/* ---------- The window is the product: modelled on the look of its public site. Inter, near black on white, hairlines, 8px corners, one quiet teal. ---------- */
-.aik-window { --bg: #fff; --ink: #1d1d1f; --muted: #636366; --accent: #1d1d1f; --accent-ink: #fff; --accent-deep: #0b6b5e; --soft: #f5f5f5; --soft-ink: #1d1d1f; --line: #e5e5e7; --gold: #636366; --gold-deep: transparent;
+/* ---------- The window is the product: modelled on the look of its public site. Inter, near black on white, hairlines, pill keys, one brand purple. Its teal was a reviews widget, not Aikonic. ---------- */
+.aik-window { --bg: #fff; --ink: #1d1d1f; --muted: #636366; --accent: #1d1d1f; --accent-ink: #fff; --accent-deep: #582ad8; --soft: #f5f5f5; --soft-ink: #1d1d1f; --line: #e5e5e7; --gold: #636366; --gold-deep: transparent;
   --aik-mono: Inter, -apple-system, "Helvetica Neue", var(--aik-cjk); --aik-text: Inter, -apple-system, "Helvetica Neue", var(--aik-cjk); --f-body: Inter, -apple-system, "Helvetica Neue", sans-serif; --aik-edge: #e5e5e7; --aik-shadow: transparent; --aik-drop: transparent; --aik-surface: #fff;
   padding: 0; color: #1d1d1f; font-family: var(--aik-text); border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px #e5e5e7, 0 14px 34px -22px rgb(0 0 0 / .35); }
 .aik-window :is(.aik-key, .aik-chip, .aik-mode, .aik-time, .aik-subtab, .aik-switch) { border-radius: 8px; background: #fff; color: #1d1d1f; box-shadow: inset 0 0 0 1px #e5e5e7; translate: 0 0; text-transform: none; letter-spacing: 0; font-weight: 500; transition: background .12s ease-out; }
@@ -382,13 +382,14 @@
 .aik-window .aik-subtab, .aik-window .aik-subtab[aria-selected="true"] { background: none; box-shadow: none; border-radius: 0; color: #636366; font-size: 13.5px; padding: 6px 2px; }
 .aik-window .aik-subtab[aria-selected="true"] { color: #1d1d1f; font-weight: 600; box-shadow: inset 0 -2px 0 #1d1d1f; }
 .aik-window .aik-subtabs { gap: 18px; border-bottom: 1px solid #e5e5e7; }
-.aik-window .aik-time { min-width: 0; min-height: 24px; padding: 2px 5px; background: none; box-shadow: none; color: #0b6b5e; font-weight: 600; font-size: 12.5px; }
-.aik-window .aik-time:hover { background: #e9f4f2; }
+.aik-window .aik-time { min-width: 0; min-height: 24px; padding: 2px 5px; background: none; box-shadow: none; color: #582ad8; font-weight: 600; font-size: 12.5px; }
+.aik-window .aik-time:hover { background: #f1ecfd; }
 .aik-window .aik-chip { font-weight: 400; color: #1d1d1f; }
 .aik-window .aik-chip small { color: #636366; }
 .aik-window .aik-titlebar { background: #fff; border-bottom: 1px solid #e5e5e7; border-radius: 12px 12px 0 0; }
 .aik-window .aik-app { font-weight: 600; }
-.aik-window .aik-app i { border-radius: 50%; background: #1d1d1f; box-shadow: none; }
+.aik-window .aik-app img { display: block; width: auto; height: 24px; }
+.aik-window .aik-key { border-radius: 999px; }
 .aik-window :is(.aik-search input, .aik-cmd input) { border-radius: 8px; background: #f5f5f5; box-shadow: none; font-weight: 400; }
 .aik-window :is(.aik-search input, .aik-cmd input):hover { box-shadow: inset 0 0 0 1px #d2d2d7; }
 .aik-window .aik-suggest { border-radius: 10px; background: #fff; box-shadow: 0 0 0 1px #e5e5e7, 0 10px 28px -14px rgb(0 0 0 / .35); }
@@ -408,15 +409,15 @@
 .aik-window .aik-rail { background-size: 100% 2px; }
 .aik-window .aik-head { width: 10px; height: 10px; top: 5px; translate: -5px 0; border-radius: 50%; background: #1d1d1f; box-shadow: none; }
 .aik-window .aik-tick { top: 7px; width: 1px; height: 6px; background: #c7c7cc; }
-.aik-window .aik-tick.hit { top: 5px; width: 2px; height: 10px; background: #0b6b5e; }
+.aik-window .aik-tick.hit { top: 5px; width: 2px; height: 10px; background: #582ad8; }
 .aik-window .aik-line { border-radius: 8px; }
-.aik-window .aik-line.hit { background: #f1f8f6; }
-.aik-window .aik-line.on { background: #e9f4f2; box-shadow: none; }
+.aik-window .aik-line.hit { background: #f7f4fe; }
+.aik-window .aik-line.on { background: #f1ecfd; box-shadow: none; }
 .aik-window .aik-ltext, .aik-window .aik-rtext { font-weight: 400; }
-.aik-window mark.kw { background: #d9eeea; border-radius: 3px; }
-.aik-window mark.sem { text-decoration-color: #0b6b5e; }
+.aik-window mark.kw { background: #e4dafb; border-radius: 3px; }
+.aik-window mark.sem { text-decoration-color: #582ad8; }
 .aik-window .aik-tag { font-weight: 500; border-radius: 6px; }
-.aik-window .aik-tag.cross { color: #0b6155; background: #e9f4f2; }
+.aik-window .aik-tag.cross { color: #4a22b8; background: #f1ecfd; }
 .aik-window .aik-msg.me { background: #f5f5f5; box-shadow: none; border-radius: 12px; font-weight: 400; }
 .aik-window :is(.aik-race-out, .aik-versions li, .aik-stages li, .aik-plan, .aik-answer, .aik-banner, .aik-linkchip) { border-radius: 8px; }
 .aik-window .aik-answer { box-shadow: inset 0 0 0 1px #d2d2d7; }
@@ -424,21 +425,23 @@
 .aik-window .aik-cite-none { border-radius: 6px; font-weight: 400; }
 .aik-window .aik-linkchip { box-shadow: none; padding: 2px 4px; }
 .aik-window .aik-linkchip small { display: none; }
-.aik-window .aik-linkchip > i { border-radius: 50%; width: 8px; height: 8px; background: #0b6b5e; }
+.aik-window .aik-linkchip > i { border-radius: 50%; width: 8px; height: 8px; background: #582ad8; }
 .aik-window .aik-linkchip[data-state="reconnecting"] { box-shadow: none; }
 .aik-window .aik-linkchip b { font-weight: 500; font-size: 12.5px; }
 .aik-window .aik-linkstate { font-weight: 400; color: #636366; }
 .aik-window .aik-linkchip .aik-key.sm { min-height: 24px; box-shadow: none; color: #636366; font-weight: 400; }
-.aik-window .aik-rec-key.live { color: #fff; background: #0b6b5e; box-shadow: none; }
+.aik-window .aik-key.aik-rec-key { background: #582ad8; color: #fff; }
+.aik-window .aik-key.aik-rec-key:hover { background: #4a22b8; }
+.aik-window .aik-key.aik-rec-key.live { color: #fff; background: linear-gradient(90deg, #582ad8, #3262ff); box-shadow: none; }
 .aik-window :is(.aik-bar, .aik-stage-n, .aik-order li[data-phase="done"]) { border-radius: 2px; }
 .aik-window .aik-phone { border-radius: 22px; box-shadow: 0 0 0 1px #d2d2d7, 0 14px 30px -20px rgb(0 0 0 / .4); padding: 6px; }
 .aik-window .aik-phone-bar { background: #fff; border-radius: 16px 16px 0 0; }
 .aik-window .aik-block-l li::before { border-radius: 50%; width: 5px; height: 5px; background: #1d1d1f; }
 .aik-window .aik-groups li i { border-radius: 50%; background: #1d1d1f; }
-/* Done and current states stay quiet: one teal tint, so the only solid black in an area is its primary key. */
-.aik-window :is(.aik-order li[data-phase="done"], .aik-stages li[data-phase="done"] .aik-stage-n, .aik-band b.on, [data-status="true"] > .aik-v-top .aik-pill) { color: #0b6155; background: #e9f4f2; }
+/* Done and current states stay quiet: one purple tint, so the only solid black in an area is its primary key. */
+.aik-window :is(.aik-order li[data-phase="done"], .aik-stages li[data-phase="done"] .aik-stage-n, .aik-band b.on, [data-status="true"] > .aik-v-top .aik-pill) { color: #4a22b8; background: #f1ecfd; }
 .aik-window .aik-versions li[data-status="true"] { box-shadow: inset 0 0 0 1px #d2d2d7; }
-.aik-window .aik-stages li[data-phase="running"] { box-shadow: inset 0 0 0 1px #0b6b5e; }
+.aik-window .aik-stages li[data-phase="running"] { box-shadow: inset 0 0 0 1px #582ad8; }
 .aik-side-mem.aik-spotlit { outline-offset: 4px; }
 /* The conversation keeps its height while the drawer is open, and the panel scrolls. */
 @container aik (min-width: 900px) {
@@ -466,7 +469,7 @@
 .aik-more, .aik-mic { border: 0; background: none; cursor: pointer; padding: 4px 0; font: 500 13px/1.3 var(--aik-text); color: #636366; }
 :is(.aik-more, .aik-mic):hover, .aik-more[aria-expanded="true"], .aik-mic[aria-expanded="true"] { color: #1d1d1f; }
 .aik-mic { display: inline-flex; align-items: center; gap: 8px; }
-.aik-mic i { width: 8px; height: 8px; border-radius: 50%; background: #0b6b5e; }
+.aik-mic i { width: 8px; height: 8px; border-radius: 50%; background: #582ad8; }
 .aik-mic::after { content: ''; width: 6px; height: 6px; margin-left: 2px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; rotate: -135deg; translate: 0 2px; }
 .aik-mic[aria-expanded="true"]::after { rotate: 45deg; translate: 0 -1px; }
 .aik-mic-more { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
@@ -474,7 +477,7 @@
 .aik-phone-key svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; }
 @container aik (max-width: 619px) { .aik-window .aik-side { border-width: 0 0 1px; } }
 
-/* A job running in the chat: hairline card, one line per step, one teal tick. */
+/* A job running in the chat: hairline card, one line per step, one purple tick. */
 .aik-run { padding: 10px 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px #e5e5e7; }
 .aik-run-h { font-weight: 600; font-size: 13.5px; line-height: 1.35; }
 .aik-run-status { font-size: 12.5px; line-height: 1.4; color: #636366; }
@@ -482,8 +485,8 @@
 .aik-run-steps li { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 1.35; color: #636366; }
 .aik-run-steps li[data-phase="running"], .aik-run-steps li[data-phase="done"] { color: #1d1d1f; }
 .aik-run-steps i { position: relative; flex: none; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #c7c7cc; }
-[data-phase="running"] > i { box-shadow: inset 0 0 0 1.5px #d9eeea; border: 1.5px solid transparent; border-top-color: #0b6b5e; animation: aik-spin .8s linear infinite; }
-[data-phase="done"] > i { background: #0b6b5e; box-shadow: none; }
+[data-phase="running"] > i { box-shadow: inset 0 0 0 1.5px #e4dafb; border: 1.5px solid transparent; border-top-color: #582ad8; animation: aik-spin .8s linear infinite; }
+[data-phase="done"] > i { background: #582ad8; box-shadow: none; }
 [data-phase="done"] > i::after { content: ''; position: absolute; left: 5px; top: 2.5px; width: 3px; height: 6.5px; border: solid #fff; border-width: 0 1.5px 1.5px 0; rotate: 45deg; }
 @keyframes aik-spin { to { rotate: 360deg; } }
 .aik-slides { display: grid; gap: 8px; }

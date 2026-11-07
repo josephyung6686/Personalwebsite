@@ -9,12 +9,11 @@ import TuckDemo from '../tuck/TuckDemo.astro';
   <!-- Tuck's own branding: its dark window, Bricolage Grotesque over Onest, the brand blue. -->
   <div class="tuck-brand">
     <i class="aurora" aria-hidden="true"></i>
-    <p class="mark"><img src="/work/tuck/tuck-icon.svg" alt="" width="28" height="28" /><b>Tuck</b><span>macOS app · team of two</span></p>
+    <p class="mark"><img src="/work/tuck/tuck-icon.svg" alt="" width="28" height="28" /><b>Tuck</b><span>macOS app</span></p>
     <h2 id="featured-h"><span>Tuck:</span> <span class="grad">the agentic AI brain that sorts your files</span></h2>
     <p class="promises" aria-label="Tuck's promises"><span>Nothing moves on disk</span><span>Private files stay on this Mac</span><span>Undo any answer</span></p>
     <TuckDemo size="compact" />
-    <div class="body"><p>A macOS app I'm building in a team of two: an agent that reads your files, sorts them into virtual folders and answers questions about them</p>
-      <ul><li>I work on the engine: reading files, grouping them, and the assistant that answers from them</li><li>Sorts into virtual folders, and asks you only about the decisions it can't make alone</li><li>Checked against sample home folders with answer keys, not by feel</li></ul></div>
+    <div class="body"><p>A macOS app I'm building: an agent that reads your files, sorts them into virtual folders and answers questions about them</p></div>
     <p class="tags"><span>Agentic AI</span><span>Sorting engine</span><span>AI products</span></p>
     <p class="cta"><a class="btn" href="/work/tuck">Read the case study</a><a class="btn alt" href="/work/tuck#demo">Try the demo</a></p>
   </div>
@@ -26,15 +25,12 @@ import TuckDemo from '../tuck/TuckDemo.astro';
   .mark img { width: 28px; height: 28px; }
   .mark b { font-size: 17px; font-weight: 700; color: var(--ink); }
   .mark span { font: 500 14px/1.2 var(--font-hand); color: var(--muted); padding-left: 10px; background: linear-gradient(var(--ink), var(--ink)) 0 50% / 2px 80% no-repeat; }
-  h2 { font-family: var(--font-body); font-weight: 700; letter-spacing: -.02em; line-height: 1.08; font-size: clamp(24px, 2.5vw, 34px); margin: 0 0 16px; color: var(--ink); -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px; filter: url(#wax-edge); }
+  h2 { font-family: var(--font-body); font-weight: 700; letter-spacing: -.02em; line-height: 1.08; font-size: clamp(24px, 2.3vw, 34px); margin: 0 0 16px; color: var(--ink); -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px; filter: url(#wax-edge); }
   .grad { color: var(--c-blue); }
   .promises { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
   .body { font-size: 16px; line-height: 1.6; color: var(--body); max-width: 680px; margin: 24px 0 0; }
-  .body p { margin: 0 0 8px; color: var(--ink); font-weight: 600; }
-  .body ul { margin: 0; padding-left: 20px; } .body li { margin: 4px 0; } .body li::marker { color: var(--c-red); }
+  .body p { margin: 0; color: var(--ink); font-weight: 600; }
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0; }
   .cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 6px; }
-  /* The big stage: where the page gives room to the crayon box, it takes it back from the panel's padding. */
-  @media (min-width: 1280px) { .tuck-brand :global(.tuck-demo) { width: calc(100% + 48px); margin-inline: -24px; } }
   @media (max-width: 480px) { .tuck-brand { padding: 16px; } .mark span { display: none; } }
 </style>

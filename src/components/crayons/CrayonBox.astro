@@ -6,6 +6,7 @@ import { COLORS, JUMPS } from './crayonList';
   <button type="button" class="cb-tab" aria-expanded="false" aria-controls="cb-panel"><i class="cb-tips" aria-hidden="true"></i><span>Crayons</span></button>
   <div id="cb-panel" class="cb-panel">
     <button type="button" id="draw-toggle" class="cb-draw" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16.5 3.5l4 4L9 19l-5 1 1-5z" /><path d="M14 6l4 4" /></svg>Draw</button>
+    <div id="dress-slot" class="cb-dress-slot"></div>
     <ul class="cb-tray">
       {JUMPS.map((c) => (
         <li><a class="cr" href={c.href} style={`--art:url(/wax/crayon-${c.art}.webp);--y:${c.y}px`}>{c.name}</a></li>

@@ -57,6 +57,8 @@
 /* After the footer, in the page, at every width: floating, it sat on demos and text at everything below about 1840px. The clearance keeps it out from under the lion. */
 .dress-btn.btn { display: flex; width: max-content; align-items: center; gap: 8px; margin: 28px auto 104px; }
 @media (min-width: 1101px) { .dress-btn.btn { position: fixed; right: 16px; bottom: 16px; z-index: 40; margin: 0; } }
+/* From 1280px up it belongs in the crayon box (crayons.ts moves it there), so it never flashes down here first. */
+@media (min-width: 1280px) { .dress-btn.btn { visibility: hidden; } }
 .dress-btn .gi { width: 20px; height: 20px; }
 .game-toast { pointer-events: none; position: fixed; left: 50%; top: 16px; z-index: 100; margin: 0; translate: -50% -140%; background: var(--panel); color: var(--ink); border-radius: var(--wobble-s); padding: 10px 16px; font: 600 15px/1.3 var(--font-ui); box-shadow: inset 0 0 0 2px var(--ink), 3px 4px 0 rgb(16 26 66 / .3); transition: translate .32s cubic-bezier(.22, 1, .36, 1); max-width: calc(100vw - 32px); width: max-content; }
 .game-toast:not(.show) { visibility: hidden; }

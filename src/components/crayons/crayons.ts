@@ -168,7 +168,21 @@ function wireDraw(closeBox: () => void) {
   });
 }
 
+// From 1280px up the Dress up button stands in the box, under Draw and in the same wax. Below that it goes back to its place in the page.
+function placeDressUp() {
+  const dress = document.getElementById('dress-btn')!, slot = document.getElementById('dress-slot')!;
+  const home = dress.parentElement!, next = dress.nextSibling, wide = matchMedia('(min-width: 1280px)');
+  const place = () => {
+    dress.className = wide.matches ? 'cb-draw' : 'btn dress-btn';
+    if (wide.matches) slot.append(dress);
+    else home.insertBefore(dress, next);
+  };
+  wide.addEventListener('change', place);
+  place();
+}
+
 export function initCrayons(): void {
+  placeDressUp();
   const setOpen = wireBox();
   wireDraw(() => setOpen(false));
 }

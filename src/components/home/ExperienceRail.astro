@@ -8,6 +8,7 @@ import { experience } from '../../data/experience';
     {experience.map((j) => (
       <li>
         <a class="job" href={`/work/${j.slug}`}>
+          <img class="logo" src={j.logo} alt="" width="28" height="28" loading="lazy" decoding="async" />
           <span class="org">{j.org}</span>
           <span class="title">{j.title}</span>
           <span class="meta">{j.where} · {j.when}</span>
@@ -21,7 +22,9 @@ import { experience } from '../../data/experience';
   .rail { position: sticky; top: 16px; padding-top: 48px; }
   h2 { font: 700 21px/1.15 var(--font-body); letter-spacing: -.012em; margin: 0 0 14px; color: var(--ink); -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px; filter: url(#wax-edge); }
   .jobs { list-style: none; margin: 0; padding: 8px; }
-  .job { position: relative; z-index: 5; display: block; padding: 12px 28px 12px 12px; border-radius: var(--wobble-s); text-decoration: none; transition: background .14s ease, translate .14s ease; }
+  .job { position: relative; z-index: 5; display: block; padding: 12px 28px 12px 50px; border-radius: var(--wobble-s); text-decoration: none; transition: background .14s ease, translate .14s ease; }
+  /* Multiply so a logo with a white background, like GRC's, doesn't show a white box on the hover colour. */
+  .logo { position: absolute; left: 12px; top: 13px; width: 28px; height: 28px; object-fit: contain; mix-blend-mode: multiply; }
   .job:hover { background: var(--gold-soft); translate: -1px -1px; }
   .job:active { translate: 1px 1px; }
   .job:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }

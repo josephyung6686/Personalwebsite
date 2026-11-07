@@ -39,6 +39,47 @@ test.describe('the crayon box', () => {
     });
     expect(clear).toBe(true);
   });
+
+  for (const [width, height] of [[1440, 860], [1280, 720]] as const) {
+    test(`at ${width}x${height} Dress up stands between Draw and the crayons, on screen, clear of the page, and opens the wardrobe`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto('/');
+      const dress = page.locator('#crayon-box #dress-btn');
+      await expect(dress).toBeVisible();
+      const m = await page.evaluate(() => {
+        const r = (s: string) => document.querySelector(s)!.getBoundingClientRect();
+        const b = document.getElementById('dress-btn')!;
+        return { draw: r('#draw-toggle'), dress: r('#dress-btn'), tray: r('.cb-tray'), box: r('#crayon-box'), carton: r('.cb-carton'), overflows: b.scrollWidth > b.clientWidth, content: [...document.querySelectorAll('.tuck-brand, .bento, .rail, .td-stage')].map((e) => e.getBoundingClientRect().right) };
+      });
+      expect(m.draw.bottom).toBeLessThanOrEqual(m.dress.top);
+      expect(m.dress.bottom).toBeLessThanOrEqual(m.tray.top);
+      expect(m.dress.width).toBeCloseTo(m.draw.width, 0);
+      expect(m.dress.height).toBeCloseTo(m.draw.height, 0);
+      expect(m.overflows).toBe(false);
+      expect(m.box.top).toBeGreaterThanOrEqual(0);
+      expect(Math.max(m.box.bottom, m.carton.bottom)).toBeLessThanOrEqual(height);
+      for (const right of m.content) expect(right).toBeLessThanOrEqual(m.box.left);
+      await dress.click();
+      await expect(page.locator('#wardrobe')).toBeVisible();
+    });
+  }
+
+  test('below 1280px Dress up goes back to its old place, and comes back to the box when the window grows', async ({ page }) => {
+    await page.setViewportSize({ width: 1279, height: 800 });
+    await page.goto('/');
+    const dress = page.locator('#dress-btn');
+    await expect(page.locator('#crayon-box #dress-btn')).toHaveCount(0);
+    await expect(dress).toBeVisible();
+    await expect(dress).toHaveCSS('position', 'fixed');
+    await dress.click();
+    await expect(page.locator('#wardrobe')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await page.setViewportSize({ width: 1440, height: 860 });
+    await expect(page.locator('#crayon-box #dress-btn')).toBeVisible();
+    await page.setViewportSize({ width: 900, height: 800 });
+    await expect(page.locator('#crayon-box #dress-btn')).toHaveCount(0);
+    await expect(dress).toHaveCSS('position', 'static');
+  });
 });
 
 test.describe('draw mode', () => {

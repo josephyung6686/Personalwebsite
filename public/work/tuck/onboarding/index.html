@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="intro">
+<html lang="en" class="intro" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1234,7 +1234,6 @@ const r=document.documentElement,bs=[...document.querySelectorAll('.theme button
 const cur=()=>r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
 const sync=()=>bs.forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===cur()));
 bs.forEach(b=>b.onclick=()=>{r.dataset.theme=b.dataset.t;try{localStorage.setItem('tuck-theme',b.dataset.t)}catch(e){}sync()});
-try{const t=localStorage.getItem('tuck-theme');if(t)r.dataset.theme=t}catch(e){}
 sync();
 initSteps();
 setTimeout(()=>document.documentElement.classList.remove('intro'),1750);

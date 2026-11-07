@@ -7,15 +7,15 @@ const { size = 'compact' } = Astro.props;
 <div class:list={['tuck-demo', size]} role="region" aria-label="Interactive demo of Tuck">
   <div class="td-bar">
     <div class="td-tabs" role="group" aria-label="Choose what to show">
-      <button type="button" class="btn" data-view="app" aria-pressed="true">The app</button>
-      <button type="button" class="btn alt" data-view="onboarding" aria-pressed="false">Onboarding</button>
+      <button type="button" class="btn" data-view="onboarding" aria-pressed="true">Onboarding</button>
+      <button type="button" class="btn alt" data-view="app" aria-pressed="false">See the app<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6" /></svg></button>
     </div>
     <p class="td-label">Prototype with sample files</p>
-    <a class="btn alt td-full" data-full href={VIEWS.app.src} target="_blank" rel="noopener">Open full screen</a>
+    <a class="btn alt td-full" data-full href={VIEWS.onboarding.src} target="_blank" rel="noopener">Open full screen</a>
   </div>
   <div class="td-stage" data-stage>
     <iframe class="td-frame" data-frame title="Tuck prototype" hidden></iframe>
-    <img class="td-poster" data-poster src={VIEWS.app.poster} alt={VIEWS.app.alt} width="1400" height="800" loading="lazy" decoding="async" />
+    <img class="td-poster" data-poster src={VIEWS.onboarding.poster} alt={VIEWS.onboarding.alt} width="1400" height="800" loading="lazy" decoding="async" />
   </div>
   <p class="td-small">A small version for phones. The full app and onboarding are best on a bigger screen.</p>
   <div class="td-phone" data-phone></div>

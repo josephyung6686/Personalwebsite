@@ -3,10 +3,9 @@ import Lion from '../Lion.astro';
 import { site } from '../../data/site';
 ---
 <section id="about" class="sec wrap about" aria-labelledby="about-h">
-  <Lion pose="scarf" class="about-lion" />
   <div>
-    <p class="num">01 · ABOUT</p>
-    <h2 id="about-h">Hi, I'm Joseph.</h2>
+    <div class="about-head"><div><p class="num">01 · ABOUT</p>
+    <h2 id="about-h">Hi, I'm Joseph.</h2></div><Lion pose="scarf" class="about-lion" /></div>
     <div class="body bio">
       <p class="intro">{site.bio.intro}</p>
       <p>{site.bio.why}</p>
@@ -23,14 +22,15 @@ import { site } from '../../data/site';
   </div>
 </section>
 <style>
-  .about { display: flex; gap: 24px; align-items: center; }
+  .about-head { display: flex; align-items: center; gap: 24px; }
+  .about .bio { max-width: none; font-size: 18px; }
   .bio p { margin: 0 0 14px; }
-  .bio .intro { font-size: 18px; color: var(--ink); font-weight: 600; }
+  .bio .intro { font-size: 21px; color: var(--ink); font-weight: 600; }
   .bio .lead { margin-bottom: 6px; }
   .bio ul { margin: 0 0 14px; padding-left: 20px; } .bio li { margin: 4px 0; } .bio li::marker { color: var(--c-red); }
   .personal { margin: 0 0 18px; display: grid; gap: 6px; }
   .personal div { display: grid; grid-template-columns: 92px 1fr; gap: 10px; }
   .personal dt { color: var(--muted); } .personal dd { margin: 0; color: var(--ink); }
-  :global(.about-lion) { width: 130px; flex: none; }
-  @media (max-width: 480px) { .about { flex-direction: column; align-items: flex-start; } :global(.about-lion) { width: 100px; } }
+  :global(.about-lion) { width: 104px; flex: none; }
+  @media (max-width: 480px) { :global(.about-lion) { width: 84px; } .about .bio { font-size: 16px; } }
 </style>

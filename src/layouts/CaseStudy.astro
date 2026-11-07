@@ -19,6 +19,7 @@ import TuckDemo from '../components/tuck/TuckDemo.astro';
 import { bioRow, bioSectionCss } from '../components/spade/bioIcons';
 import SpadeDemo from '../components/spade/SpadeDemo.astro';
 import AikonicDemo from '../components/aikonic/AikonicDemo.astro';
+import { experience } from '../data/experience';
 
 interface Props {
   title: string; role: string; summary: string; chips: string[];
@@ -33,6 +34,8 @@ const [lead, rest] = cut > 0 ? [title.slice(0, cut + 1), title.slice(cut + 2)] :
 const OWN = ['tuck', 'doom-drive', 'kwungfund', 'nutrigene', 'aikonic'];
 const look = OWN.includes(theme) ? theme : 'game';
 const states = ['day', 'sunset', 'night'] as const;
+const job = experience.find((j) => j.slug === theme);
+const orgLogo = job && (job.logoHead ?? job.logo);
 const eyebrow: Record<string, string> = {
   tuck: 'Case study · Mac app', 'doom-drive': 'Case study · Local AI hardware', kwungfund: 'Case study · Desktop app',
   nutrigene: 'Experience · NutriGene AI', aikonic: 'Experience · Aikonic', grc: 'Experience · Global Research & Consulting Group', ey: 'Experience · Ernst & Young', morphogenesis: 'Experience · Columbia',
@@ -55,6 +58,7 @@ const eyebrow: Record<string, string> = {
             <p class="eyebrow">{eyebrow[theme] ?? 'Case study'}</p>
             <h1>{title}</h1>
             <div class="head-card dialog">
+              {orgLogo && <img class="cs-logo" src={orgLogo} alt="" decoding="async" />}
               <p class="summary">{summary}</p>
               <p class="role"><span class="label">My role</span> {role}</p>
               <p class="tags">{chips.map((c) => <span>{c}</span>)}</p>
@@ -74,6 +78,7 @@ const eyebrow: Record<string, string> = {
           <header class="cs-head wrap">
             <div class="head-card">
               <i class="deco" aria-hidden="true">{theme === 'nutrigene' && <Fragment set:html={bioRow.join('')} />}</i>
+              {orgLogo && <img class="cs-logo" src={orgLogo} alt="" decoding="async" />}
               <p class="eyebrow">{eyebrow[theme] ?? 'Case study'}</p>
               <h1><span class="t1">{lead}</span>{rest && <> <span class="t2">{rest}</span></>}</h1>
               <p class="summary">{summary}</p>
@@ -123,6 +128,8 @@ const eyebrow: Record<string, string> = {
   .cs-head { padding-top: 22px; }
   .head-card { position: relative; overflow: hidden; isolation: isolate; }
   .deco { display: none; }
+  /* Inside the paper card, because the campus header's night sky would swallow a dark logo. Not in the h1: its wax filter would distort it. */
+  .cs-logo { display: block; height: 44px; width: auto; max-width: 100%; object-fit: contain; object-position: left; margin: 0 0 14px; mix-blend-mode: multiply; }
   .eyebrow { margin: 0 0 14px; font: 700 14px/1 var(--font-hand); letter-spacing: .04em; text-transform: uppercase; color: var(--accent-deep); }
   h1 { font-family: var(--f-head); font-weight: var(--head-weight); letter-spacing: var(--head-track); font-size: clamp(32px, 5.6vw, 56px); line-height: 1.08; margin: 0 0 18px; max-width: 920px; color: var(--ink); -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px; filter: url(#wax-edge); }
   .t2 { color: var(--accent-deep); }

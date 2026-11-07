@@ -20,7 +20,7 @@ function mount(root: HTMLElement): void {
   const stage = root.querySelector<HTMLElement>('[data-stage]')!, frame = root.querySelector<HTMLIFrameElement>('[data-frame]')!;
   const poster = root.querySelector<HTMLImageElement>('[data-poster]')!, full = root.querySelector<HTMLAnchorElement>('[data-full]')!, small = root.querySelector<HTMLElement>('[data-phone]')!;
   const wide = matchMedia('(min-width: 700px)');
-  let view: View = 'app', near = false, loaded = false, pressed = false, phone = false;
+  let view: View = 'onboarding', near = false, loaded = false, pressed = false, phone = false;
 
   /* The quest listens for tuck:sorted on this page. The frame is same-origin, so the first press inside it counts.
      The phone version fires it itself, when a decision is accepted. */
