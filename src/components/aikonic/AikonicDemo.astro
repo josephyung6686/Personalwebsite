@@ -102,6 +102,7 @@ const links = ['classic', 'ble'] as const;
           <div class="aik-host" data-host="memory" hidden></div>
           <div class="aik-host" data-host="podcast" hidden></div>
           <div class="aik-host" data-host="phone" hidden></div>
+          <div class="aik-host" data-host="slides" hidden></div>
         </div>
       </section>
 
@@ -116,7 +117,7 @@ const links = ['classic', 'ble'] as const;
           <p class="aik-aside-h">Ask Aikonic</p>
           <div class="aik-log" role="log" aria-label="Conversation"></div>
           <div class="aik-prompts" role="group" aria-label="Suggested prompts">
-            {ASK_PROMPTS.map((p) => <button type="button" class="aik-chip" data-prompt={p.text} data-away={p.away}>{p.text}{p.hint && <small>{p.hint}</small>}</button>)}
+            {ASK_PROMPTS.map((p) => <button type="button" class="aik-chip" data-prompt={p.text} data-away={p.away} data-set={p.set}>{p.text}{p.hint && <small>{p.hint}</small>}</button>)}
           </div>
           <form class="aik-cmd">
             <label class="aik-sr" for={`${uid}-ask`}>Ask a question or give an instruction</label>

@@ -14,6 +14,8 @@ export const GROUPS = [
   { id: 'manage', name: 'Manage recordings through conversational commands', outcome: 'Recording updated' },
 ] as const;
 export type GroupId = (typeof GROUPS)[number]['id'];
+/** Slides sit beside the six groups, not among them: his report does not list them, so they stay out of GROUPS and the drawer. */
+type Intent = GroupId | 'slides';
 
 export const COMMANDS = [
   'Generate a podcast from Q3 launch sync',
@@ -28,11 +30,12 @@ export const COMMANDS = [
 export type ToolResult =
   | { kind: 'empty' }
   | { kind: 'no-tool' }
-  | { kind: 'need-target'; group: GroupId; options: string[] }
-  | { kind: 'refused'; group: GroupId; target: string; owner: string; scope: string }
-  | { kind: 'call'; group: GroupId; target: string; scope: string; outcome: string; dest?: string };
+  | { kind: 'need-target'; group: Intent; options: string[] }
+  | { kind: 'refused'; group: Intent; target: string; owner: string; scope: string }
+  | { kind: 'call'; group: Intent; target: string; scope: string; outcome: string; dest?: string };
 
-const INTENTS: [GroupId, RegExp][] = [
+const INTENTS: [Intent, RegExp][] = [
+  ['slides', /\b(slides?|deck|ppt|powerpoint)\b/],
   ['edit', /\b(edit|rewrite|fix|change)\b/],
   ['memory', /\b(remember|memory|forget|correct|correction)\b/],
   ['podcast', /\b(podcast|episode)\b/],
@@ -64,15 +67,16 @@ export function interpret(text: string, folderId: string, openRecording?: string
   const target = recording ?? (wholeFolder ? `Folder: ${here.name}` : null);
   if (!target) return { kind: 'need-target', group, options };
   const dest = group === 'move' ? text.trim().match(/\bto\s+(?:the\s+)?(.+?)(?:\s+folder)?[.!]?$/i)?.[1] : undefined;
-  return { kind: 'call', group, target, scope: here.name, outcome: GROUPS.find((g) => g.id === group)!.outcome, dest };
+  return { kind: 'call', group, target, scope: here.name, outcome: GROUPS.find((g) => g.id === group)?.outcome ?? 'Slides built', dest };
 }
 
 export type ToolCall = Exclude<ToolResult, { kind: 'empty' } | { kind: 'no-tool' }>;
 
 const whole = (target: string) => target.startsWith('Folder: ');
 const plain = (target: string) => target.replace('Folder: ', '');
-const DONE: Record<GroupId, (what: string, r: Extract<ToolResult, { kind: 'call' }>) => string> = {
+const DONE: Record<Intent, (what: string, r: Extract<ToolResult, { kind: 'call' }>) => string> = {
   podcast: (w) => `Queued a podcast of ${w}.`,
+  slides: (w) => `Made slides from ${w}.`,
   summary: (w, r) => `Summarized ${w}.${whole(r.target) ? '' : ' It’s on the Summary tab.'}`,
   edit: (w) => `Saved your edit to ${w}.`,
   move: (w, r) => (whole(r.target) ? 'Which recording should I move?' : r.dest ? `Moved ${w} to the ${r.dest} folder.` : `Where should ${w} go? Name a folder.`),
@@ -115,6 +119,53 @@ export function renderCall(box: HTMLElement, r: ToolCall | null): void {
   if (r.dest) rows.append(row('To', r.dest));
   rows.append(row('Result (simulated)', r.outcome));
   box.replaceChildren(el('p', 'aik-h', 'Last request: tool call allowed'), rows);
+}
+
+export type RunKind = 'podcast' | 'slides';
+export const RUNS: Record<RunKind, { title: string; steps: string[]; done: string; open: string }> = {
+  podcast: { title: 'Making a podcast', steps: ['Analyzing', 'Writing script', 'Generating audio'], done: 'Your podcast is ready.', open: 'Open podcast' },
+  slides: { title: 'Turning this into slides', steps: ['Reading the transcript', 'Outlining', 'Building slides'], done: 'Your slides are ready.', open: 'Open slides' },
+};
+const STEP_MS = 900; // simulated: nothing is generated here
+
+/** The card a longer job leaves in the chat: a status line and its steps ticking through, then one key to open the result. */
+export function runCard(kind: RunKind, name: string, opts: { instant: boolean; onOpen: () => void; onChange: () => void }): HTMLElement {
+  const run = RUNS[kind];
+  const card = el('div', 'aik-run');
+  card.dataset.kind = kind;
+  const status = el('p', 'aik-run-status');
+  const list = el('ol', 'aik-run-steps');
+  const rows = run.steps.map((text) => {
+    const li = el('li');
+    li.append(el('i'), el('span', '', text));
+    return li;
+  });
+  list.append(...rows);
+  card.append(el('p', 'aik-run-h', run.title), status, list);
+  const show = (at: number): void => {
+    rows.forEach((li, i) => { li.dataset.phase = i < at ? 'done' : i === at ? 'running' : 'waiting'; });
+    const finished = at >= rows.length;
+    card.dataset.state = finished ? 'done' : 'running';
+    status.textContent = finished ? run.done : `${name}: step ${at + 1} of ${rows.length}`;
+    if (finished) {
+      const key = el('button', 'aik-key sm aik-reply-key', run.open);
+      key.type = 'button';
+      key.addEventListener('click', opts.onOpen);
+      card.append(key);
+    }
+    opts.onChange();
+  };
+  if (opts.instant) {
+    show(rows.length);
+    return card;
+  }
+  let at = 0;
+  show(at);
+  const timer = window.setInterval(() => {
+    show(++at);
+    if (at >= rows.length) clearInterval(timer);
+  }, STEP_MS);
+  return card;
 }
 
 export function fillDrawer(body: HTMLElement): void {

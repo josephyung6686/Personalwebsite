@@ -453,7 +453,8 @@
 .aik-window .aik-drawer-body :is(.aik-built, .aik-h, .aik-built b) { background: none; box-shadow: none; padding: 0; color: #101a42; font-family: var(--font-hand); }
 
 /* ---------- The calm window: a short list, one transcript, one Ask box. Everything else waits until it is asked for. ---------- */
-.aik:not([data-show-folders]) :is(.aik-folder-h, .aik-sub-h, .aik-rec-meta, .aik-rec[data-open] small, .aik-chip[data-away]) { display: none; }
+.aik:not([data-show-folders]) :is(.aik-folder-h, .aik-sub-h, .aik-rec-meta, .aik-rec[data-open] small, .aik-chip[data-set="folders"]) { display: none; }
+.aik[data-show-folders] .aik-chip[data-set="work"] { display: none; }
 .aik:not([data-show-folders]) li:has(> :is([data-open="supply"], [data-open="support"]):not([aria-current])) { display: none; }
 .aik:not([data-show-folders]) .aik-folder[data-folder="support"]:not(:has([aria-current])) { display: none; }
 .aik:not([data-show-folders]) .aik-folder { margin-bottom: 5px !important; }
@@ -468,8 +469,27 @@
 .aik-mic i { width: 8px; height: 8px; border-radius: 50%; background: #0b6b5e; }
 .aik-mic::after { content: ''; width: 6px; height: 6px; margin-left: 2px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; rotate: -135deg; translate: 0 2px; }
 .aik-mic[aria-expanded="true"]::after { rotate: 45deg; translate: 0 -1px; }
-.aik-window .aik-status { justify-content: space-between; }
 .aik-mic-more { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
 .aik-phone-key { padding-inline: 8px !important; }
 .aik-phone-key svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; }
 @container aik (max-width: 619px) { .aik-window .aik-side { border-width: 0 0 1px; } }
+
+/* A job running in the chat: hairline card, one line per step, one teal tick. */
+.aik-run { padding: 10px 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px #e5e5e7; }
+.aik-run-h { font-weight: 600; font-size: 13.5px; line-height: 1.35; }
+.aik-run-status { font-size: 12.5px; line-height: 1.4; color: #636366; }
+.aik-run-steps { display: grid; gap: 5px; margin-top: 8px; }
+.aik-run-steps li { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 1.35; color: #636366; }
+.aik-run-steps li[data-phase="running"], .aik-run-steps li[data-phase="done"] { color: #1d1d1f; }
+.aik-run-steps i { position: relative; flex: none; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #c7c7cc; }
+[data-phase="running"] > i { box-shadow: inset 0 0 0 1.5px #d9eeea; border: 1.5px solid transparent; border-top-color: #0b6b5e; animation: aik-spin .8s linear infinite; }
+[data-phase="done"] > i { background: #0b6b5e; box-shadow: none; }
+[data-phase="done"] > i::after { content: ''; position: absolute; left: 5px; top: 2.5px; width: 3px; height: 6.5px; border: solid #fff; border-width: 0 1.5px 1.5px 0; rotate: 45deg; }
+@keyframes aik-spin { to { rotate: 360deg; } }
+.aik-slides { display: grid; gap: 8px; }
+.aik-slides > li { padding: 10px 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px #e5e5e7; }
+.aik-slides small { font-size: 12px; color: #636366; }
+.aik-slide-h { font-weight: 600; font-size: 14px; line-height: 1.35; }
+
+/* Below about 1340px the page's floating crayons and Dress up button reach over the window's right edge, so it leaves them room. */
+@media (min-width: 1000px) and (max-width: 1339px) { .aik-window { margin-right: 60px; } }

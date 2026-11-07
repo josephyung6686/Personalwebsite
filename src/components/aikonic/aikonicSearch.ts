@@ -258,11 +258,14 @@ export const ANSWER: { text: string; ref: string }[] = [
 export const resolveCitation = (ref: string): Passage | null => PASSAGES.find((p) => p.id === ref) ?? null;
 
 export const SAMPLE_QUESTION = 'Why did the Kowloon opening move?';
-/** `away` names the folder a prompt reaches outside of, so its hint can disappear once that folder is the open one. */
-export const ASK_PROMPTS: { text: string; hint?: string; away?: string }[] = [
+/** `away` names the folder a prompt reaches outside of, so its hint can disappear once that folder is the open one.
+ *  `set` swaps the action prompts with the folder prompts, so at most three are ever on screen. */
+export const ASK_PROMPTS: { text: string; hint?: string; away?: string; set?: 'work' | 'folders' }[] = [
   { text: SAMPLE_QUESTION },
-  { text: 'Move this to the Q3 folder' },
-  { text: 'Summarize Board prep', hint: 'In another folder', away: 'finance' },
+  { text: 'Make this a podcast', set: 'work' },
+  { text: 'Turn this into slides', set: 'work' },
+  { text: 'Move this to the Q3 folder', set: 'folders' },
+  { text: 'Summarize Board prep', hint: 'In another folder', away: 'finance', set: 'folders' },
 ];
 
 export const isQuestion = (text: string): boolean => {

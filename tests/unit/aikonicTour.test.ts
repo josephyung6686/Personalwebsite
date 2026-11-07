@@ -4,7 +4,8 @@ import { tabForKey } from '../../src/components/aikonic/aikonicDom';
 import { FOLDERS, MEETINGS, meetingById, folderOf } from '../../src/components/aikonic/aikonicSearch';
 import { NOTES, flatten, loadTodos, saveTodos, TODO_KEY } from '../../src/components/aikonic/aikonicNotes';
 import { STEPS } from '../../src/components/aikonic/aikonicGuide';
-import { GROUPS, TOOL_COUNT, COMMANDS, interpret, replyFor, type ToolCall } from '../../src/components/aikonic/featureTools';
+import { GROUPS, RUNS, TOOL_COUNT, COMMANDS, interpret, replyFor, type ToolCall } from '../../src/components/aikonic/featureTools';
+import { outlineFor } from '../../src/components/aikonic/featureSlides';
 import { ASK_PROMPTS } from '../../src/components/aikonic/aikonicSearch';
 import { FACTS, RACE_RUNS, dayOf, factAt, runPipeline, statusAt } from '../../src/components/aikonic/featureMemory';
 import { END, PLAY_READY, SEGMENTS, SEQUENTIAL, CONCURRENT, STAGES, TTS_START, durationPolicy, schedule, speedup, stateAt } from '../../src/components/aikonic/featurePodcast';
@@ -158,7 +159,6 @@ describe('agent tools', () => {
     for (const c of COMMANDS) expect(say(c)).not.toMatch(/tool|capability|scope|refused|simulated|Folder:/i);
   });
   it('every suggestion succeeds, or says up front that it reaches another folder', () => {
-    expect(ASK_PROMPTS.length).toBeLessThanOrEqual(3);
     for (const p of ASK_PROMPTS) {
       const kind = interpret(p.text, 'stores', 'Q3 launch sync').kind;
       if (p.hint) {
@@ -169,6 +169,23 @@ describe('agent tools', () => {
         expect(['call', 'no-tool']).toContain(kind);
       }
     }
+  });
+  it('runs slides on the open recording, inside the folder rule, without adding a group or a claim', () => {
+    const r = interpret('Turn this into slides', 'stores', 'Q3 launch sync');
+    expect(r.kind).toBe('call');
+    if (r.kind === 'call') { expect(r.group).toBe('slides'); expect(r.target).toBe('Q3 launch sync'); }
+    expect(interpret('Turn Board prep into slides', 'stores').kind).toBe('refused');
+    expect(interpret('Make this a podcast', 'stores', 'Q3 launch sync').kind).toBe('call');
+    expect(GROUPS.map((g) => g.id)).not.toContain('slides');
+    expect(JSON.stringify(BUILT)).not.toMatch(/slides/i);
+    expect(RUNS.podcast.steps).toEqual(['Analyzing', 'Writing script', 'Generating audio']);
+    expect(RUNS.slides.steps).toEqual(['Reading the transcript', 'Outlining', 'Building slides']);
+  });
+  it('builds the sample outline from the recording’s own summary and to-dos', () => {
+    const slides = outlineFor('launch', 'Q3 launch sync');
+    expect(slides.map((s) => s.title)).toEqual(['Q3 launch sync', 'Decisions', 'Risks', 'To-dos']);
+    expect(slides[1].points).toEqual(['Move the Kowloon opening to 21 September.']);
+    expect(slides[3].points).toEqual(NOTES.launch.todos.map((t) => t.text));
   });
   it('a question is not a command, even with a command word in it', () => {
     expect(interpret('Why did the Kowloon opening move?', 'stores', 'Menu review').kind).toBe('no-tool');
@@ -355,7 +372,7 @@ describe('web and mobile', () => {
 
 describe('no em or en dashes in visible text', () => {
   it('holds for all tab data', () => {
-    const text = JSON.stringify([BUILT, STEPS.map(({ title, does, tryIt }) => ({ title, does, tryIt })), GROUPS, COMMANDS, FACTS, STAGES, SEGMENTS, LINKS, STRINGS, NOTES, [...Array(RACE_RUNS).keys()].map((n) => runPipeline(n, 'same'))]);
+    const text = JSON.stringify([BUILT, RUNS, STEPS.map(({ title, does, tryIt }) => ({ title, does, tryIt })), GROUPS, COMMANDS, FACTS, STAGES, SEGMENTS, LINKS, STRINGS, NOTES, [...Array(RACE_RUNS).keys()].map((n) => runPipeline(n, 'same'))]);
     expect(text).not.toMatch(/[–—]/);
   });
 });

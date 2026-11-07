@@ -142,9 +142,11 @@ test.describe('Aikonic product', () => {
     await expect(d.locator('.aik-rec:visible')).toHaveCount(4);
     await expect(d.locator('.aik-folder-h:visible, .aik-side-mem:visible, .aik-playbar:visible, .aik-linkchip:visible')).toHaveCount(0);
     await expect(d.locator('.aik-log .aik-msg')).toHaveCount(0);
-    await expect(d.locator('.aik-chip:visible')).toHaveCount(2);
+    await expect(d.locator('.aik-chip:visible')).toHaveCount(3);
     await expect(d.locator('.aik-drawer:visible')).toHaveCount(1);
     await expect(d.locator('.aik-status')).toContainText('Microphone connected');
+    await d.locator('[data-show="folders"]').click();
+    await expect(d.locator('.aik-chip:visible')).toHaveCount(3);
     await d.locator('.aik-chip[data-prompt^="Move"]').click();
     await expect(d.locator('.aik-folder-h').first()).toBeVisible();
     await d.getByRole('button', { name: 'Make a podcast' }).click();
@@ -453,6 +455,7 @@ test.describe('Aikonic product', () => {
     test('"move this to the Q3 folder" moves it, says so in a sentence, and can be undone', async ({ page }) => {
       await openAikonic(page);
       const d = aik(page);
+      await d.locator('[data-show="folders"]').click();
       await d.getByRole('button', { name: 'Move this to the Q3 folder' }).click();
       await expect(lastReply(page).locator('p')).toHaveText('Moved Q3 launch sync to the Q3 folder.');
       await expect(lastReply(page)).not.toContainText('Tool');
@@ -497,6 +500,49 @@ test.describe('Aikonic product', () => {
       await d.getByRole('button', { name: 'Move this to the Q3 folder' }).click();
       await expect(last).toContainText('tool call allowed');
       await expect(last).toContainText('Move and reorganize recordings between folders');
+    });
+
+    test('Make this a podcast shows a card ticking through its steps, then opens the finished panel', async ({ page }) => {
+      await openAikonic(page);
+      const d = aik(page);
+      await d.getByRole('button', { name: 'Make this a podcast' }).click();
+      const card = d.locator('.aik-run');
+      await expect(card).toHaveAttribute('data-state', 'running');
+      await expect(card.locator('li')).toHaveText(['Analyzing', 'Writing script', 'Generating audio']);
+      await expect(card.locator('li[data-phase="running"]')).toHaveText('Writing script');
+      await expect(card.locator('li[data-phase="done"]')).toHaveText('Analyzing');
+      await expect(card.getByRole('button')).toHaveCount(0);
+      await expect(card).toHaveAttribute('data-state', 'done', { timeout: 8000 });
+      await expect(card).toContainText('Your podcast is ready.');
+      await expect(card).not.toContainText(/Capability|Folder scope/);
+      await card.getByRole('button', { name: 'Open podcast' }).click();
+      await expect(d.locator('.aik-pod-status')).toContainText('Your episode is ready');
+      await expect(d.getByRole('button', { name: 'Play', exact: true })).toHaveAttribute('aria-disabled', 'false');
+    });
+
+    test('Turn this into slides shows its steps, then a sample outline with no claim about building it', async ({ page }) => {
+      await openAikonic(page);
+      const d = aik(page);
+      await d.getByRole('button', { name: 'Turn this into slides' }).click();
+      const card = d.locator('.aik-run');
+      await expect(card.locator('li')).toHaveText(['Reading the transcript', 'Outlining', 'Building slides']);
+      await expect(card).toHaveAttribute('data-state', 'done', { timeout: 8000 });
+      await card.getByRole('button', { name: 'Open slides' }).click();
+      const host = d.locator('.aik-host[data-host="slides"]');
+      await expect(host).toContainText('Slides: Q3 launch sync');
+      await expect(host).toContainText('Move the Kowloon opening to 21 September.');
+      await expect(host).not.toContainText('What I built');
+      await expect(d.locator('.aik-drawer:visible')).toHaveCount(0);
+      await d.getByRole('button', { name: /Back to Q3 launch sync/ }).click();
+      await expect(d.locator('.aik-vtitle')).toBeVisible();
+    });
+
+    test('with reduced motion the card lands finished', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await openAikonic(page);
+      await aik(page).getByRole('button', { name: 'Make this a podcast' }).click();
+      await expect(aik(page).locator('.aik-run')).toHaveAttribute('data-state', 'done');
+      await expect(aik(page).locator('.aik-run li[data-phase="done"]')).toHaveCount(3);
     });
 
     test('a question gets an answer with citations, and nothing invented when nothing fits', async ({ page }) => {

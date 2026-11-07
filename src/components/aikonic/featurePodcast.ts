@@ -216,5 +216,7 @@ export function mount(host: HTMLElement, ctx: { title: () => string }) {
   return {
     show(): void { $('.aik-pod-name').textContent = ctx.title(); draw(); },
     generate,
+    /** Lands finished, for when the chat has already made the episode. */
+    finish(): void { cancelAnimationFrame(frame); stopPlay(); t = END; draw(); },
   };
 }

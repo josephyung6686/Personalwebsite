@@ -203,8 +203,8 @@ describe('Ask', () => {
     expect(answerFor('Order me a pizza')).toEqual([]);
     expect(answerFor('Which purchase order is late?').length).toBeGreaterThan(0);
   });
-  it('offers three prompts: a question, an action and the folder limit', () => {
-    expect(ASK_PROMPTS).toHaveLength(3);
+  it('never shows more than three prompts at once', () => {
+    for (const set of ['work', 'folders']) expect(ASK_PROMPTS.filter((p) => !p.set || p.set === set).length).toBeLessThanOrEqual(3);
   });
 });
 

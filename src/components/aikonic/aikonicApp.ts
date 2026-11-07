@@ -438,6 +438,21 @@ export function mountApp(root: HTMLElement) {
       return;
     }
     const m = r.kind === 'call' ? folder.meetings.map(meetingById).find((x) => x.name === r.target) : undefined;
+    if (r.kind === 'call' && (r.group === 'podcast' || r.group === 'slides')) {
+      const kind = r.group;
+      void tools().then((t) => {
+        reply.append(t.runCard(kind, r.target.replace('Folder: ', ''), {
+          instant: reducedMotion(),
+          onChange: () => { log.scrollTop = log.scrollHeight; },
+          onOpen: () => {
+            if (m) showRecording(m.id);
+            if (kind === 'podcast') void openPodcast().then((p) => p?.finish());
+            else void feature('slides').then((s) => s?.show());
+          },
+        }));
+      });
+      return;
+    }
     if (r.kind === 'call' && r.group === 'summary' && m) {
       sub = 'summary';
       showRecording(m.id);
@@ -482,10 +497,12 @@ export function mountApp(root: HTMLElement) {
         reply.append(el('p', '', 'I couldn’t find that in your recordings, and it isn’t something I can do here.'));
       }
     } else {
-      lastCall = r;
       carryOut(r, reply, replyFor(r));
-      const record = root.querySelector<HTMLElement>('.aik-last');
-      if (record) renderCall(record, r);
+      if (r.group !== 'slides') {
+        lastCall = r;
+        const record = root.querySelector<HTMLElement>('.aik-last');
+        if (record) renderCall(record, r);
+      }
     }
     say(reply);
   }
@@ -510,13 +527,15 @@ export function mountApp(root: HTMLElement) {
   const ctx = { title: () => open.name, meetingId: () => open.id, todos };
   type Features = {
     memory: { show: (factId: string, iso?: string) => void };
-    podcast: { show: () => void; generate: () => void };
+    podcast: { show: () => void; generate: () => void; finish: () => void };
+    slides: { show: () => void };
     phone: { show: () => void; setLocale: (l: 'en' | 'ja' | 'zh-Hant') => void };
   };
   const LOADERS: { [K in keyof Features]: () => Promise<{ mount: (host: HTMLElement, ctx: never) => Features[K] }> } = {
     memory: () => import('./featureMemory') as never,
     podcast: () => import('./featurePodcast') as never,
     phone: () => import('./featurePhone') as never,
+    slides: () => import('./featureSlides') as never,
   };
   const mounted: Partial<Features> = {};
 
