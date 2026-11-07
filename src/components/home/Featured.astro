@@ -5,7 +5,7 @@ import '@fontsource/onest/600.css';
 import TuckDemo from '../tuck/TuckDemo.astro';
 ---
 <section id="tuck" class="sec wrap" aria-labelledby="featured-h">
-  <p class="num">01 · FEATURED</p>
+  <p class="num">02 · FEATURED</p>
   <!-- Tuck's own branding: its dark window, Bricolage Grotesque over Onest, the brand blue. -->
   <div class="tuck-brand">
     <i class="aurora" aria-hidden="true"></i>
@@ -20,15 +20,15 @@ import TuckDemo from '../tuck/TuckDemo.astro';
   </div>
 </section>
 <style>
-  .tuck-brand { position: relative; isolation: isolate; overflow: hidden; padding: clamp(20px, 4vw, 44px); color: var(--body); }
+  .tuck-brand { position: relative; isolation: isolate; overflow: hidden; padding: clamp(14px, 1.8vw, 24px); color: var(--body); }
   .aurora { display: none; }
-  .mark { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; }
+  .mark { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; }
   .mark img { width: 28px; height: 28px; }
   .mark b { font-size: 17px; font-weight: 700; color: var(--ink); }
   .mark span { font: 500 14px/1.2 var(--font-hand); color: var(--muted); padding-left: 10px; background: linear-gradient(var(--ink), var(--ink)) 0 50% / 2px 80% no-repeat; }
-  h2 { font-family: var(--font-body); font-weight: 700; letter-spacing: -.02em; line-height: 1.08; font-size: clamp(30px, 5vw, 52px); margin: 0 0 16px; color: var(--ink); -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px; filter: url(#wax-edge); }
+  h2 { font-family: var(--font-body); font-weight: 700; letter-spacing: -.02em; line-height: 1.08; font-size: clamp(24px, 2.5vw, 34px); margin: 0 0 16px; color: var(--ink); -webkit-mask: url(/wax/grain.webp) 0 0 / 256px; mask: url(/wax/grain.webp) 0 0 / 256px; filter: url(#wax-edge); }
   .grad { color: var(--c-blue); }
-  .promises { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+  .promises { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
   .body { font-size: 16px; line-height: 1.6; color: var(--body); max-width: 680px; margin: 24px 0 0; }
   .body p { margin: 0 0 8px; color: var(--ink); font-weight: 600; }
   .body ul { margin: 0; padding-left: 20px; } .body li { margin: 4px 0; } .body li::marker { color: var(--c-red); }

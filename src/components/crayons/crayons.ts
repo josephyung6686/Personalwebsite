@@ -93,7 +93,11 @@ function wireDraw(closeBox: () => void) {
       pts: wax.spline(line.filter((_, i) => i % 2 === 0 || i === line.length - 1).map((p) => [p[0] + scrollX, p[1] + scrollY]), false, 3),
       crayon: pick.dataset.key!,
       onStep: (x, y) => { if (c.isConnected) { pass.to(x - docX, y - docY); sheet.flush(); } },
-      onDone: () => { sheet.mask = sheet.sid = null; },
+      onDone: () => {
+        sheet.mask = sheet.sid = null;
+        // The line fades away 5 seconds after he has walked it.
+        window.setTimeout(() => { c.style.transition = 'opacity .6s'; c.style.opacity = '0'; window.setTimeout(() => c.remove(), 650); }, 5000);
+      },
     });
     if (!walking) next();
   }
